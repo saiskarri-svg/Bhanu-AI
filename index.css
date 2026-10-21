@@ -200,3 +200,13 @@ html { scroll-padding-top: 120px; }
   .row-new, .saved-tick, .ans-pop, .ans-shake, .fade-in, .tick-pop { animation: none; }
   .saved-tick { opacity: 0; }
 }
+
+/* Overview: power flowing along a wire; reverse when the grid feeds the school */
+.flow-dash { stroke-dasharray: 6 8; animation: flow-dash 1.5s linear infinite; }
+.flow-dash.flow-reverse { animation-direction: reverse; }
+@keyframes flow-dash { to { stroke-dashoffset: -28; } }
+
+/* Returns: the payback marker drops in after the cash flow line has drawn */
+.payback-mark { animation: payback-in 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) 1.4s both; transform-box: fill-box; transform-origin: center bottom; }
+@keyframes payback-in { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .flow-dash, .payback-mark { animation: none; } }

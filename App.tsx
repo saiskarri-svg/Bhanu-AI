@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ComposedChart
+  BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ReferenceDot, ComposedChart
 } from 'recharts';
+import { EnergyNow } from './components/EnergyNow';
 import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, ResponsiveChart, CountUp } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
@@ -93,7 +94,8 @@ const App: React.FC = () => {
   const forecastData = useMemo(() => {
     const data = [];
     for (let i = 0; i < 24; i++) {
-      const gen = Math.max(0, config.systemSize * 0.75 * Math.sin((i * Math.PI) / 12 - Math.PI / 4));
+      // Sunrise about 6:00, peak at noon, sunset about 18:00
+      const gen = Math.max(0, config.systemSize * 0.75 * Math.sin(((i - 6) * Math.PI) / 12));
       data.push({ time: i + ":00", generation: parseFloat(gen.toFixed(2)) });
     }
     return data;
@@ -632,6 +634,7 @@ const App: React.FC = () => {
 
           {activeTab === 0 && (
             <div className="space-y-6">
+              <EnergyNow forecast={forecastData} />
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <Box>
                   <BoxHeader title="Typical day" meta="kW by hour" />
@@ -742,8 +745,14 @@ const App: React.FC = () => {
                     <YAxis {...axisProps} width={64} tickFormatter={(v) => `${v < 0 ? '-' : ''}₹${Math.abs(Math.round(v / 1000))}k`} />
                     <Tooltip content={<RoiTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
                     <ReferenceLine y={0} stroke={CHART.faint} />
+                    {typeof paybackYear === 'number' && (
+                      <ReferenceLine x={paybackYear} className="payback-mark" stroke={CHART.positive} strokeDasharray="3 3" label={{ value: `Paid back, year ${paybackYear}`, position: 'insideTopLeft', fill: CHART.positive, fontSize: 11 }} />
+                    )}
                     <Bar dataKey="annualSavings" fill={CHART.faint} fillOpacity={0.6} radius={[2, 2, 0, 0]} maxBarSize={22} />
                     <Area type="monotone" dataKey="cashFlow" stroke="url(#splitStroke)" strokeWidth={2.25} fill="url(#splitFill)" baseValue={0} dot={false} activeDot={{ r: 4, fill: CHART.primary, stroke: 'none' }} />
+                    {typeof paybackYear === 'number' && (
+                      <ReferenceDot x={paybackYear} y={roiData[paybackYear].cashFlow} r={5} className="payback-mark" fill={CHART.positive} stroke="var(--surface)" strokeWidth={2} />
+                    )}
                   </ComposedChart>
                 </ResponsiveChart>
               </div>

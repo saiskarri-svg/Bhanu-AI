@@ -12,6 +12,9 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Overview (idea 25):** new "Where the power goes now" box (`components/EnergyNow.tsx`): panels to school to grid with moving lines sized by power, estimated from the typical day curve and school hours (Mon to Sat, 9:00 to 16:30), updates each minute, labelled as not a live meter.
+- **Fix:** Typical day curve peaked at 9:00 and ended at 15:00; it now runs about 6:00 to 18:00 with the peak at noon.
+- **Returns (idea 26):** payback marker (dashed line, dot and "Paid back, year N") drops in after the cash flow line draws.
 - **Motion (ideas 22 to 24):** new rows in the maintenance log, repair log, savings tracker and inverter readings slide in with a green wash and a fading "Saved" tick (`useFreshIds`, `SavedTick`); removed months and readings fade and fold away (`fadeOutRow`); quiz right answers pop and wrong picks shake once; Learn has a steps bar under "x of 10 steps" that fills smoothly, and a finished lesson's tick pops.
 - **Motion (ideas 20, 21):** charts draw in when scrolled into view (`ResponsiveChart` in `ui.tsx` replaces `ResponsiveContainer`); big numbers count up the first time they are seen (`CountUp`, used by `StatStrip`, Impact, Maintenance, bill check).
 - **Rename:** the Soiling tab is now Maintenance (label only; component files keep their names).
