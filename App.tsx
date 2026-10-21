@@ -4,7 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ComposedChart
 } from 'recharts';
-import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn } from './components/ui';
+import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
 import BillCheck from './components/BillCheck';
@@ -454,7 +454,26 @@ const App: React.FC = () => {
     return () => window.removeEventListener(OPEN_SOURCE_EVENT, on);
   }, []);
   // A new tab always opens at its top, not where the last tab was scrolled to
-  const goTab = (t: number) => { setActiveTab(t); window.scrollTo(0, 0); };
+  const goTab = (t: number) => { setActiveTab(t); window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); };
+  // The tab underline slides to the active tab; on a phone the tab also scrolls into view
+  const navRef = React.useRef<HTMLElement>(null);
+  const [ink, setInk] = useState<{ x: number; w: number } | null>(null);
+  React.useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const place = () => {
+      const b = nav.querySelectorAll<HTMLElement>('[role="tab"]')[activeTab];
+      if (b) setInk({ x: b.offsetLeft, w: b.offsetWidth });
+    };
+    place();
+    const b = nav.querySelectorAll<HTMLElement>('[role="tab"]')[activeTab];
+    if (b && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+    const ro = new ResizeObserver(place);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [activeTab]);
+  const pageRef = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => revealWithin(pageRef.current), [activeTab]);
   const pageHasMainAction = activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5;
   const openFaults = sensorLogs.filter(l => l.status === 'Maintenance Required').length;
   const netInvestment = -roiData[0].cashFlow;
@@ -552,9 +571,10 @@ const App: React.FC = () => {
           </div>
 
           <nav
+            ref={navRef}
             role="tablist"
             aria-label="Sections"
-            className="order-3 lg:order-2 w-full lg:w-auto -mx-[var(--gutter)] px-[var(--gutter)] lg:mx-0 lg:px-0 flex gap-6 overflow-x-auto no-scrollbar"
+            className="relative order-3 lg:order-2 w-full lg:w-auto -mx-[var(--gutter)] px-[var(--gutter)] lg:mx-0 lg:px-0 flex gap-6 overflow-x-auto no-scrollbar"
           >
             {tabs.map((tab, idx) => {
               const active = activeTab === idx;
@@ -570,10 +590,10 @@ const App: React.FC = () => {
                 >
                   {tab.label}
                   {!!tab.count && <span className="text-xs text-muted tabular-nums">{tab.count}</span>}
-                  <span className={`absolute left-0 right-0 bottom-0 h-0.5 rounded-full ${active ? 'bg-fg' : 'bg-transparent'}`} />
                 </button>
               );
             })}
+            {ink && <span aria-hidden="true" className="tab-ink absolute left-0 bottom-0 h-0.5 rounded-full bg-fg pointer-events-none" style={{ width: ink.w, transform: `translateX(${ink.x}px)` }} />}
           </nav>
 
           <div className="order-2 lg:order-3 ml-auto flex items-center gap-4">
@@ -594,7 +614,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <div className={`relative max-w-page mx-auto px-[var(--gutter)] py-6 grid gap-6 items-start ${activeTab === 0 ? 'lg:grid-cols-[300px_minmax(0,1fr)]' : ''}`}>
+      <div ref={pageRef} className={`relative max-w-page mx-auto px-[var(--gutter)] py-6 grid gap-6 items-start ${activeTab === 0 ? 'lg:grid-cols-[300px_minmax(0,1fr)]' : ''}`}>
         {/* Site settings live on the Overview tab only */}
         {activeTab === 0 && <Sidebar config={config} setConfig={setConfig} saveNote={settings.mode === 'shared' ? (settings.canWrite ? 'Settings are saved for everyone who opens this page.' : 'You can view these settings. Changes you make stay on this device.') : settings.mode === 'local' ? 'Settings are saved on this device.' : undefined} />}
 
@@ -887,6 +907,7 @@ const App: React.FC = () => {
 
           {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} standalone={false} onOpenDashboard={() => goTab(0)} />}
         </main>
+        <BackToTop />
       </div>
     </div>
   );

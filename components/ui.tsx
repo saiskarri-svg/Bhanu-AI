@@ -33,6 +33,60 @@ export const Box: React.FC<{ className?: string; children: React.ReactNode }> = 
   <div className={`bg-surface border border-line rounded-box ${className}`}>{children}</div>
 );
 
+// Boxes fade and rise in the first time they scroll into view. Call it on a
+// page's root when the tab changes: it picks the outer boxes and sections
+// (not ones inside another box), and one observer staggers boxes that
+// arrive together. Reduced motion skips it.
+let revealObserver: IntersectionObserver | null = null;
+export const revealWithin = (root: HTMLElement | null) => {
+  if (!root || typeof IntersectionObserver === 'undefined') return () => {};
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
+  revealObserver ??= new IntersectionObserver(entries => {
+    let i = 0;
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const el = e.target as HTMLElement;
+      el.style.transitionDelay = `${Math.min(i++, 5) * 60}ms`;
+      el.classList.add('in');
+      revealObserver!.unobserve(el);
+    }
+  }, { rootMargin: '0px 0px -6% 0px' });
+  // Outer boxes taller than the screen pass the effect down to the boxes inside
+  const pick = (within: HTMLElement): HTMLElement[] =>
+    [...within.querySelectorAll<HTMLElement>('.rounded-box, section')]
+      .filter(el => el.parentElement?.closest('.rounded-box, section') === (within === root ? null : within))
+      .flatMap(el => {
+        if (el.offsetHeight > window.innerHeight * 1.2) { const inner = pick(el); if (inner.length > 1) return inner; }
+        return [el];
+      });
+  const els = pick(root).filter(el => !el.classList.contains('in'));
+  els.forEach(el => { el.classList.add('reveal'); revealObserver!.observe(el); });
+  return () => els.forEach(el => revealObserver?.unobserve(el));
+};
+
+// Shows after scrolling well down a long page, and takes you back to the top
+export const BackToTop: React.FC = () => {
+  const [show, setShow] = React.useState(false);
+  React.useEffect(() => {
+    const on = () => setShow(window.scrollY > window.innerHeight * 1.5);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0 })}
+      aria-label="Back to top"
+      tabIndex={show ? 0 : -1}
+      className={`back-to-top fixed z-40 right-[var(--gutter)] bottom-[calc(16px+env(safe-area-inset-bottom,0px))] h-11 w-11 grid place-items-center rounded-full border border-line bg-surface-2/90 text-fg shadow-lg hover:bg-line ${show ? 'show' : ''}`}
+    >
+      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M10 16V4m0 0L5 9m5-5l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+};
+
 export const BoxHeader: React.FC<{ title: string; meta?: React.ReactNode }> = ({ title, meta }) => (
   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 pt-4 pb-1">
     <h3 className="text-[15px] font-semibold text-fg whitespace-nowrap">{title}</h3>

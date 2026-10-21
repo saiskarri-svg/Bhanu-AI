@@ -29,6 +29,9 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['pho
     await page.waitForTimeout(400);
     for (const c of clicks) await page.getByRole('button', { name: c }).first().click().catch(() => console.log(`could not click "${c}"`));
     await page.waitForTimeout(wait);
+    // Boxes fade in as they scroll into view, so pass over the page once first
+    await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 500) { window.scrollTo({ top: y, behavior: 'instant' }); await new Promise(r => setTimeout(r, 40)); } window.scrollTo({ top: 0, behavior: 'instant' }); });
+    await page.waitForTimeout(700);
     const file = `${out}/${slug(tab)}${args.section ? '-' + slug(args.section) : ''}-${name}.png`;
     if (args.section) {
       const box = page.getByText(args.section, { exact: true }).first().locator('xpath=ancestor::*[contains(@class,"rounded-box") or self::section][1]');

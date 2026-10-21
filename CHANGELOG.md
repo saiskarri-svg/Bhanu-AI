@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Motion:** boxes fade and rise in as they scroll into view (`revealWithin` in `ui.tsx`, tall boxes pass it to inner boxes); the tab underline slides between tabs and the active tab scrolls into view on phones; a Back to top button appears after 1.5 screens; smooth scrolling for in-page links. All off with reduced motion. Screenshot script now scrolls the page once before shooting.
 - **Fix:** clicking a top tab now opens the new tab at its top, instead of keeping the scroll position from the last tab (`App.tsx` tabs use `goTab`).
 - **Tooling:** added `CHANGELOG.md` (this file) and the rule to keep it current.
 - **Tooling:** added the `ui-improver` agent, the `ideas-midpoint` hook (runs it at the 6th prompt of each session) and `.claude/ideas-log.md`.
