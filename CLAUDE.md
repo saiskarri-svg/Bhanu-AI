@@ -2,6 +2,7 @@
 
 ## How Sai likes to work
 
+- Start each session by reading `CHANGELOG.md` instead of exploring the code; it has the site at a glance and every change so far. After every change, add a one-line entry there (newest first) in the same commit, and update "Site at a glance" if tabs, data or key files change.
 - After every update, give the link to view it: https://claude.ai/artifact/VpVawmYFnpyzbMrM5D4kVT (keep publishing to this same artifact).
 - Translation files (`translations/en.md`, `te.md`, `hi.md`): do NOT update them after each change. Keep a running list of text changes and update the files only near the end of the session. Ask Sai before updating when there is a long pause between prompts, or when Sai says the session is nearing its end.
 - Work in batches and stop after each one with a short report and the link, so Sai can check their Claude usage limits before continuing.
