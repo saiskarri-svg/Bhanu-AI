@@ -30,3 +30,28 @@ Written by the `ui-improver` agent so ideas are not repeated. The main session u
 | 38 | 2026-10-21 | Top bar, Overview | Make the "Sample data" badge a link to the inverter readings box, with a one-line "add your first reading" prompt | built |
 | 39 | 2026-10-21 | All charts | Text summaries for screen readers on every chart (highest, lowest, payback year); phone monthly chart shows all 12 month letters | built |
 | 40 | 2026-10-21 | Overview, Maintenance (desktop) | Inner scroll boxes (site sidebar, Maintenance list) cut text mid-line: add a bottom fade and "x more" hint | built |
+
+## 2026-10-21 (segments)
+
+New website ideas by market segment from the `segment-scout` agent. Full research in `research/segments-2026-10-21.md`. Batches: A 41, 52, 42 · B 47, 48, 46 · C 43, 44, 45 · D 49, 50, 58 · E 53, 54, 55 · F 56, 57, 51.
+
+| No. | Date | Segment | Idea | Status |
+|---|---|---|---|---|
+| 41 | 2026-10-21 | Energy | Rooftop solar installer site with quote, subsidy and payback, then home solar care (cleaning log, readings, WhatsApp) for PM Surya Ghar vendors | suggested |
+| 42 | 2026-10-21 | Energy, abroad | Bhanu AI made general for solar schools abroad (Africa NGOs, UK school energy programmes) | suggested |
+| 43 | 2026-10-21 | Agriculture (AP) | Shrimp and fish pond log: water readings, feed, risk alerts | suggested |
+| 44 | 2026-10-21 | Agriculture | FPO dashboard: members, inputs, produce, prices, board report PDF | suggested |
+| 45 | 2026-10-21 | Agriculture | Village dairy collection centre: fat and SNF entries, rate chart, payout slips | suggested |
+| 46 | 2026-10-21 | Health | Small clinic site with appointment requests, day list and WhatsApp reminders | suggested |
+| 47 | 2026-10-21 | Education | Coaching centre manager: batches, attendance, fees, marks, parent messages, quizzes | suggested |
+| 48 | 2026-10-21 | Education | Budget private school website with admissions enquiry, notices and fee reminders | suggested |
+| 49 | 2026-10-21 | Local government | Gram panchayat works and funds board with grievance triage | suggested |
+| 50 | 2026-10-21 | Finance literacy | SHG books plus Telugu scam safety lessons and quizzes | suggested |
+| 51 | 2026-10-21 | Trades | Local trades booking and job log for electricians, plumbers, AC and solar technicians | suggested |
+| 52 | 2026-10-21 | NGOs, abroad | NGO and CSR impact site: public impact page, activity log, funder report PDF | suggested |
+| 53 | 2026-10-21 | Tourism | Village homestay and tribal tourism site (Araku, Lambasingi) with availability and enquiries | suggested |
+| 54 | 2026-10-21 | Events | Function hall booking: calendar with muhurtham dates, advances and balances | suggested |
+| 55 | 2026-10-21 | Real estate | Plot layout sales site: layout map with plot status and approval numbers | suggested |
+| 56 | 2026-10-21 | Services, abroad | NRI property care: inspections with photos, rent, repairs, yearly PDF | suggested |
+| 57 | 2026-10-21 | Education, abroad | Telugu lessons for diaspora kids with quizzes, progress and certificates | suggested |
+| 58 | 2026-10-21 | Climate | Heat-safe schools: daily heat level, action checklist, incident log, red-day alerts | suggested |
