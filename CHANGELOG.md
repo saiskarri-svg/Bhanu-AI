@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Tooling:** new `kits/site-studio/`: general versions of the agents and skills (ui-improver, fact-checker, content-reviewer, issue-triage, new-client; publish, screenshots, translations, idea-batches, pitch-pack), new agents `segment-scout`, `market-researcher`, `site-planner`, a `new-site` skill, the midpoint hook, a starter project in `template/` and CLAUDE/CHANGELOG templates. Also fixed `single.sh` wrongly failing when a source URL contains "assets/".
 - **Returns: funding by state.** New "Funding for schools in (state)" box under Ways to pay (`components/Funding.tsx`, data in `components/fundingData.ts`): the state's solar agency, state schemes with status and source links, net metering, and 8 national routes (Samagra Shiksha, PM SHRI, MPLADS, MLA fund, panchayat grants, DMF, CSR, pay per unit). Researched for all 36 states and UTs; research caveats in `research/funding-notes.md`.
 - **WhatsApp:** the button no longer says "practice"; the message still starts PRACTICE ONLY on sample data.
 - **Top bar:** clicking the sun or "Bhanu AI" goes back to Overview, at the top.

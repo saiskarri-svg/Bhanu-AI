@@ -20,7 +20,7 @@ css = open(glob.glob(d + '/assets/*.css')[0]).read()
 js = open(glob.glob(d + '/assets/*.js')[0]).read().replace('</script', '<\\/script')
 h = re.sub(r'<link rel="stylesheet"[^>]*assets/[^>]*>', lambda m: '<style>' + css + '</style>', h)
 h = re.sub(r'<script type="module" crossorigin src="[^"]*"></script>', lambda m: '<script type="module">' + js + '</script>', h)
-assert 'assets/' not in h, 'an asset was not inlined'
+assert not re.search(r'(src|href)="(\./)?assets/', h), 'an asset was not inlined'
 open(dest, 'w').write(h)
 print('wrote', dest, len(h) // 1024, 'KB')
 PY
