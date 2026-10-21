@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, BoxHeader, StatusDot, btn, useFreshIds, SavedTick, fadeOutRow } from './ui';
+import { Box, BoxHeader, StatusDot, btn, useFreshIds, SavedTick, fadeOutRow, SkeletonRows } from './ui';
 import { useCap, saveFile } from './runtime';
 
 // Repairs done by technicians: what was fixed, by whom, for which organisation.
@@ -185,7 +185,8 @@ const RepairLog: React.FC = () => {
             )}
           </li>
         ))}
-        {shown.length === 0 && (
+        {mode === 'loading' && <li className="px-5 py-5"><SkeletonRows /></li>}
+        {mode !== 'loading' && shown.length === 0 && (
           <li className="px-5 py-10 text-center text-sm text-muted">
             {rows.length ? 'No repairs with this status.' : 'No repairs logged yet. Press "Log a repair" after a technician visit.'}
           </li>

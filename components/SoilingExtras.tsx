@@ -490,7 +490,7 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
               <p className="flex flex-wrap items-center gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
                   style={{ color: `var(--${RISK_TONE[a.risk]})`, background: `color-mix(in srgb, var(--${RISK_TONE[a.risk]}) 14%, transparent)` }}>
-                  {a.risk} risk
+                  {a.risk === 'High' && <span className="risk-pulse inline-block h-1.5 w-1.5 rounded-full bg-bad mr-1.5 align-middle" aria-hidden="true" />}{a.risk} risk
                 </span>
                 <span className="text-sm text-fg">{a.title}</span>
               </p>

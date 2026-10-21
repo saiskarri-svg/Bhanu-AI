@@ -160,6 +160,15 @@ export const fadeOutRow = (e: React.MouseEvent, then: () => void) => {
   setTimeout(then, 280);
 };
 
+// Grey shimmering lines shown while shared data loads, in place of rows
+export const SkeletonRows: React.FC<{ rows?: number; className?: string }> = ({ rows = 3, className = '' }) => (
+  <div className={`space-y-2.5 ${className}`} aria-busy="true" aria-label="Loading">
+    {Array.from({ length: rows }, (_, i) => (
+      <div key={i} className="shimmer h-3.5 rounded-ctl" style={{ width: `${[78, 62, 70, 55][i % 4]}%` }} />
+    ))}
+  </div>
+);
+
 // Shows after scrolling well down a long page, and takes you back to the top
 export const BackToTop: React.FC = () => {
   const [show, setShow] = React.useState(false);
@@ -237,9 +246,10 @@ const toneClass: Record<Tone, string> = {
 };
 
 // Colour as a small dot plus plain text, no box
-export const StatusDot: React.FC<{ tone: Tone; children: React.ReactNode; className?: string }> = ({ tone, children, className = '' }) => (
+// pulse: a soft ring that keeps drawing the eye; use only for high risk items
+export const StatusDot: React.FC<{ tone: Tone; children: React.ReactNode; className?: string; pulse?: boolean }> = ({ tone, children, className = '', pulse }) => (
   <span className={`inline-flex items-center gap-1.5 ${className}`}>
-    <span className={`h-1.5 w-1.5 rounded-full ${toneClass[tone]}`} aria-hidden="true" />
+    <span className={`h-1.5 w-1.5 rounded-full ${toneClass[tone]} ${pulse ? 'risk-pulse' : ''}`} aria-hidden="true" />
     {children}
   </span>
 );

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, BoxHeader, StatusDot, TINT, btn, useFreshIds, SavedTick, fadeOutRow } from './ui';
+import { Box, BoxHeader, StatusDot, TINT, btn, useFreshIds, SavedTick, fadeOutRow, SkeletonRows } from './ui';
 import { useCap, setLastClean, downloadCsv } from './runtime';
 
 interface Task { id: string; title: string; every: number; who: 'Students with a teacher' | 'Teacher' | 'Technician'; tint: string }
@@ -182,7 +182,7 @@ const MaintenanceLog: React.FC = () => {
             </button>
           )}
         </div>
-        {entries.length ? (
+        {mode === 'loading' ? <SkeletonRows rows={2} /> : entries.length ? (
           <ul className="space-y-1.5 text-sm">
             {entries.slice(0, 8).map(e => (
               <li key={e.id} className={`text-muted rounded-ctl -mx-1.5 px-1.5 ${isFresh(e.id) ? 'row-new' : ''}`}>

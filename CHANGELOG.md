@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Motion (ideas 27, 28):** high risk items get a soft red pulsing ring on their dot (Maintenance list and Alerts; `StatusDot pulse`); shimmer placeholders (`SkeletonRows`) replace the empty message while the maintenance log, repair log and savings tracker load shared data.
 - **Overview (idea 25):** new "Where the power goes now" box (`components/EnergyNow.tsx`): panels to school to grid with moving lines sized by power, estimated from the typical day curve and school hours (Mon to Sat, 9:00 to 16:30), updates each minute, labelled as not a live meter.
 - **Fix:** Typical day curve peaked at 9:00 and ended at 15:00; it now runs about 6:00 to 18:00 with the peak at noon.
 - **Returns (idea 26):** payback marker (dashed line, dot and "Paid back, year N") drops in after the cash flow line draws.

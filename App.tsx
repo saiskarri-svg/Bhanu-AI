@@ -829,7 +829,7 @@ const App: React.FC = () => {
                           <div className="min-w-0">
                             <p className="text-xs text-muted">
                               {open ? (() => { const r = classifyFault(log.faultDescription || ''); return (
-                                <StatusDot tone={RISK_TONE[r]} className={`text-${RISK_TONE[r]}`}>{r} risk</StatusDot>
+                                <StatusDot tone={RISK_TONE[r]} className={`text-${RISK_TONE[r]}`} pulse={r === 'High'}>{r} risk</StatusDot>
                               ); })() : (
                                 <StatusDot tone="ok" className="text-ok">Resolved</StatusDot>
                               )}

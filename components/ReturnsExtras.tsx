@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { SystemConfig } from '../types';
 import { calculateIndianSubsidy, SEASONAL_YIELDS, MONTHS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp, useFreshIds, SavedTick, fadeOutRow } from './ui';
+import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp, useFreshIds, SavedTick, fadeOutRow, SkeletonRows } from './ui';
 import { Cite } from './Sources';
 import { useCap, saveFile, downloadCsv } from './runtime';
 
@@ -274,7 +274,7 @@ export const SavingsTracker: React.FC<{ config: SystemConfig; annualGen: number 
             {isFresh(r.month) && <SavedTick />}
             {canWrite && <button onClick={e => fadeOutRow(e, () => remove(r.month))} className={`${btn.quiet} ml-auto`}>Remove</button>}
           </li>
-        )) : <li className="px-5 py-8 text-center text-sm text-muted">No months added yet. Start with last month's bill.</li>}
+        )) : mode === 'loading' ? <li className="px-5 py-5"><SkeletonRows /></li> : <li className="px-5 py-8 text-center text-sm text-muted">No months added yet. Start with last month's bill.</li>}
       </ul>
       <div className="px-5 py-3 border-t border-line flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <p className="text-xs text-muted max-w-prose">Savings are the solar units times what the school pays per unit on that bill. A month under 90% of the estimate is worth checking: dirty panels, shade or a fault.</p>

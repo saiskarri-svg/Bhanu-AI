@@ -11,5 +11,5 @@ Written by the `ui-improver` agent so ideas are not repeated. The main session u
 | 24 | 2026-10-21 | Learn | Steps bar fills smoothly; finished step chip gets a tick | built |
 | 25 | 2026-10-21 | Overview | Live energy flow line: panels to school to grid, sized by power now | built |
 | 26 | 2026-10-21 | Returns | Payback chart marker travels to the payback year | built |
-| 27 | 2026-10-21 | Maintenance | High risk items get a soft red pulse on their dot | suggested |
-| 28 | 2026-10-21 | All tabs | Shimmer placeholders while shared data loads | suggested |
+| 27 | 2026-10-21 | Maintenance | High risk items get a soft red pulse on their dot | built |
+| 28 | 2026-10-21 | All tabs | Shimmer placeholders while shared data loads | built |
