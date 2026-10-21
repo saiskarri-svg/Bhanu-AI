@@ -442,8 +442,11 @@ const LearnTab: React.FC<LearnTabProps> = props => {
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight">Learn solar</h2>
           <p className="text-base sm:text-lg text-silver">Short lessons for students and staff, using this school's own system.</p>
         </div>
-        <button onClick={() => goTo('Certificate')} className="text-sm text-silver hover:text-fg tabular-nums">
+        <button onClick={() => goTo('Certificate')} className="text-sm text-silver hover:text-fg tabular-nums text-left">
           {done} of {reqs.length} steps to the certificate
+          <span className="mt-1.5 block h-1 w-full min-w-[180px] rounded-full bg-line overflow-hidden" aria-hidden="true">
+            <span className="progress-fill block h-full rounded-full bg-ok" style={{ width: `${reqs.length ? (done / reqs.length) * 100 : 0}%` }} />
+          </span>
         </button>
       </div>
 
@@ -472,7 +475,7 @@ const LearnTab: React.FC<LearnTabProps> = props => {
                 style={{ background: on ? c : `color-mix(in srgb, ${c} 18%, transparent)`, color: on ? '#0b0b0d' : c }}
                 aria-label={isDone ? 'done' : undefined}
               >
-                {isDone ? '✓' : i < LESSON_COUNT ? i + 1 : m === 'Certificate' ? '★' : '✎'}
+                {isDone ? <span key="done" className="tick-pop">✓</span> : i < LESSON_COUNT ? i + 1 : m === 'Certificate' ? '★' : '✎'}
               </span>
               {m}
             </button>

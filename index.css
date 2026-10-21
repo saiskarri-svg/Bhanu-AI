@@ -175,3 +175,28 @@ html { scroll-padding-top: 120px; }
 
 .back-to-top { opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease; }
 .back-to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+
+/* New rows slide in with a soft green wash; removed rows fade and fold */
+.row-new { animation: row-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), row-wash 2.2s ease-out; }
+@keyframes row-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes row-wash { from { background-color: color-mix(in srgb, var(--ok) 12%, transparent); } to { background-color: transparent; } }
+.row-out { opacity: 0; height: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; overflow: hidden; transition: opacity 0.2s ease, height 0.28s ease, padding 0.28s ease; }
+.saved-tick { animation: saved-tick 2.4s ease-out forwards; }
+@keyframes saved-tick { 0% { opacity: 0; transform: scale(0.8); } 12% { opacity: 1; transform: scale(1.08); } 20% { transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Quiz: the right answer pops, a wrong pick shakes once */
+.ans-pop { animation: ans-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes ans-pop { 0% { transform: scale(1); } 45% { transform: scale(1.025); } 100% { transform: none; } }
+.ans-shake { animation: ans-shake 0.4s ease-in-out; }
+@keyframes ans-shake { 0%, 100% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+.fade-in { animation: mission-fade 0.35s ease-out both; }
+
+/* Learn: progress fills smoothly; a finished lesson's tick pops */
+.progress-fill { transition: width 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.tick-pop { animation: tick-pop 0.5s cubic-bezier(0.3, 1.8, 0.5, 1); }
+@keyframes tick-pop { 0% { transform: scale(0.4); } 100% { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .row-new, .saved-tick, .ans-pop, .ans-shake, .fade-in, .tick-pop { animation: none; }
+  .saved-tick { opacity: 0; }
+}

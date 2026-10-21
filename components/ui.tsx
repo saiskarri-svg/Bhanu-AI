@@ -125,6 +125,41 @@ export const CountUp: React.FC<{ value: React.ReactNode }> = ({ value }) => {
   return <span ref={ref}>{shown ?? value}</span>;
 };
 
+// Rows added after the list first loads, so they can slide in with a tick.
+// Rows present in the first moments (from storage) count as old.
+export const useFreshIds = (ids: string[]) => {
+  const seen = React.useRef(new Set<string>());
+  const ready = React.useRef(false);
+  const [fresh, setFresh] = React.useState<string[]>([]);
+  React.useEffect(() => { const t = setTimeout(() => { ready.current = true; }, 1500); return () => clearTimeout(t); }, []);
+  React.useEffect(() => {
+    const added = ids.filter(id => !seen.current.has(id));
+    added.forEach(id => seen.current.add(id));
+    if (!ready.current || !added.length || !motionOK()) return;
+    setFresh(f => [...f, ...added]);
+    const t = setTimeout(() => setFresh(f => f.filter(id => !added.includes(id))), 2400);
+    return () => clearTimeout(t);
+  }, [ids.join('|')]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (id: string) => fresh.includes(id);
+};
+
+// A small green "Saved" tick that fades away
+export const SavedTick: React.FC = () => (
+  <span className="saved-tick inline-flex items-center gap-1 text-xs text-ok" role="status">
+    <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    Saved
+  </span>
+);
+
+// Fades and folds the clicked row away before it is removed
+export const fadeOutRow = (e: React.MouseEvent, then: () => void) => {
+  const row = (e.currentTarget as HTMLElement).closest('li, tr') as HTMLElement | null;
+  if (!row || !motionOK()) { then(); return; }
+  row.style.height = `${row.offsetHeight}px`;
+  requestAnimationFrame(() => row.classList.add('row-out'));
+  setTimeout(then, 280);
+};
+
 // Shows after scrolling well down a long page, and takes you back to the top
 export const BackToTop: React.FC = () => {
   const [show, setShow] = React.useState(false);

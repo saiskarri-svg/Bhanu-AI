@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, BoxHeader, StatusDot, btn } from './ui';
+import { Box, BoxHeader, StatusDot, btn, useFreshIds, SavedTick, fadeOutRow } from './ui';
 import { useCap, saveFile } from './runtime';
 
 // Repairs done by technicians: what was fixed, by whom, for which organisation.
@@ -92,6 +92,7 @@ const RepairLog: React.FC = () => {
     saveFile('repair-log.csv', new Blob([lines.join('\n')], { type: 'text/csv' }));
   };
 
+  const isFresh = useFreshIds(shown.map(r => r.id));
   return (
     <Box>
       <BoxHeader
@@ -168,9 +169,9 @@ const RepairLog: React.FC = () => {
 
       <ul className="mt-4 border-t border-line divide-y divide-line">
         {shown.map(r => (
-          <li key={r.id} className="px-5 py-3 flex items-start justify-between gap-4">
+          <li key={r.id} className={`px-5 py-3 flex items-start justify-between gap-4 ${isFresh(r.id) ? 'row-new' : ''}`}>
             <div className="min-w-0">
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted">{isFresh(r.id) && <><SavedTick /> </>}
                 <StatusDot tone={r.status === 'Fixed' ? 'ok' : 'warn'} className={r.status === 'Fixed' ? 'text-ok' : 'text-warn'}>{r.status}</StatusDot>
                 <span> · {fmt(r.date)} · {r.part}{r.cost ? ` · ₹${r.cost.toLocaleString('en-IN')}` : ''}</span>
               </p>

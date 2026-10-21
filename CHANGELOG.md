@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Motion (ideas 22 to 24):** new rows in the maintenance log, repair log, savings tracker and inverter readings slide in with a green wash and a fading "Saved" tick (`useFreshIds`, `SavedTick`); removed months and readings fade and fold away (`fadeOutRow`); quiz right answers pop and wrong picks shake once; Learn has a steps bar under "x of 10 steps" that fills smoothly, and a finished lesson's tick pops.
 - **Motion (ideas 20, 21):** charts draw in when scrolled into view (`ResponsiveChart` in `ui.tsx` replaces `ResponsiveContainer`); big numbers count up the first time they are seen (`CountUp`, used by `StatStrip`, Impact, Maintenance, bill check).
 - **Rename:** the Soiling tab is now Maintenance (label only; component files keep their names).
 - **Motion:** boxes fade and rise in as they scroll into view (`revealWithin` in `ui.tsx`, tall boxes pass it to inner boxes); the tab underline slides between tabs and the active tab scrolls into view on phones; a Back to top button appears after 1.5 screens; smooth scrolling for in-page links. All off with reduced motion. Screenshot script now scrolls the page once before shooting.

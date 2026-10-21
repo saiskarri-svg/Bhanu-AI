@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, BoxHeader, StatusDot, TINT, btn } from './ui';
+import { Box, BoxHeader, StatusDot, TINT, btn, useFreshIds, SavedTick, fadeOutRow } from './ui';
 import { useCap, setLastClean, downloadCsv } from './runtime';
 
 interface Task { id: string; title: string; every: number; who: 'Students with a teacher' | 'Teacher' | 'Technician'; tint: string }
@@ -109,6 +109,7 @@ const MaintenanceLog: React.FC = () => {
   const who = (e: Entry) => (e.by ? names[e.by] || 'Someone' : mode === 'local' ? 'You' : 'Someone');
   const overdueCount = TASKS.filter(t => { const l = last[t.id]; return !l || Date.now() - new Date(l.at).getTime() > t.every * DAY; }).length;
 
+  const isFresh = useFreshIds(entries.map(e => e.id));
   return (
     <Box>
       <BoxHeader
@@ -184,8 +185,8 @@ const MaintenanceLog: React.FC = () => {
         {entries.length ? (
           <ul className="space-y-1.5 text-sm">
             {entries.slice(0, 8).map(e => (
-              <li key={e.id} className="text-muted">
-                <span className="text-fg">{who(e)}</span> · {TASKS.find(t => t.id === e.task)?.title ?? e.task} · {ago(e.at)}
+              <li key={e.id} className={`text-muted rounded-ctl -mx-1.5 px-1.5 ${isFresh(e.id) ? 'row-new' : ''}`}>
+                <span className="text-fg">{who(e)}</span> · {TASKS.find(t => t.id === e.task)?.title ?? e.task} · {ago(e.at)}{isFresh(e.id) && <> <SavedTick /></>}
                 {e.note && <span className="block text-xs pl-0.5">“{e.note}”</span>}
               </li>
             ))}

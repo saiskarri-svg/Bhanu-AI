@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SystemConfig, SensorLog } from '../types';
 import { SEASONAL_YIELDS } from '../constants';
-import { Box, BoxHeader, StatusDot, btn } from './ui';
+import { Box, BoxHeader, StatusDot, btn, useFreshIds, SavedTick, fadeOutRow } from './ui';
 import { useCap, downloadCsv } from './runtime';
 import { Cite } from './Sources';
 
@@ -200,6 +200,7 @@ export const ConnectData: React.FC<{ config: SystemConfig; annualGen: number; da
 
   const field = 'h-10 w-full px-3 rounded-ctl bg-surface-2 border border-line text-sm text-fg focus:outline-none focus:border-silver';
 
+  const isFresh = useFreshIds(readings.slice(0, 5).map(r => r.date));
   return (
     <Box>
       <BoxHeader
@@ -277,11 +278,12 @@ export const ConnectData: React.FC<{ config: SystemConfig; annualGen: number; da
             {readings.slice(0, 5).map(r => {
               const ratio = r.kwh / expectedOn(r.date, annualGen);
               return (
-                <li key={r.date} className="px-4 py-2 flex items-center gap-3 text-sm">
+                <li key={r.date} className={`px-4 py-2 flex items-center gap-3 text-sm ${isFresh(r.date) ? 'row-new' : ''}`}>
                   <StatusDot tone={ratio >= 0.85 ? 'ok' : ratio >= 0.6 ? 'warn' : 'bad'} className="text-fg tabular-nums">{fmt(r.date)}</StatusDot>
                   <span className="tabular-nums">{r.kwh} kWh</span>
                   <span className="text-xs text-muted">{Math.round(ratio * 100)}% of expected</span>
-                  {canWrite && <button onClick={() => remove(r.date)} className={`${btn.quiet} ml-auto`}>Remove</button>}
+                  {isFresh(r.date) && <SavedTick />}
+                  {canWrite && <button onClick={e => fadeOutRow(e, () => remove(r.date))} className={`${btn.quiet} ml-auto`}>Remove</button>}
                 </li>
               );
             })}

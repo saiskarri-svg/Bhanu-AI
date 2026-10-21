@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { SystemConfig } from '../types';
 import { calculateIndianSubsidy, SEASONAL_YIELDS, MONTHS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp } from './ui';
+import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp, useFreshIds, SavedTick, fadeOutRow } from './ui';
 import { Cite } from './Sources';
 import { useCap, saveFile, downloadCsv } from './runtime';
 
@@ -241,6 +241,7 @@ export const SavingsTracker: React.FC<{ config: SystemConfig; annualGen: number 
 
   const field = 'h-9 w-full bg-bg border border-line rounded-ctl px-3 text-sm text-fg tabular-nums focus:outline-none focus:border-silver';
 
+  const isFresh = useFreshIds(rows.map(r => r.month));
   return (
     <Box>
       <BoxHeader title="Savings tracker" meta={mode === 'shared' ? 'Shared with everyone who opens this page' : mode === 'local' ? 'Saved on this device only' : 'Loading'} />
@@ -266,11 +267,12 @@ export const SavingsTracker: React.FC<{ config: SystemConfig; annualGen: number 
 
       <ul className="mt-4 border-t border-line divide-y divide-line">
         {rows.length ? rows.map(r => (
-          <li key={r.month} className="px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+          <li key={r.month} className={`px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm ${isFresh(r.month) ? 'row-new' : ''}`}>
             <span className="w-24 text-fg">{MONTHS[Number(r.month.slice(5, 7)) - 1]} {r.month.slice(0, 4)}</span>
             <StatusDot tone={r.ok ? 'ok' : 'bad'} className="text-muted tabular-nums">{Math.round(r.solar)} of {Math.round(r.exp)} kWh expected</StatusDot>
             <span className="text-fg tabular-nums">Saved {inr(r.saved)}</span>
-            {canWrite && <button onClick={() => remove(r.month)} className={`${btn.quiet} ml-auto`}>Remove</button>}
+            {isFresh(r.month) && <SavedTick />}
+            {canWrite && <button onClick={e => fadeOutRow(e, () => remove(r.month))} className={`${btn.quiet} ml-auto`}>Remove</button>}
           </li>
         )) : <li className="px-5 py-8 text-center text-sm text-muted">No months added yet. Start with last month's bill.</li>}
       </ul>

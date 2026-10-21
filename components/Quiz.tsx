@@ -59,7 +59,7 @@ const Quiz: React.FC<{ id: string; title: string; questions: QuizQuestion[] }> =
                         key={oi}
                         className={`flex items-center gap-3 rounded-ctl border px-3 py-2 text-sm transition-colors ${
                           showRight ? 'border-ok text-fg' : showWrong ? 'border-bad text-fg' : selected ? 'border-silver bg-surface-2 text-fg' : 'border-line text-muted hover:bg-surface-2'
-                        } ${checked ? 'cursor-default' : 'cursor-pointer'}`}
+                        } ${checked ? 'cursor-default' : 'cursor-pointer'} ${showRight && selected ? 'ans-pop' : showWrong ? 'ans-shake' : ''}`}
                       >
                         <input
                           type="radio"
@@ -80,7 +80,7 @@ const Quiz: React.FC<{ id: string; title: string; questions: QuizQuestion[] }> =
                   })}
                 </div>
                 {checked && (
-                  <p className="mt-2 text-xs text-muted">
+                  <p className="mt-2 text-xs text-muted fade-in">
                     <StatusDot tone={right ? 'ok' : 'bad'} className={right ? 'text-ok' : 'text-bad'}>{right ? 'Correct' : 'Not quite'}</StatusDot>
                     <span> · {item.why}</span>
                   </p>
