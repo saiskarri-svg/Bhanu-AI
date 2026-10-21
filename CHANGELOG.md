@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Fix:** clicking a top tab now opens the new tab at its top, instead of keeping the scroll position from the last tab (`App.tsx` tabs use `goTab`).
 - **Tooling:** added `CHANGELOG.md` (this file) and the rule to keep it current.
 - **Tooling:** added the `ui-improver` agent, the `ideas-midpoint` hook (runs it at the 6th prompt of each session) and `.claude/ideas-log.md`.
 - **Translations:** en, te and hi updated for inverter data box, CSV export, school address and map link, one-message-per-site WhatsApp alerts, Sample data badge, Sources tab name, sources 44 and 45.

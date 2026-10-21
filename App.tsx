@@ -453,7 +453,8 @@ const App: React.FC = () => {
     window.addEventListener(OPEN_SOURCE_EVENT, on);
     return () => window.removeEventListener(OPEN_SOURCE_EVENT, on);
   }, []);
-  const goTab = (t: number) => { setActiveTab(t); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  // A new tab always opens at its top, not where the last tab was scrolled to
+  const goTab = (t: number) => { setActiveTab(t); window.scrollTo(0, 0); };
   const pageHasMainAction = activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5;
   const openFaults = sensorLogs.filter(l => l.status === 'Maintenance Required').length;
   const netInvestment = -roiData[0].cashFlow;
@@ -562,7 +563,7 @@ const App: React.FC = () => {
                   key={tab.label}
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setActiveTab(idx)}
+                  onClick={() => goTab(idx)}
                   className={`relative shrink-0 h-11 lg:h-16 flex items-center gap-1.5 text-sm transition-colors ${
                     active ? 'text-fg font-medium' : 'text-muted hover:text-fg'
                   }`}
@@ -884,7 +885,7 @@ const App: React.FC = () => {
 
           {activeTab === 7 && <SourcesPage />}
 
-          {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} standalone={false} onOpenDashboard={() => setActiveTab(0)} />}
+          {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} standalone={false} onOpenDashboard={() => goTab(0)} />}
         </main>
       </div>
     </div>
