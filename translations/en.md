@@ -5,8 +5,8 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 ## Top bar
 
 - Bhanu AI
-- Tabs: Overview · Returns · Soiling · AI Advisor · Learn · Mission · Impact
-- Sensors live
+- Tabs: Overview · Returns · Soiling · AI Advisor · Learn · Mission · Impact · Sources
+- Sample data · Real data · {date}
 - Export report
 
 ## Site settings (Overview only)
@@ -15,6 +15,8 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - State
 - Village or area
 - School
+- School address · For technician visits · Street, village, mandal, PIN
+- Map link, optional · Paste a Google Maps share link
 - System size
 - Finance
 - Install cost (₹ per kWp)
@@ -23,6 +25,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Grants secured (₹) · CSR or state scheme
 - Yearly degradation
 - Tariffs [14], install costs [13] and yields per kWp [29] are rough guides for each state; use the rate on the school's own bill and a local quote. Schools get no central rooftop subsidy, so enter any CSR or state grant above [8].
+- Settings are saved for everyone who opens this page. · You can view these settings. Changes you make stay on this device. · Settings are saved on this device.
 
 ## Overview
 
@@ -38,6 +41,24 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Classrooms powered: Daytime power for lights and fans, made on the school's own roof.
 - Computer lab time: Daytime solar runs the lab. Add a UPS to ride through cuts and voltage dips.
 - Library budget: Bill savings that can go to library materials instead.
+
+### Real data from the inverter
+
+- Real data from the inverter · Showing sample data · {n} days · last {date}
+- The dashboard is showing sample data. Add real readings and every chart, alert and AI answer switches to them. · The charts, faults, alerts and AI Advisor now use the school's real readings. Add each day's reading to keep them current.
+- Readings are shared with everyone who opens this page. · Readings are saved on this device only.
+- 1. Every day: read the inverter display
+- After sunset, a student and teacher read "E-Today", "Today yield" or "Daily energy" (kWh) on the inverter screen. Look only; do not open the inverter.
+- Date · Energy today (kWh) · about {n} · Save reading · Saved {n} kWh for {date}.
+- 2. Or upload history from the monitoring app
+- Many monitoring portals have a Reports or Export option. For example, Huawei FusionSolar exports plant and inverter yield reports from its Reports menu [44]. Choose a daily report, export it as CSV (or open the Excel file and save it as CSV), then upload it here. Some portals, such as some Growatt web portals, only export pictures of graphs [45]. If yours has no data export, use the daily reading, or ask the installer for a daily energy file.
+- Choose CSV file · {file}: {n} rows. Check the columns: · Date column · Energy column · Unit
+- {n} days, {date} to {date}, about {n} kWh a day (expected about {n}). · Import {n} days · Saving {n} of {n} · Saved {n} days of readings. · Cancel
+- No dates and numbers found in those columns. Try another column. · That is far from what a {size} kWp system makes. Check the energy column and the unit, or that it is a daily (not total) figure.
+- Please choose a CSV file. In Excel or Google Sheets, use File, Download or Save as, then CSV. · That file has no table we can read. · Could not save. You may only have view access to this page.
+- Latest readings · {n}% of expected · Remove · Download as spreadsheet (CSV)
+- Below 85% of expected on a sunny day usually means dust or shade; below 60%, or several low days in a row, needs a check. Cloudy days are lower too, so look at the weather before cleaning.
+- Inverter may be off: almost no power made. Check the inverter display for a fault code.
 
 ## Returns
 
@@ -85,6 +106,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Month · Solar made (kWh) · Units on bill · Bill amount (₹) · Add month · Remove
 - No months added yet. Start with last month's bill.
 - Savings are the solar units times what the school pays per unit on that bill. A month under 90% of the estimate is worth checking: dirty panels, shade or a fault.
+- Download as spreadsheet (CSV)
 
 ### Check a real bill
 
@@ -155,6 +177,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Not done yet · Due in {n} days · Due today · Overdue by {n} days
 - Mark done · Note, optional: what did you see? · Save · Cancel
 - Recent activity
+- Download as spreadsheet (CSV)
 
 ### Repair log
 
@@ -209,21 +232,22 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 ### Alerts
 
 - Alerts · {n} high · {n} medium · {n} low · All clear
-- Every alert gets a risk level. Only high risk alerts can be sent to the teacher in charge on WhatsApp, so nobody gets spammed. Medium and low ones stay here.
-- Teacher's WhatsApp number, with country code
-- {n} of 3 WhatsApp messages used in the last 24 hours
-- The same alert can be sent once every 24 hours. The limit is shared by everyone using this page. · The limit counts sends from this device.
-- High risk: Safety or fire risk, or the system may stop. A technician should check within a day. Can be sent on WhatsApp.
-- Medium risk: Losing power or money, but safe. Fix within a week. Shown here only.
-- Low risk: Good to know or a routine reminder. Shown here only.
-- Fault message: {school}: {risk} risk solar fault: "{fault}". Please ask the technician to check within a day. Do not let students touch the panels, cables or inverter until then.
-- No cleaning logged yet (low): {school}: please log the last panel cleaning in the Bhanu AI maintenance log.
-- Cleaning overdue ({n} days) (medium) · Panels due for cleaning ({n} days) (low): {school}: the solar panels are due for cleaning. Last cleaned {n} days ago. Plain water and a soft brush, early morning, with a teacher.
-- Very dusty season (low): {school}: this is a very dusty time of year. Check the panels from the ground each week.
-- Send on WhatsApp · Copy · Copied · Sent just now. · Sent {n} h ago.
-- Already sent. Can send again in {n} hours. · Daily limit reached. Next send in {n} hours. · in under an hour · in about 1 hour
+- Every item gets a risk level. When something is high risk, one WhatsApp message goes to the technician or teacher in charge with the site address and the full list of things to fix, so everything is done in one visit and nobody gets spammed.
+- Site address · Open in Maps
+- Add the full school address in the site settings (Overview tab) so the technician can find it.
+- Technician or teacher's WhatsApp number, with country code
+- {n} of 3 messages sent to this number about this site in the last 24 hours · WhatsApp (no number set)
+- The limit is per phone number and per site: a different number or site has its own count. The same list is not sent again within 24 hours. · Counted for everyone using this page. · Counted on this device.
+- High risk: Safety or fire risk, or the system may stop. Check and repair within a day.
+- Medium risk: Losing power or money, but safe. Check this week.
+- Low risk: Good to know or a routine reminder. Check at the next visit.
+- No cleaning logged yet: Log the last panel cleaning in the maintenance log. · Cleaning overdue ({n} days): Clean the panels with plain water and a soft brush, early morning. · Panels due for cleaning ({n} days): Clean with plain water and a soft brush, early morning, with a teacher. · Very dusty season: Check the panels from the ground each week.
+- Preview the message · Send list on WhatsApp ({n} items) · Copy message · Copied
+- Message: Bhanu AI: solar work needed at {school} · Address: {address} · Map: {link} · To fix on this visit ({n}): · 1. [HIGH] {item}. {action}
+- Message end: High risk items need a technician within a day. Do not let students touch the panels, cables or inverter until they are checked. · Please reply when the visit is booked, and log each repair in the Bhanu AI repair log.
+- No high risk items, so nothing is sent. The list stays here. · This list was already sent. It can be sent again in {n} hours, or straight away if a new high risk item appears. · Limit of 3 messages to this number for this site reached. Next send in {n} hours.
 - Nothing needs attention right now.
-- Someone taps to send each high risk alert. Fully automatic messages need a WhatsApp or SMS service connected to the school's account.
+- Someone taps to send. Fully automatic messages need a WhatsApp or SMS service connected to the school's account.
 - Maintenance list: High risk · Medium risk · Low risk · Resolved
 
 ## AI Advisor
@@ -797,3 +821,8 @@ Numbers in square brackets, like [1], match the numbered sources on the site's S
 - [41] Suryamitra skill development programme. Vikaspedia, with MNRE. https://en.vikaspedia.in/viewcontent/energy/policy-support/renewable-energy-1/solar-energy/suryamitra-skill-development-programme
 - [42] ITI Electrician trade. Government ITI Cacora, Goa. https://iticacora.goa.gov.in/?p=460
 - [43] Solar installer salary in India. QuickEstimate. https://quickestimate.co/blog/solar-installer-salary-india
+
+### Getting real data from the inverter
+
+- [44] SmartPVMS 24.2.0 user manual: viewing and managing reports. Huawei (FusionSolar). https://support.huawei.com/enterprise/en/doc/EDOC1100331328/90b9638d/viewing-and-managing-report
+- [45] Raw access to Growatt inverter data (forum thread). Power Forum. https://powerforum.co.za/topic/11621-raw-access-to-growatt-inverter-data/
