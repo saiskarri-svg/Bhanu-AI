@@ -2,13 +2,22 @@ import React from 'react';
 import { BarChart, Bar, XAxis, Cell } from 'recharts';
 import { SystemConfig } from '../types';
 import { MONTHS, SEASONAL_YIELDS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { CHART, axisProps, ResponsiveChart, CountUp } from './ui';
+import { CHART, axisProps, ResponsiveChart, CountUp, btn } from './ui';
+import { useFunderPdf } from './ReturnsExtras';
+import { PAGE_URL } from './runtime';
 import { Cite } from './Sources';
 import GlowSun from './GlowSun';
 import { FLOW_ART } from './FlowIcons';
 
 // A plain, friendly page for parents and the village. Opens on its own with #impact.
-const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; standalone: boolean; onOpenDashboard: () => void }> = ({ config, annualGen, standalone, onOpenDashboard }) => {
+const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; payback: number | string; standalone: boolean; onOpenDashboard: () => void }> = ({ config, annualGen, payback, standalone, onOpenDashboard }) => {
+  const pdf = useFunderPdf(config, annualGen, payback);
+  const [copied, setCopied] = React.useState(false);
+  // Inside claude.ai the page runs in a frame, so share the claude.ai address
+  const shareLink = (window.top !== window || location.hostname.endsWith('claude.ai') ? PAGE_URL : location.href.split('#')[0]) + '#impact';
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(shareLink); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
+  };
   const saved = annualGen * config.unitPrice;
   const co2 = (annualGen * EMISSION_FACTOR) / 1000;
   const trees = Math.floor((annualGen * EMISSION_FACTOR) / TREE_ABSORPTION);
@@ -86,8 +95,20 @@ const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; standalone
           ))}
         </section>
 
+        <section aria-label="Next steps" className="rounded-box border border-line bg-surface p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="max-w-prose">
+            <h2 className="text-base font-semibold">Help the next school go solar</h2>
+            <p className="mt-1 text-sm text-muted">Send a company's CSR team or a bank the one page summary, or share this page with parents and the village.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {(pdf.msg || copied) && <span className="text-xs text-muted" role="status">{copied ? 'Link copied' : pdf.msg}</span>}
+            <button onClick={pdf.make} disabled={pdf.busy} className={btn.secondary}>{pdf.busy ? 'Making the PDF…' : 'Download funder summary'}</button>
+            <button onClick={copyLink} className={btn.secondary}>Copy share link</button>
+          </div>
+        </section>
+
         <p className="text-center text-xs text-muted">
-          Figures are estimates for a typical year from the system size and local sunshine. {standalone ? '' : 'To share this page on its own, add #impact to the end of the link.'}
+          Figures are estimates for a typical year from the system size and local sunshine.
         </p>
       </div>
     </div>

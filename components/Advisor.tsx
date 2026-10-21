@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, BoxHeader, StatusDot, btn } from './ui';
+import { PAGE_URL } from './runtime';
 import { getSample, sampleErrorText, saveFile, SampleFn } from './runtime';
 
 // ---------- Shared ----------
@@ -71,9 +72,26 @@ const Answer: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+// Each card's placeholder when AI answers are off; the full explanation is
+// said once, by AdvisorNotice at the top of the tab.
 const Unavailable: React.FC = () => (
-  <p className="text-sm text-muted">AI answers work on the published page in claude.ai. Open the page there to use them.</p>
+  <p className="text-sm text-muted">Available on the claude.ai page.</p>
 );
+
+// One notice for the whole tab when the page is opened outside claude.ai
+export const AdvisorNotice: React.FC = () => {
+  const sample = useSampleFn();
+  if (sample !== null) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-box border border-line bg-surface px-5 py-4">
+      <div className="max-w-prose">
+        <p className="text-sm text-fg font-medium">AI answers need the claude.ai page</p>
+        <p className="mt-1 text-sm text-muted">This copy of the site works offline, so it cannot ask the AI. Open the same page on claude.ai to ask questions, diagnose faults, write the weekly report and build lessons.</p>
+      </div>
+      <a href={PAGE_URL} target="_blank" rel="noopener noreferrer" className={btn.secondary}>Open in claude.ai</a>
+    </div>
+  );
+};
 
 const LangPicker: React.FC<{ id: string; value: string; onChange: (v: string) => void }> = ({ id, value, onChange }) => (
   <div className="flex items-center gap-2">

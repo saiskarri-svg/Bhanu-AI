@@ -338,7 +338,8 @@ export const SavingsSplit: React.FC<{ config: SystemConfig; annualGen: number }>
 
 // ---------- 5. Funder summary (PDF) ----------
 
-export const FunderSummary: React.FC<{ config: SystemConfig; annualGen: number; payback: number | string }> = ({ config, annualGen, payback }) => {
+// Makes the one page funder PDF; used by the Returns box and the Impact page
+export const useFunderPdf = (config: SystemConfig, annualGen: number, payback: number | string) => {
   const m = useMoney(config, annualGen);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
@@ -430,6 +431,11 @@ export const FunderSummary: React.FC<{ config: SystemConfig; annualGen: number; 
     }
   };
 
+  return { make, busy, msg };
+};
+
+export const FunderSummary: React.FC<{ config: SystemConfig; annualGen: number; payback: number | string }> = ({ config, annualGen, payback }) => {
+  const { make, busy, msg } = useFunderPdf(config, annualGen, payback);
   return (
     <Box>
       <BoxHeader title="Funder summary" meta="One page PDF" />

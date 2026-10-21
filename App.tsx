@@ -17,7 +17,7 @@ import { SourcesPage, OPEN_SOURCE_EVENT, focusSource } from './components/Source
 import { Cite } from './components/Sources';
 import { SOURCES } from './components/sourceList';
 import { ThreeJobs, WhoItHelps, Problems, ScaleUp, NextSteps } from './components/MissionInteractive';
-import { AskAdvisor, WeeklyReport, Diagnose, LessonBuilder } from './components/Advisor';
+import { AskAdvisor, WeeklyReport, Diagnose, LessonBuilder, AdvisorNotice } from './components/Advisor';
 import { CleaningPlanner, BeforeAfter, DustOutlook, PanelHealth, Alerts, TodayStrip } from './components/SoilingExtras';
 import { FundingOptions, WhatIf, SavingsTracker, SavingsSplit, FunderSummary } from './components/ReturnsExtras';
 import { getLastClean, LAST_CLEAN_EVENT } from './components/runtime';
@@ -558,6 +558,7 @@ const App: React.FC = () => {
         <SolarSky />
         <ImpactPage
           config={config}
+          payback={paybackYear}
           annualGen={annualGen}
           standalone
           onOpenDashboard={() => { try { history.replaceState(null, '', ' '); } catch { /* ignore */ } setStandalone(false); setActiveTab(0); }}
@@ -876,6 +877,7 @@ const App: React.FC = () => {
 
           {activeTab === 3 && (
             <div className="space-y-6">
+              <AdvisorNotice />
               <AskAdvisor context={advisorContext} />
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                 <Diagnose context={advisorContext} />
@@ -924,7 +926,7 @@ const App: React.FC = () => {
 
           {activeTab === 7 && <SourcesPage />}
 
-          {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} standalone={false} onOpenDashboard={() => goTab(0)} />}
+          {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} payback={paybackYear} standalone={false} onOpenDashboard={() => goTab(0)} />}
         </main>
         <BackToTop />
       </div>

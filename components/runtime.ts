@@ -106,3 +106,6 @@ export function downloadCsv(filename: string, headers: string[], rows: (string |
   const text = [headers.map(q).join(','), ...rows.map(r => r.map(q).join(','))].join('\n');
   return saveFile(filename, new Blob([text], { type: 'text/csv' }));
 }
+
+// Sai's published page on claude.ai, where AI answers work
+export const PAGE_URL = 'https://claude.ai/artifact/VpVawmYFnpyzbMrM5D4kVT';
