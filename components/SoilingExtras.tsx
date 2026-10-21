@@ -409,7 +409,8 @@ export function siteMessage(config: SystemConfig, alerts: Alert[]) {
   ].filter((l, i, all) => l !== '' || all[i - 1] !== '').join('\n').trim();
 }
 
-export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults: string[] }> = ({ config, annualGen, faults }) => {
+// sample: the faults come from sample data, so they are tagged and never sent
+export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults: string[]; sample?: boolean }> = ({ config, annualGen, faults, sample = false }) => {
   const logged = useLastClean();
   const [phone, setPhone] = useState(() => { try { return localStorage.getItem(PHONE_KEY) || ''; } catch { return ''; } });
   const [copied, setCopied] = useState(false);
@@ -446,7 +447,7 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
   const scope = { phone: phoneKey(phone), site: siteKey(where.text) };
   const st = waStatus(sends, sendId, now, scope);
   const hasHigh = counts.High > 0;
-  const canSend = hasHigh && st.wait === 0;
+  const canSend = hasHigh && st.wait === 0 && !sample;
 
   const link = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
   const copy = async () => {
@@ -492,6 +493,7 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
                   style={{ color: `var(--${RISK_TONE[a.risk]})`, background: `color-mix(in srgb, var(--${RISK_TONE[a.risk]}) 14%, transparent)` }}>
                   {a.risk === 'High' && <span className="risk-pulse inline-block h-1.5 w-1.5 rounded-full bg-bad mr-1.5 align-middle" aria-hidden="true" />}{a.risk} risk
                 </span>
+                {sample && a.id.startsWith('fault:') && <span className="text-[11px] px-1.5 py-0.5 rounded border border-line text-muted">Sample</span>}
                 <span className="text-sm text-fg">{a.title}</span>
               </p>
               <p className="mt-1 text-xs text-muted">{RISK_MEANING[a.risk]} {a.action}</p>
@@ -513,12 +515,13 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
               </a>
             ) : (
               <span className="text-xs text-muted">
-                {!hasHigh ? 'No high risk items, so nothing is sent. The list stays here.'
+                {sample && hasHigh ? 'These faults are sample data for practice, so nothing is sent. Sending turns on once real inverter readings are added on the Overview tab.'
+                  : !hasHigh ? 'No high risk items, so nothing is sent. The list stays here.'
                   : st.cooldownLeft > 0 ? `This list was already sent. It can be sent again ${hoursText(st.cooldownLeft)}, or straight away if a new high risk item appears.`
                   : `Limit of ${WA_DAILY_CAP} messages to this number for this site reached. Next send ${hoursText(st.wait)}.`}
               </span>
             )}
-            <button onClick={copy} className={btn.quiet}>{copied ? 'Copied' : 'Copy message'}</button>
+            {!sample && <button onClick={copy} className={btn.quiet}>{copied ? 'Copied' : 'Copy message'}</button>}
           </div>
         </div>
       )}

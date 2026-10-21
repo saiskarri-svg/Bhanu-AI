@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Trust (ideas 29 to 31):** with no real readings, the Maintenance list says "Sample" and explains the faults are for practice, the tab hides its fault count, Alerts tags sample faults and will not send or copy them on WhatsApp; Impact's rooms line no longer suggests power during cuts and the savings and books figures say rough guide; Overview's "Grants" stat is now "Saved a year (rough)".
 - **Motion (ideas 27, 28):** high risk items get a soft red pulsing ring on their dot (Maintenance list and Alerts; `StatusDot pulse`); shimmer placeholders (`SkeletonRows`) replace the empty message while the maintenance log, repair log and savings tracker load shared data.
 - **Overview (idea 25):** new "Where the power goes now" box (`components/EnergyNow.tsx`): panels to school to grid with moving lines sized by power, estimated from the typical day curve and school hours (Mon to Sat, 9:00 to 16:30), updates each minute, labelled as not a live meter.
 - **Fix:** Typical day curve peaked at 9:00 and ended at 15:00; it now runs about 6:00 to 18:00 with the peak at noon.

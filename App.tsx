@@ -492,7 +492,7 @@ const App: React.FC = () => {
   const tabs = [
     { label: 'Overview' },
     { label: 'Returns' },
-    { label: 'Maintenance', count: openFaults },
+    { label: 'Maintenance', count: realData ? openFaults : 0 },
     { label: 'AI Advisor' },
     { label: 'Learn' },
     { label: 'Mission' },
@@ -627,7 +627,7 @@ const App: React.FC = () => {
               { label: 'Annual generation', value: annualGen.toLocaleString(), unit: 'kWh / yr', icon: Icons.sun, tint: TINT.sun },
               { label: 'Carbon offset', value: environmentalMetrics.co2Tonnes.toFixed(1), unit: 't CO₂ / yr', icon: Icons.leaf, tint: TINT.leaf },
               { label: 'Payback', value: paybackYear, unit: 'years', icon: Icons.clock, tint: TINT.sky },
-              { label: 'Grants', value: inr(subsidyInfo.totalSubsidy), icon: Icons.rupee, tint: TINT.violet },
+              { label: 'Saved a year (rough)', value: inr(annualGen * config.unitPrice), icon: Icons.rupee, tint: TINT.leaf },
             ]}
           />
           )}
@@ -820,7 +820,8 @@ const App: React.FC = () => {
                 </div>
 
                 <Box>
-                  <BoxHeader title="Maintenance" meta={openFaults ? `${openFaults} open` : 'All clear'} />
+                  <BoxHeader title="Maintenance" meta={`${realData ? '' : 'Sample · '}${openFaults ? `${openFaults} open` : 'All clear'}`} />
+                  {!realData && <p className="px-5 -mt-1 pb-3 text-xs text-muted">These are sample faults for practice. Real faults show here once inverter readings are added on the Overview tab.</p>}
                   <ul className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
                     {filteredLogs.map(log => {
                       const open = log.status !== 'Resolved';
@@ -859,7 +860,7 @@ const App: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               <DustOutlook config={config} />
-              <Alerts config={config} annualGen={annualGen} faults={sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => l.faultDescription || 'Fault reported')} />
+              <Alerts config={config} annualGen={annualGen} faults={sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => l.faultDescription || 'Fault reported')} sample={!realData} />
             </div>
             </div>
           )}

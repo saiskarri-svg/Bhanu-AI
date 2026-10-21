@@ -45,11 +45,11 @@ const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; standalone
         <section aria-label="This year's impact" className="grid grid-cols-2 lg:grid-cols-3 gap-px bg-line border border-line rounded-box overflow-hidden">
           {[
             { v: Math.round(annualGen).toLocaleString('en-IN'), u: 'kWh of clean power a year', c: CHART.sun },
-            { v: '₹' + Math.round(saved).toLocaleString('en-IN'), u: 'saved on electricity bills a year', c: CHART.positive },
+            { v: '₹' + Math.round(saved).toLocaleString('en-IN'), u: 'saved on electricity bills a year (rough guide)', c: CHART.positive },
             { v: co2.toFixed(1), u: 'tonnes of CO₂ avoided a year', c: CHART.positive, src: 'cea-co2' },
             { v: trees.toLocaleString('en-IN'), u: 'trees would be needed to absorb the same', src: 'tree-co2' },
-            { v: String(rooms), u: 'classrooms with steady lights and fans' },
-            { v: books.toLocaleString('en-IN'), u: 'library books the savings could buy' },
+            { v: String(rooms), u: 'classrooms whose daytime lights and fans the solar power covers' },
+            { v: books.toLocaleString('en-IN'), u: 'library books the savings could buy (rough guide, ₹250 a book)' },
           ].map(s => (
             <div key={s.u} className="bg-surface px-5 py-6 text-center">
               <p className="font-display font-semibold text-[34px] leading-none tabular-nums" style={{ color: s.c }}><CountUp value={s.v} /></p>
