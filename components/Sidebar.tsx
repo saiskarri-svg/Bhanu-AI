@@ -1,23 +1,46 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Cite } from './Sources';
 import { SystemConfig } from '../types';
 import { STATE_YIELDS, VILLAGE_DATA, STATE_TARIFFS, SCHOOL_DATA } from '../constants';
 
 interface SidebarProps {
   config: SystemConfig;
   setConfig: React.Dispatch<React.SetStateAction<SystemConfig>>;
-  onGenerateReport: () => void;
+  /** Where the settings are saved, shown under the form */
+  saveNote?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ config, setConfig, onGenerateReport }) => {
+const fieldClass =
+  'w-full h-9 bg-bg border border-line rounded-ctl px-3 text-sm text-fg placeholder:text-muted/60 hover:border-[#3a3a42] focus:outline-none focus:border-silver transition-colors';
+
+const Chevron = () => (
+  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const Field: React.FC<{ label: string; htmlFor: string; hint?: React.ReactNode; children: React.ReactNode }> = ({ label, htmlFor, hint, children }) => (
+  <div>
+    <div className="flex items-baseline justify-between mb-1.5">
+      <label htmlFor={htmlFor} className="text-xs text-muted">{label}</label>
+      {hint && <span className="text-xs text-muted">{hint}</span>}
+    </div>
+    {children}
+  </div>
+);
+
+const Sidebar: React.FC<SidebarProps> = ({ config, setConfig, saveNote }) => {
+  const [open, setOpen] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setConfig(prev => {
       const updated = {
         ...prev,
-        [name]: name === 'state' || name === 'village' || name === 'schoolName' ? value : parseFloat(value)
+        [name]: ['state', 'village', 'schoolName', 'address', 'mapLink'].includes(name) ? value : (parseFloat(value) || 0)
       };
-      
+
       // If state changes, reset village, school and update tariff to DISCOM rate
       if (name === 'state') {
         const villages = VILLAGE_DATA[value];
@@ -31,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, setConfig, onGenerateReport }
       if (name === 'village') {
         updated.schoolName = SCHOOL_DATA[value] || '';
       }
-      
+
       return updated;
     });
   };
@@ -50,148 +73,90 @@ const Sidebar: React.FC<SidebarProps> = ({ config, setConfig, onGenerateReport }
   }, [config.state]);
 
   const sortedStates = Object.keys(STATE_YIELDS).sort();
+  const isDefaultTariff = STATE_TARIFFS[config.state] === config.unitPrice;
 
   return (
-    <aside id="sidebar" className="w-full lg:w-80 bg-[#161b22] border-r border-[#30363d] p-6 space-y-8 h-full lg:overflow-y-auto shrink-0">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-yellow-400 p-1.5 rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.3)]">
-          <svg className="w-7 h-7 text-gray-900" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="4.5" fill="currentColor" />
-            <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="12" y1="3" x2="12" y2="5.5" />
-              <line x1="12" y1="18.5" x2="12" y2="21" />
-              <line x1="3" y1="12" x2="5.5" y2="12" />
-              <line x1="18.5" y1="12" x2="21" y2="12" />
-              <line x1="5.64" y1="5.64" x2="7.41" y2="7.41" />
-              <line x1="16.59" y1="16.59" x2="18.36" y2="18.36" />
-              <line x1="5.64" y1="18.36" x2="7.41" y2="16.59" />
-              <line x1="16.59" y1="7.41" x2="18.36" y2="5.64" />
-            </g>
-          </svg>
-        </div>
-        <h1 className="text-xl font-black text-yellow-400 tracking-tighter uppercase italic">BHANU AI</h1>
-      </div>
+    <aside id="sidebar" className="bg-surface border border-line rounded-box lg:sticky lg:top-[88px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto">
+      {/* Phone: one summary line that opens the full form */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-controls="site-form"
+        className="lg:hidden w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+      >
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-fg">Site settings</span>
+          <span className="block text-xs text-muted truncate">{config.village} · {config.state} · {config.systemSize} kWp</span>
+        </span>
+        <svg className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
 
-      <section className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Site Configuration</h2>
-          <span className="text-[10px] bg-yellow-400/10 text-yellow-400 px-1 rounded">IoT Active</span>
-        </div>
-        
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Installation State</label>
-          <select 
-            name="state" 
-            value={config.state} 
-            onChange={handleChange}
-            className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-400"
-          >
-            {sortedStates.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
+      <div id="site-form" className={`${open ? 'block border-t border-line' : 'hidden'} lg:block lg:border-0`}>
+        <section className="p-5 space-y-4">
+          <h2 className="hidden lg:block text-[15px] font-semibold text-fg">Site</h2>
 
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Local Area / Village</label>
-          <select 
-            name="village" 
-            value={config.village} 
-            onChange={handleChange}
-            className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-400"
-          >
-            {VILLAGE_DATA[config.state] && VILLAGE_DATA[config.state].map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
-        </div>
+          <Field label="State" htmlFor="state">
+            <div className="relative">
+              <select id="state" name="state" value={config.state} onChange={handleChange} className={`${fieldClass} appearance-none pr-8`}>
+                {sortedStates.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <Chevron />
+            </div>
+          </Field>
 
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Institutional Beneficiary (School)</label>
-          <input 
-            type="text"
-            name="schoolName"
-            value={config.schoolName}
-            onChange={handleChange}
-            placeholder="e.g. ZPH High School"
-            className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-400"
-          />
-        </div>
+          <Field label="Village or area" htmlFor="village">
+            <div className="relative">
+              <select id="village" name="village" value={config.village} onChange={handleChange} className={`${fieldClass} appearance-none pr-8`}>
+                {VILLAGE_DATA[config.state] && VILLAGE_DATA[config.state].map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+              <Chevron />
+            </div>
+          </Field>
 
-        <div>
-          <label className="block text-xs text-gray-500 mb-3 font-medium">System Size (kWp): {config.systemSize}</label>
-          <div className="pt-1">
-            <input 
-              type="range" 
-              name="systemSize" 
-              min="1" max="15" step="0.5" 
-              value={config.systemSize} 
-              onChange={handleChange}
-              className="w-full h-1 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-yellow-400"
-            />
-          </div>
-        </div>
-      </section>
+          <Field label="School" htmlFor="schoolName">
+            <input id="schoolName" type="text" name="schoolName" value={config.schoolName} onChange={handleChange} placeholder="e.g. ZPH High School" className={fieldClass} />
+          </Field>
 
-      <div className="border-t border-[#30363d] pt-6"></div>
+          <Field label="School address" htmlFor="address" hint="For technician visits">
+            <input id="address" type="text" name="address" value={config.address ?? ''} onChange={handleChange} placeholder="Street, village, mandal, PIN" className={fieldClass} />
+          </Field>
 
-      <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Financial Inputs</h2>
-        
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Install Cost (₹/kWp)</label>
-          <input 
-            type="number" 
-            name="costPerKw" 
-            value={config.costPerKw} 
-            onChange={handleChange}
-            className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-400"
-          />
-        </div>
+          <Field label="Map link, optional" htmlFor="mapLink">
+            <input id="mapLink" type="url" name="mapLink" value={config.mapLink ?? ''} onChange={handleChange} placeholder="Paste a Google Maps share link" className={fieldClass} />
+          </Field>
 
-        <div>
-          <div className="flex justify-between items-center mb-1">
-             <label className="block text-xs text-gray-500">Tariff (₹/kWh)</label>
-             <span className="text-[10px] text-blue-400 font-mono">DISCOM Default</span>
-          </div>
-          <input 
-            type="number" 
-            name="unitPrice" 
-            step="0.1"
-            value={config.unitPrice} 
-            onChange={handleChange}
-            className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-400"
-          />
-        </div>
+          <Field label="System size" htmlFor="systemSize" hint={<span className="text-fg tabular-nums">{config.systemSize} kWp</span>}>
+            <input id="systemSize" type="range" name="systemSize" min="1" max="30" step="0.5" value={config.systemSize} onChange={handleChange} className="w-full" />
+          </Field>
+        </section>
 
-        <div>
-          <label className="block text-xs text-gray-500 mb-3 font-medium">Annual Degradation (%): {config.degradation}%</label>
-          <div className="pt-1">
-            <input 
-              type="range" 
-              name="degradation" 
-              min="0.1" max="1.5" step="0.1" 
-              value={config.degradation} 
-              onChange={handleChange}
-              className="w-full h-1 bg-[#30363d] rounded-lg appearance-none cursor-pointer accent-yellow-400"
-            />
-          </div>
-        </div>
+        <section className="p-5 space-y-4 border-t border-line">
+          <h2 className="hidden lg:block text-[15px] font-semibold text-fg">Finance</h2>
+          <h2 className="lg:hidden text-xs text-muted">Finance</h2>
 
-        <div className="pt-2">
-          <button 
-            onClick={onGenerateReport}
-            className="w-full flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 py-2.5 rounded-md text-xs font-bold transition-all shadow-sm active:scale-95"
-          >
-            <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export PDF Report
-          </button>
-        </div>
-      </section>
+          <Field label="Install cost (₹ per kWp)" htmlFor="costPerKw">
+            <input id="costPerKw" type="number" name="costPerKw" value={config.costPerKw} onChange={handleChange} className={`${fieldClass} tabular-nums`} />
+          </Field>
 
-      <div className="pt-6">
-        <div className="bg-[#21262d] rounded-lg p-4 text-xs text-gray-400 leading-relaxed border border-[#30363d]">
-          <p className="font-bold text-gray-300">Total Solar Intelligence (v5.1)</p>
-          <p className="mt-1 text-[11px]">Dynamic DISCOM billing enabled. School-specific RTS subsidies verified.</p>
-        </div>
+          <Field label="Tariff (₹ per kWh)" htmlFor="unitPrice" hint={isDefaultTariff ? 'DISCOM default' : undefined}>
+            <input id="unitPrice" type="number" name="unitPrice" step="0.1" value={config.unitPrice} onChange={handleChange} className={`${fieldClass} tabular-nums`} />
+          </Field>
+
+          <Field label="Grants secured (₹)" htmlFor="grant" hint="CSR or state scheme">
+            <input id="grant" type="number" name="grant" min="0" step="1000" value={config.grant ?? 0} onChange={handleChange} className={`${fieldClass} tabular-nums`} />
+          </Field>
+
+          <Field label="Yearly degradation" htmlFor="degradation" hint={<span className="text-fg tabular-nums">{config.degradation}%</span>}>
+            <input id="degradation" type="range" name="degradation" min="0.1" max="1.5" step="0.1" value={config.degradation} onChange={handleChange} className="w-full" />
+          </Field>
+        </section>
+
+        <p className="px-5 py-4 border-t border-line text-xs text-muted leading-relaxed">
+          Tariffs<Cite id="tariffs" />, install costs<Cite id="benchmark" /> and yields per kWp<Cite id="state-yields" /> are rough guides for each state; use the rate on the school's own bill and a local quote. Schools get no central rooftop subsidy, so enter any CSR or state grant above<Cite id="rts2" />.
+        {saveNote && <span className="block mt-2 text-fg">{saveNote}</span>}</p>
       </div>
     </aside>
   );

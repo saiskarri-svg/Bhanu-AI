@@ -2,9 +2,27 @@ import React, { useState, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, Cell, ScatterChart, Scatter, LineChart, Line, ReferenceLine, Label,
-  Legend, ComposedChart
+  BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ComposedChart
 } from 'recharts';
+import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn } from './components/ui';
+import SolarSky from './components/SolarSky';
+import LearnTab from './components/LearnTab';
+import BillCheck from './components/BillCheck';
+import MaintenanceLog from './components/MaintenanceLog';
+import RepairLog from './components/RepairLog';
+import ImpactPage from './components/ImpactPage';
+import GlowSun from './components/GlowSun';
+import { SourcesPage, OPEN_SOURCE_EVENT, focusSource } from './components/Sources';
+import { Cite } from './components/Sources';
+import { SOURCES } from './components/sourceList';
+import { ThreeJobs, WhoItHelps, Problems, ScaleUp, NextSteps } from './components/MissionInteractive';
+import { AskAdvisor, WeeklyReport, Diagnose, LessonBuilder } from './components/Advisor';
+import { CleaningPlanner, BeforeAfter, DustOutlook, PanelHealth, Alerts } from './components/SoilingExtras';
+import { FundingOptions, WhatIf, SavingsTracker, SavingsSplit, FunderSummary } from './components/ReturnsExtras';
+import { getLastClean, LAST_CLEAN_EVENT } from './components/runtime';
+import { classifyFault, RISK_TONE } from './components/risk';
+import { useSharedSettings } from './components/useSharedSettings';
+import { useReadings, readingsToLogs, ConnectData } from './components/LiveData';
 import { 
   SystemConfig, SensorLog 
 } from './types';
@@ -13,7 +31,6 @@ import {
   generateSensorData, getBacktestData, 
   calculateIndianSubsidy, getHistoricalAverageYield
 } from './constants';
-import { getAIInsights } from './services/geminiService';
 
 const App: React.FC = () => {
   const [config, setConfig] = useState<SystemConfig>({
@@ -26,14 +43,35 @@ const App: React.FC = () => {
     degradation: 0.5
   });
 
+  const settings = useSharedSettings(config, setConfig);
   const [activeTab, setActiveTab] = useState(0);
+  // #impact opens the shareable impact page on its own
+  const [standalone, setStandalone] = useState(() => window.location.hash === '#impact');
+  React.useEffect(() => {
+    const on = () => setStandalone(window.location.hash === '#impact');
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
   const [sensorLogs, setSensorLogs] = useState<SensorLog[]>(() => generateSensorData());
-  const [aiInsights, setAiInsights] = useState<{title: string, insight: string}[]>([]);
-  const [isAiLoading, setIsAiLoading] = useState(false);
+  const aiInsights: {title: string, insight: string}[] = [];
+  const [lastClean, setLastCleanState] = useState<string | null>(getLastClean());
+  React.useEffect(() => {
+    const on = () => setLastCleanState(getLastClean());
+    window.addEventListener(LAST_CLEAN_EVENT, on);
+    return () => window.removeEventListener(LAST_CLEAN_EVENT, on);
+  }, []);
 
   const annualGen = useMemo(() => {
     return config.systemSize * (STATE_YIELDS[config.state] || 1450);
   }, [config.state, config.systemSize]);
+
+  // Real readings replace the sample data everywhere once the school adds any
+  const readingsData = useReadings();
+  const realData = readingsData.readings.length > 0;
+  React.useEffect(() => {
+    setSensorLogs(realData ? readingsToLogs(readingsData.readings, annualGen) : generateSensorData());
+  }, [realData, readingsData.readings, annualGen]);
+  const lastReading = readingsData.readings[0]?.date;
 
   const backtestedAvgAnnualGen = useMemo(() => {
     const avgYieldPerKwp = getHistoricalAverageYield(config.state);
@@ -47,7 +85,7 @@ const App: React.FC = () => {
   }, [annualGen]);
 
   const subsidyInfo = useMemo(() => {
-    return calculateIndianSubsidy(config.systemSize, config.state);
+    return calculateIndianSubsidy(config.systemSize, config.state, config.grant);
   }, [config.systemSize, config.state]);
 
   const latestStatus = useMemo(() => sensorLogs[sensorLogs.length - 1], [sensorLogs]);
@@ -130,12 +168,6 @@ const App: React.FC = () => {
     return { classroomsLighted, computerLabHours, booksEquivalent, kwhGainedBypass };
   }, [annualGen, config.unitPrice]);
 
-  const handleFetchAiInsights = async () => {
-    setIsAiLoading(true);
-    const insights = await getAIInsights(config, sensorLogs);
-    setAiInsights(insights);
-    setIsAiLoading(false);
-  };
 
   const handleResolveFault = (id: string) => {
     const now = new Date();
@@ -154,6 +186,27 @@ const App: React.FC = () => {
       .slice()
       .reverse();
   }, [sensorLogs]);
+
+  // Everything the AI advisor knows about this school, sent with each question.
+  const advisorContext = useMemo(() => {
+    const today = new Date();
+    const recent = sensorLogs.slice(-14).map(l => `${l.date}: efficiency ${(l.efficiency * 100).toFixed(0)}%, dust ${(l.dustIndex * 100).toFixed(0)}%, ${l.status}`).join('\n');
+    const faults = sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => `${l.date}: ${l.faultDescription || 'fault'}`).join('\n') || 'none';
+    return [
+      `School: ${config.schoolName}, ${config.village}, ${config.state}, India`,
+      `System: ${config.systemSize} kWp grid-tied rooftop solar, no battery`,
+      `Electricity price: Rs ${config.unitPrice} per unit (kWh)`,
+      `Expected generation: about ${Math.round(annualGen).toLocaleString('en-IN')} kWh a year`,
+      `Cost: Rs ${Math.round(config.systemSize * config.costPerKw).toLocaleString('en-IN')} before subsidy, grants secured Rs ${Math.round(subsidyInfo.totalSubsidy).toLocaleString('en-IN')} (schools get no central rooftop subsidy)`,
+      `Breaks even in year: ${paybackYear}`,
+      `Today: ${today.toDateString()}`,
+      `Soiling loss now: ${currentYieldLoss.percentage}% (${currentYieldLoss.kw} kW blocked)`,
+      `Last cleaning logged: ${lastClean ? new Date(lastClean).toDateString() : 'none logged'}`,
+      `Open faults:\n${faults}`,
+      realData ? 'Data source: real daily readings from the school inverter (dust level is estimated from the shortfall).' : 'Data source: SAMPLE data for demonstration, not real readings. Say so if asked about real performance.',
+      `Last 14 days of sensor readings:\n${recent}`,
+    ].join('\n');
+  }, [config, annualGen, subsidyInfo, paybackYear, currentYieldLoss, lastClean, sensorLogs, realData]);
 
   const handleGenerateReport = () => {
     const reportWindow = window.open('', '_blank');
@@ -208,18 +261,18 @@ const App: React.FC = () => {
           .stamp { border: 2px solid #b91c1c; color: #b91c1c; padding: 5px 10px; border-radius: 4px; font-weight: bold; text-transform: uppercase; display: inline-block; transform: none; margin-bottom: 10px; font-size: 10pt; }
           .section { margin-bottom: 30px; page-break-inside: avoid; }
           .section-title { font-size: 11pt; font-weight: 900; text-transform: uppercase; border-left: 5px solid #000; padding-left: 10px; background: #f3f4f6; padding-top: 5px; padding-bottom: 5px; margin-bottom: 15px; }
-          .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
           .card { border: 1.5px solid #000; padding: 15px; border-radius: 2px; background: #fafafa; }
           .card h3 { margin: 0 0 10px; font-size: 10pt; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
           .card p { margin: 5px 0; font-size: 9.5pt; }
           table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 9pt; }
           th, td { border: 1px solid #000; padding: 10px; text-align: left; }
           th { background: #eee; font-weight: bold; text-transform: uppercase; }
-          .kpi-grid { display: grid; grid-template-cols: repeat(4, 1fr); gap: 10px; }
+          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
           .kpi-box { border: 1px solid #000; padding: 10px; text-align: center; }
           .kpi-box span { display: block; font-size: 7pt; font-weight: bold; color: #666; text-transform: uppercase; }
           .kpi-box strong { display: block; font-size: 13pt; margin-top: 2px; }
-          .signature-area { display: grid; grid-template-cols: repeat(3, 1fr); gap: 30px; margin-top: 50px; }
+          .signature-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 50px; }
           .sig-box { text-align: center; }
           .sig-line { border-bottom: 1px solid #000; height: 40px; margin-bottom: 10px; }
           .sig-box p { font-size: 8pt; font-weight: bold; margin: 0; text-transform: uppercase; }
@@ -393,509 +446,447 @@ const App: React.FC = () => {
     reportWindow.document.close();
   };
 
-  const chartTooltipStyle = {
-    backgroundColor: '#161b22',
-    border: '1px solid #30363d',
-    borderRadius: '8px',
-    padding: '12px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
-    fontSize: '13px',
-    color: '#ffffff'
+  // AI Advisor and Learn have their own main action, so Export steps back
+  // A citation anywhere on the site opens the Sources tab at its entry
+  React.useEffect(() => {
+    const on = (e: Event) => { setActiveTab(7); focusSource((e as CustomEvent<string>).detail); };
+    window.addEventListener(OPEN_SOURCE_EVENT, on);
+    return () => window.removeEventListener(OPEN_SOURCE_EVENT, on);
+  }, []);
+  const goTab = (t: number) => { setActiveTab(t); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const pageHasMainAction = activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5;
+  const openFaults = sensorLogs.filter(l => l.status === 'Maintenance Required').length;
+  const netInvestment = -roiData[0].cashFlow;
+  const finalBalance = roiData[roiData.length - 1].cashFlow;
+  const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
+
+  const nowLabel = `${new Date().getHours()}:00`;
+  const cashValues = roiData.map(d => d.cashFlow);
+  const cashMax = Math.max(0, ...cashValues);
+  const cashMin = Math.min(0, ...cashValues);
+  const zeroOffset = cashMax === cashMin ? 0 : cashMax / (cashMax - cashMin);
+  const effColor = (e: number) => (e >= 0.75 ? CHART.positive : e >= 0.45 ? CHART.sun : CHART.negative);
+
+  const tabs = [
+    { label: 'Overview' },
+    { label: 'Returns' },
+    { label: 'Soiling', count: openFaults },
+    { label: 'AI Advisor' },
+    { label: 'Learn' },
+    { label: 'Mission' },
+    { label: 'Impact' },
+    ...(SOURCES.length ? [{ label: 'Sources' }] : []),
+  ];
+
+  const ForecastTooltip = ({ active, payload, label }: any) =>
+    active && payload?.length ? (
+      <TooltipCard title={label} rows={[{ label: 'Output', value: `${payload[0].value} kW`, color: CHART.sun }]} />
+    ) : null;
+
+  const MonthlyTooltip = ({ active, payload, label }: any) =>
+    active && payload?.length ? (
+      <TooltipCard
+        title={label}
+        rows={[{
+          label: payload[0].payload.isMonsoon ? 'Monsoon month' : 'Production',
+          value: `${Math.round(payload[0].value).toLocaleString()} kWh`,
+          color: payload[0].payload.isMonsoon ? CHART.monsoon : CHART.sun,
+        }]}
+      />
+    ) : null;
+
+  const RoiTooltip = ({ active, payload, label }: any) =>
+    active && payload?.length ? (
+      <TooltipCard
+        title={`Year ${label}`}
+        rows={payload.map((item: any) => ({
+          label: item.dataKey === 'cashFlow' ? 'Running balance' : 'Yearly savings',
+          value: (item.value < 0 ? '-' : '') + inr(Math.abs(item.value)),
+          color: item.dataKey === 'cashFlow' ? (item.value < 0 ? CHART.negative : CHART.positive) : CHART.positive,
+        }))}
+      />
+    ) : null;
+
+  const DustTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const p = payload[0].payload;
+    const eff = p.efficiency ?? p.avgEfficiency;
+    return (
+      <TooltipCard
+        title={`Dust ${(p.dust * 100).toFixed(0)}%`}
+        rows={[{ label: p.efficiency !== undefined ? 'Measured' : 'Expected', value: `${(eff * 100).toFixed(1)}%` }]}
+      />
+    );
   };
 
-  const tooltipItemStyle = { color: '#facc15' };
-  const tooltipLabelStyle = { color: '#ffffff', fontWeight: 'bold', marginBottom: '4px' };
+  const Spinner = () => (
+    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+      <path className="opacity-90" d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
 
-  // Custom ROI Tooltip
-  const RoiTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#161b22] border border-[#30363d] p-4 rounded-lg shadow-2xl space-y-2 min-w-[200px]">
-          <p className="text-white font-bold border-b border-[#30363d] pb-2 mb-2 text-sm uppercase tracking-wider">Year: {label}</p>
-          {payload.map((item: any, index: number) => {
-            const isBalance = item.dataKey === 'cashFlow';
-            const color = isBalance ? '#facc15' : '#238636';
-            const displayName = isBalance ? 'Cumulative Balance' : 'Annual Savings';
-            return (
-              <div key={index} className="flex justify-between items-center gap-6">
-                <span className="text-xs font-medium" style={{ color }}>{displayName}:</span>
-                <span className="text-sm font-black" style={{ color }}>₹{item.value.toLocaleString()}</span>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomDustTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const dustVal = parseFloat(label) || 0;
-      
-      const dustLine = payload.find((p: any) => p.dataKey === 'avgEfficiency');
-      const actualDust = payload.find((p: any) => p.dataKey === 'efficiency');
-      const displayEff = actualDust ? actualDust.value : (dustLine ? dustLine.value : null);
-
-      return (
-        <div className="bg-[#161b22] border border-[#30363d] p-3 rounded-lg shadow-2xl">
-          <p className="text-white font-bold border-b border-[#30363d] pb-1 mb-2">
-            Soiling Level: {(dustVal * 100).toFixed(1)}%
-          </p>
-          <p className="text-[#facc15] font-semibold">
-            Efficiency: {(displayEff * 100).toFixed(1)}%
-          </p>
-          <p className="text-[10px] text-gray-400 mt-2 italic leading-tight">
-            Modeled from IoT sensor telemetry.
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
+  if (standalone) {
+    return (
+      <div className="relative min-h-screen bg-bg text-fg font-sans isolate">
+        <SolarSky />
+        <ImpactPage
+          config={config}
+          annualGen={annualGen}
+          standalone
+          onOpenDashboard={() => { try { history.replaceState(null, '', ' '); } catch { /* ignore */ } setStandalone(false); setActiveTab(0); }}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#0d1117] text-[#c9d1d9] overflow-hidden font-sans">
-      <Sidebar config={config} setConfig={setConfig} onGenerateReport={handleGenerateReport} />
-      
-      <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8 text-[#c9d1d9]">
-        <header className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#161b22] border border-[#30363d] p-5 rounded-xl shadow-sm hover:border-yellow-400/50 transition-all">
-            <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Annual Generation</p>
-            <h3 className="text-2xl font-bold text-white">{annualGen.toLocaleString()} <span className="text-sm font-normal text-gray-400">kWh/yr</span></h3>
+    <div className="relative min-h-screen bg-bg text-fg font-sans isolate">
+      <SolarSky />
+      <header className="sticky top-0 z-30 border-b border-line bg-[rgba(11,11,13,0.72)] backdrop-blur-xl backdrop-saturate-150">
+        <div className="max-w-page mx-auto px-[var(--gutter)] flex flex-wrap items-center gap-x-8">
+          <div className="order-1 flex items-center gap-2.5 h-14 lg:h-16">
+            <GlowSun className="h-12 w-12 lg:h-14 lg:w-14 -mx-2 -my-2 shrink-0" />
+            <span className="text-[17px] font-semibold tracking-tight text-fg">Bhanu AI</span>
           </div>
-          <div className="bg-[#161b22] border border-[#30363d] p-5 rounded-xl shadow-sm">
-            <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Carbon Offset</p>
-            <h3 className="text-2xl font-bold text-green-400">{environmentalMetrics.co2Tonnes.toFixed(1)} <span className="text-sm font-normal text-gray-400">tonnes CO₂</span></h3>
-          </div>
-          <div className="bg-[#161b22] border border-[#30363d] p-5 rounded-xl shadow-sm">
-            <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Payback Period</p>
-            <h3 className="text-2xl font-bold text-yellow-400">{paybackYear} <span className="text-sm font-normal text-gray-400">years</span></h3>
-          </div>
-          <div className="bg-[#161b22] border border-[#30363d] p-5 rounded-xl shadow-sm">
-            <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Total Subsidy</p>
-            <h3 className="text-2xl font-bold text-blue-400">₹{subsidyInfo.totalSubsidy.toLocaleString()}</h3>
-          </div>
-        </header>
 
-        <nav className="flex space-x-1 border-b border-[#30363d] overflow-x-auto whitespace-nowrap scrollbar-hide">
-          {['Dashboard', 'ROI Analysis', 'Soiling Intelligence', 'AI Advisor', 'Mission & Impact'].map((tab, idx) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(idx)}
-              className={`px-6 py-3 text-sm font-medium transition-all ${
-                activeTab === idx 
-                  ? 'text-yellow-400 border-b-2 border-yellow-400 bg-[#1c2128]' 
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-[#161b22]'
-              }`}
-            >
-              {tab}
+          <nav
+            role="tablist"
+            aria-label="Sections"
+            className="order-3 lg:order-2 w-full lg:w-auto -mx-[var(--gutter)] px-[var(--gutter)] lg:mx-0 lg:px-0 flex gap-6 overflow-x-auto no-scrollbar"
+          >
+            {tabs.map((tab, idx) => {
+              const active = activeTab === idx;
+              return (
+                <button
+                  key={tab.label}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveTab(idx)}
+                  className={`relative shrink-0 h-11 lg:h-16 flex items-center gap-1.5 text-sm transition-colors ${
+                    active ? 'text-fg font-medium' : 'text-muted hover:text-fg'
+                  }`}
+                >
+                  {tab.label}
+                  {!!tab.count && <span className="text-xs text-muted tabular-nums">{tab.count}</span>}
+                  <span className={`absolute left-0 right-0 bottom-0 h-0.5 rounded-full ${active ? 'bg-fg' : 'bg-transparent'}`} />
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="order-2 lg:order-3 ml-auto flex items-center gap-4">
+            <span className="hidden sm:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full border border-line text-xs text-muted">
+              <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                {realData && <span className="absolute inset-0 rounded-full bg-ok opacity-60 animate-ping" />}
+                <span className={`relative h-1.5 w-1.5 rounded-full ${realData ? 'bg-ok' : 'bg-muted'}`} />
+              </span>
+              {realData ? `Real data · ${new Date(lastReading + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : 'Sample data'}
+            </span>
+            <button onClick={handleGenerateReport} className={pageHasMainAction ? btn.secondary : btn.primary}>
+              <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 3v9m0 0l-3.5-3.5M10 12l3.5-3.5M4 15.5h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Export report
             </button>
-          ))}
-        </nav>
+          </div>
+        </div>
+      </header>
 
-        <div className="space-y-6">
-          {(activeTab === 0) && (
+      <div className={`relative max-w-page mx-auto px-[var(--gutter)] py-6 grid gap-6 items-start ${activeTab === 0 ? 'lg:grid-cols-[300px_minmax(0,1fr)]' : ''}`}>
+        {/* Site settings live on the Overview tab only */}
+        {activeTab === 0 && <Sidebar config={config} setConfig={setConfig} saveNote={settings.mode === 'shared' ? (settings.canWrite ? 'Settings are saved for everyone who opens this page.' : 'You can view these settings. Changes you make stay on this device.') : settings.mode === 'local' ? 'Settings are saved on this device.' : undefined} />}
+
+        <main className="min-w-0 space-y-6">
+          {activeTab === 0 && (
+          <StatStrip
+            stats={[
+              { label: 'Annual generation', value: annualGen.toLocaleString(), unit: 'kWh / yr', icon: Icons.sun, tint: TINT.sun },
+              { label: 'Carbon offset', value: environmentalMetrics.co2Tonnes.toFixed(1), unit: 't CO₂ / yr', icon: Icons.leaf, tint: TINT.leaf },
+              { label: 'Payback', value: paybackYear, unit: 'years', icon: Icons.clock, tint: TINT.sky },
+              { label: 'Grants', value: inr(subsidyInfo.totalSubsidy), icon: Icons.rupee, tint: TINT.violet },
+            ]}
+          />
+          )}
+
+          {activeTab === 0 && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#161b22] border border-[#30363d] p-6 rounded-xl">
-                  <h4 className="text-sm font-semibold mb-6 flex items-center gap-2">
-                    Projected 24-Hour Solar Curve
-                  </h4>
-                  <div className="h-[320px]">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <Box>
+                  <BoxHeader title="Typical day" meta="kW by hour" />
+                  <div className="h-[300px] px-2 pb-3">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={forecastData} margin={{ top: 10, right: 30, left: 20, bottom: 30 }}>
+                      <AreaChart data={forecastData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#facc15" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#facc15" stopOpacity={0}/>
+                            <stop offset="0%" stopColor={CHART.sun} stopOpacity={0.32} />
+                            <stop offset="100%" stopColor={CHART.sunLow} stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="sunStroke" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor={CHART.sunLow} />
+                            <stop offset="50%" stopColor="#ffe08a" />
+                            <stop offset="100%" stopColor={CHART.sunLow} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
-                        <XAxis dataKey="time" stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                          <Label value="Time of Day" offset={-20} position="insideBottom" fill="#8b949e" fontSize={12} />
-                        </XAxis>
-                        <YAxis stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                          <Label value="Yield (kW)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle', fill: '#8b949e', fontSize: 12 }} />
-                        </YAxis>
-                        <Tooltip 
-                          contentStyle={chartTooltipStyle} 
-                          itemStyle={tooltipItemStyle}
-                          labelStyle={tooltipLabelStyle}
-                          formatter={(value: number) => [value + " kW", 'Solar Yield']}
-                        />
-                        <Area name="Yield" type="monotone" dataKey="generation" stroke="#facc15" strokeWidth={2} fillOpacity={1} fill="url(#colorGen)" />
+                        <CartesianGrid stroke={CHART.grid} vertical={false} />
+                        <XAxis dataKey="time" {...axisProps} interval={3} />
+                        <YAxis {...axisProps} width={44} domain={[0, (max: number) => Math.max(1, Math.ceil(max))]} allowDecimals={false} />
+                        <Tooltip content={<ForecastTooltip />} cursor={{ stroke: CHART.faint }} />
+                        <ReferenceLine x={nowLabel} stroke={CHART.sun} strokeOpacity={0.6} strokeDasharray="3 3" label={{ value: 'Now', position: 'insideTopRight', fill: CHART.sun, fontSize: 11 }} />
+                        <Area type="monotone" dataKey="generation" stroke="url(#sunStroke)" strokeWidth={2} fill="url(#colorGen)" activeDot={{ r: 4, fill: CHART.sun, stroke: 'none' }} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                </div>
+                </Box>
 
-                <div className="bg-[#161b22] border border-[#30363d] p-6 rounded-xl">
-                  <h4 className="text-sm font-semibold mb-6 flex items-center gap-2">
-                    Monthly Generation Backtest
-                  </h4>
-                  <div className="h-[320px]">
+                <Box>
+                  <BoxHeader
+                    title="Monthly generation"
+                    meta={<Legend items={[{ label: 'Dry season', color: CHART.sun }, { label: 'Monsoon', color: CHART.monsoon }]} />}
+                  />
+                  <div className="h-[300px] px-2 pb-3">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyBacktestData} margin={{ top: 10, right: 30, left: 20, bottom: 30 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
-                        <XAxis dataKey="month" stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                           <Label value="Months" offset={-20} position="insideBottom" fill="#8b949e" fontSize={12} />
-                        </XAxis>
-                        <YAxis stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                          <Label value="Energy (kWh)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle', fill: '#8b949e', fontSize: 12 }} />
-                        </YAxis>
-                        <Tooltip 
-                          contentStyle={chartTooltipStyle} 
-                          cursor={{fill: '#21262d'}} 
-                          itemStyle={tooltipItemStyle}
-                          labelStyle={tooltipLabelStyle}
-                          formatter={(value: number) => [Math.round(value) + " kWh", 'Production']}
-                        />
-                        <Legend 
-                          verticalAlign="top" 
-                          align="right" 
-                          wrapperStyle={{ paddingBottom: '30px', top: '-10px' }}
-                          content={() => (
-                            <div className="flex justify-end gap-4 text-[10px] font-bold uppercase tracking-wider">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 bg-[#facc15] rounded-sm"></div>
-                                <span className="text-gray-400">Standard Production</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 bg-[#3b82f6] rounded-sm"></div>
-                                <span className="text-gray-400">Monsoon Impact</span>
-                              </div>
-                            </div>
-                          )}
-                        />
-                        <Bar name="Production" dataKey="value" radius={[4, 4, 0, 0]}>
+                      <BarChart data={monthlyBacktestData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="barSun" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={CHART.sun} />
+                            <stop offset="100%" stopColor={CHART.sunLow} stopOpacity={0.55} />
+                          </linearGradient>
+                          <linearGradient id="barRain" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={CHART.monsoon} />
+                            <stop offset="100%" stopColor={CHART.monsoon} stopOpacity={0.45} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke={CHART.grid} vertical={false} />
+                        <XAxis dataKey="month" {...axisProps} />
+                        <YAxis {...axisProps} width={44} />
+                        <Tooltip content={<MonthlyTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                        <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={28}>
                           {monthlyBacktestData.map((entry, index) => (
-                            <Cell key={"cell-" + index} fill={entry.isMonsoon ? '#3b82f6' : '#facc15'} />
+                            <Cell key={'cell-' + index} fill={entry.isMonsoon ? 'url(#barRain)' : 'url(#barSun)'} />
                           ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </div>
+                </Box>
               </div>
 
-              <div className="bg-[#161b22] border border-[#30363d] p-8 rounded-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 blur-[100px] rounded-full"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-yellow-400/20 rounded-lg flex items-center justify-center text-xl">🎓</div>
-                    <div>
-                      <h4 className="text-lg font-bold text-white">Institutional Grid Bypass & Impact</h4>
-                      <p className="text-sm text-gray-500">Beneficiary: <span className="text-yellow-400 font-semibold">{config.schoolName}</span></p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="space-y-2 p-4 bg-[#1c2128] rounded-xl border border-[#30363d] hover:border-yellow-400/30 transition-colors">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Grid Loss Reclaim</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-white">{schoolSustainabilityImpact.kwhGainedBypass}</span>
-                        <span className="text-sm text-gray-400">kWh/Yr</span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 leading-relaxed">Energy normally lost in the 'leaky grid' that now reaches classrooms directly.</p>
-                    </div>
-
-                    <div className="space-y-2 p-4 bg-[#1c2128] rounded-xl border border-[#30363d] hover:border-yellow-400/30 transition-colors">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Full Classroom Support</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-yellow-400">{schoolSustainabilityImpact.classroomsLighted}</span>
-                        <span className="text-sm text-gray-400">Rooms</span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 leading-relaxed">Solar yields bypass 65% daily outage rate for consistent lighting and fans.</p>
-                    </div>
-
-                    <div className="space-y-2 p-4 bg-[#1c2128] rounded-xl border border-[#30363d] hover:border-yellow-400/30 transition-colors">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Digital Resilience</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-blue-400">{schoolSustainabilityImpact.computerLabHours.toLocaleString()}</span>
-                        <span className="text-sm text-gray-400">Lab Hrs</span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 leading-relaxed">Bypasses agricultural pump voltage sags to protect lab hardware.</p>
-                    </div>
-
-                    <div className="space-y-2 p-4 bg-[#1c2128] rounded-xl border border-[#30363d] hover:border-yellow-400/30 transition-colors">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Learning Funding</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-green-400">{schoolSustainabilityImpact.booksEquivalent}</span>
-                        <span className="text-sm text-gray-400">Books</span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 leading-relaxed">Savings redirectable to library materials from DISCOM bill displacement.</p>
-                    </div>
-                  </div>
+              <section className="space-y-3">
+                <div>
+                  <h2 className="text-[15px] font-semibold">What it means for {config.schoolName || 'the school'}</h2>
+                  <p className="text-sm text-muted">Yearly, based on this site's generation and tariff.</p>
                 </div>
-              </div>
+                <StatStrip
+                  stats={[
+                    { icon: Icons.bolt, tint: TINT.sun, label: 'Grid loss avoided', value: schoolSustainabilityImpact.kwhGainedBypass.toLocaleString(), unit: 'kWh', note: <>About 17% of India's power is lost on the grid<Cite id="td-loss" />. Power made on the roof is used right there.</> },
+                    { icon: Icons.room, tint: TINT.sky, label: 'Classrooms powered', value: schoolSustainabilityImpact.classroomsLighted, unit: 'rooms', note: 'Daytime power for lights and fans, made on the school\'s own roof.' },
+                    { icon: Icons.screen, tint: TINT.violet, label: 'Computer lab time', value: schoolSustainabilityImpact.computerLabHours.toLocaleString(), unit: 'hours', note: 'Daytime solar runs the lab. Add a UPS to ride through cuts and voltage dips.' },
+                    { icon: Icons.book, tint: TINT.leaf, label: 'Library budget', value: schoolSustainabilityImpact.booksEquivalent.toLocaleString(), unit: 'books', note: 'Bill savings that can go to library materials instead.' },
+                  ]}
+                />
+              </section>
+              <ConnectData config={config} annualGen={annualGen} data={readingsData} />
             </div>
           )}
 
-          {(activeTab === 1) && (
-            <div className="bg-[#161b22] border border-[#30363d] p-6 rounded-xl">
-              <h4 className="text-sm font-semibold mb-6">20-Year Cumulative Cash Flow Analysis</h4>
-              <div className="h-[420px]">
+          {activeTab === 1 && (
+            <div className="space-y-6">
+            <FundingOptions config={config} annualGen={annualGen} />
+            <Box>
+              <BoxHeader
+                title="20 year cash flow"
+                meta={<Legend items={[{ label: 'Still paying off', color: CHART.negative }, { label: 'In profit', color: CHART.positive }, { label: 'Yearly savings', color: CHART.faint }]} />}
+              />
+              <p className="px-5 text-sm text-muted">
+                {inr(netInvestment)} after grants · breaks even in year {paybackYear} · {inr(finalBalance)} ahead by year 20
+              </p>
+              <div className="h-[clamp(380px,62vh,600px)] px-2 pb-3 pt-2">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={roiData} margin={{ top: 20, right: 30, left: 30, bottom: 30 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
-                    <XAxis dataKey="year" stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                      <Label value="Project Lifetime (Years)" offset={-20} position="insideBottom" fill="#8b949e" fontSize={12} />
-                    </XAxis>
-                    <YAxis stroke="#8b949e" fontSize={10} tickLine={false} axisLine={false}>
-                      <Label value="Net Balance (INR)" angle={-90} position="insideLeft" dx={-10} style={{ textAnchor: 'middle', fill: '#8b949e', fontSize: 12 }} />
-                    </YAxis>
-                    <Tooltip content={<RoiTooltip />} />
-                    <ReferenceLine y={0} stroke="#444c56" />
-                    <Bar dataKey="annualSavings" name="Annual Savings" fill="#238636" opacity={0.3} radius={[2, 2, 0, 0]} />
-                    <Line type="monotone" dataKey="cashFlow" name="Cumulative Balance" stroke="#facc15" strokeWidth={3} dot={{ r: 4, fill: '#facc15' }} />
-                    <Legend verticalAlign="top" height={36}/>
+                  <ComposedChart data={roiData} margin={{ top: 16, right: 16, left: 8, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="splitStroke" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset={zeroOffset} stopColor={CHART.positive} />
+                        <stop offset={zeroOffset} stopColor={CHART.negative} />
+                      </linearGradient>
+                      <linearGradient id="splitFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor={CHART.positive} stopOpacity={0.28} />
+                        <stop offset={zeroOffset} stopColor={CHART.positive} stopOpacity={0.02} />
+                        <stop offset={zeroOffset} stopColor={CHART.negative} stopOpacity={0.02} />
+                        <stop offset="1" stopColor={CHART.negative} stopOpacity={0.28} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={CHART.grid} vertical={false} />
+                    <XAxis dataKey="year" {...axisProps} />
+                    <YAxis {...axisProps} width={64} tickFormatter={(v) => `${v < 0 ? '-' : ''}₹${Math.abs(Math.round(v / 1000))}k`} />
+                    <Tooltip content={<RoiTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                    <ReferenceLine y={0} stroke={CHART.faint} />
+                    <Bar dataKey="annualSavings" fill={CHART.faint} fillOpacity={0.6} radius={[2, 2, 0, 0]} maxBarSize={22} />
+                    <Area type="monotone" dataKey="cashFlow" stroke="url(#splitStroke)" strokeWidth={2.25} fill="url(#splitFill)" baseValue={0} dot={false} activeDot={{ r: 4, fill: CHART.primary, stroke: 'none' }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
+            </Box>
+            <FunderSummary config={config} annualGen={annualGen} payback={paybackYear} />
+            <SavingsTracker config={config} annualGen={annualGen} />
+            <BillCheck config={config} annualGen={annualGen} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              <WhatIf config={config} annualGen={annualGen} />
+              <SavingsSplit config={config} annualGen={annualGen} />
+            </div>
             </div>
           )}
 
           {activeTab === 2 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] p-6 rounded-xl">
-                <h4 className="text-sm font-semibold mb-6 flex justify-between items-center">
-                  <span>Performance Decay Roadmap</span>
-                  <span className="text-xs font-normal text-gray-500">Asset Health Analytics</span>
-                </h4>
-                <div className="h-[380px]">
+            <div className="space-y-6">
+            <CleaningPlanner config={config} annualGen={annualGen} />
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+              <Box className="xl:col-span-2">
+                <BoxHeader
+                  title="Dust vs efficiency"
+                  meta={<Legend items={[{ label: 'Healthy', color: CHART.positive }, { label: 'Losing output', color: CHART.sun }, { label: 'Needs cleaning', color: CHART.negative }, { label: 'Expected', color: CHART.primary }]} />}
+                />
+                <div className="h-[380px] xl:h-[514px] px-2 pb-3">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
-                      <XAxis 
-                        type="number" 
-                        dataKey="dust" 
-                        name="Soiling" 
-                        domain={[0, 1]} 
-                        stroke="#8b949e" 
-                        fontSize={10}
-                        tickFormatter={(v) => (v * 100).toFixed(0) + "%"}
-                      >
-                         <Label value="Dust Accumulation (%)" offset={-25} position="insideBottom" fill="#8b949e" fontSize={12} />
-                      </XAxis>
-                      <YAxis 
-                        type="number" 
-                        dataKey="efficiency" 
-                        domain={[0, 1.1]} 
-                        stroke="#8b949e" 
-                        fontSize={10}
-                        tickFormatter={(v) => (v * 100).toFixed(0) + "%"}
-                      >
-                         <Label value="Efficiency (%)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle', fill: '#8b949e', fontSize: 12 }} />
-                      </YAxis>
-                      <Tooltip content={<CustomDustTooltip />} />
-                      <Scatter data={scatterData} fill="#444c56" opacity={0.3} shape="circle" name="Past Performance" />
-                      <Line 
-                        data={dustImpactCurve} 
-                        type="monotone" 
-                        dataKey="avgEfficiency" 
-                        stroke="#facc15" 
-                        strokeWidth={3} 
-                        dot={false} 
-                        name="Decay Curve"
-                      />
-                      <Legend verticalAlign="top" height={36}/>
+                    <ComposedChart margin={{ top: 16, right: 16, bottom: 0, left: -8 }}>
+                      <CartesianGrid stroke={CHART.grid} vertical={false} />
+                      <XAxis type="number" dataKey="dust" domain={[0, 1]} {...axisProps} tickFormatter={(v) => (v * 100).toFixed(0) + '%'} />
+                      <YAxis type="number" dataKey="efficiency" domain={[0, 1.1]} {...axisProps} width={48} tickFormatter={(v) => (v * 100).toFixed(0) + '%'} />
+                      <Tooltip content={<DustTooltip />} cursor={{ stroke: CHART.faint }} />
+                      <Scatter data={scatterData} shape="circle">
+                        {scatterData.map((d, i) => (
+                          <Cell key={i} fill={effColor(d.efficiency)} fillOpacity={0.75} />
+                        ))}
+                      </Scatter>
+                      <Line data={dustImpactCurve} type="monotone" dataKey="avgEfficiency" stroke={CHART.primary} strokeWidth={2} dot={false} activeDot={false} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-[#1c2128] border border-[#30363d] p-5 rounded-xl">
-                  <h5 className="text-xs font-bold text-gray-500 uppercase mb-3 flex justify-between items-center">
-                    <span>Live Yield Analysis</span>
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                    </span>
-                  </h5>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-3xl font-bold text-orange-500">{currentYieldLoss.percentage}%</p>
-                      <p className="text-xs text-gray-400 mt-1">Soiling Loss</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-white">{currentYieldLoss.kw} kW</p>
-                      <p className="text-xs text-gray-400 mt-1">Blocked Power</p>
-                    </div>
+                <p className="px-5 pb-4 -mt-1 text-xs text-muted">Horizontal: dust on panels. Vertical: efficiency. From the last 120 days of sensor data.</p>
+              </Box>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-px bg-line border border-line rounded-box overflow-hidden">
+                  <div className="bg-surface px-5 py-4">
+                    <p className="flex items-center gap-2 text-xs text-muted">
+                      <span className="h-6 w-6 rounded-ctl flex items-center justify-center" style={{ color: CHART.sun, background: `color-mix(in srgb, ${CHART.sun} 14%, transparent)` }} aria-hidden="true">{Icons.drop}</span>
+                      Soiling loss now
+                    </p>
+                    <p className="mt-1 flex items-baseline gap-1.5">
+                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums">{currentYieldLoss.percentage}</span>
+                      <span className="text-xs text-muted">%</span>
+                    </p>
+                  </div>
+                  <div className="bg-surface px-5 py-4">
+                    <p className="flex items-center gap-2 text-xs text-muted">
+                      <span className="h-6 w-6 rounded-ctl flex items-center justify-center" style={{ color: CHART.negative, background: `color-mix(in srgb, ${CHART.negative} 14%, transparent)` }} aria-hidden="true">{Icons.bolt}</span>
+                      Power blocked
+                    </p>
+                    <p className="mt-1 flex items-baseline gap-1.5">
+                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums">{currentYieldLoss.kw}</span>
+                      <span className="text-xs text-muted">kW</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-[#161b22] border border-[#30363d] p-5 rounded-xl flex-1">
-                  <h5 className="text-xs font-bold text-gray-500 uppercase mb-4">Maintenance Center</h5>
-                  <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar text-xs">
-                    {filteredLogs.map(log => (
-                      <div key={log.id} className={"p-3 rounded-lg border " + (log.status === 'Resolved' ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20')}>
-                        <div className="flex justify-between items-start mb-1">
-                          <div className="flex flex-col">
-                            <span className={"font-bold " + (log.status === 'Resolved' ? 'text-green-400' : 'text-red-400')}>{log.status}</span>
-                            {log.status === 'Resolved' && log.resolvedDate && (
-                              <span className="text-[9px] text-green-500 font-mono mt-0.5">Resolved @ {log.resolvedDate}</span>
-                            )}
+                <Box>
+                  <BoxHeader title="Maintenance" meta={openFaults ? `${openFaults} open` : 'All clear'} />
+                  <ul className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
+                    {filteredLogs.map(log => {
+                      const open = log.status !== 'Resolved';
+                      return (
+                        <li key={log.id} className="px-5 py-3 flex items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted">
+                              {open ? (() => { const r = classifyFault(log.faultDescription || ''); return (
+                                <StatusDot tone={RISK_TONE[r]} className={`text-${RISK_TONE[r]}`}>{r} risk</StatusDot>
+                              ); })() : (
+                                <StatusDot tone="ok" className="text-ok">Resolved</StatusDot>
+                              )}
+                              <span> · {log.date}</span>
+                            </p>
+                            <p className="mt-0.5 text-sm text-fg">{log.faultDescription}</p>
+                            {!open && log.resolvedDate && <p className="text-xs text-muted">Closed {log.resolvedDate}</p>}
                           </div>
-                          <span className="text-gray-500 text-[10px]">{log.date}</span>
-                        </div>
-                        <p className="text-gray-300 mt-1">{log.faultDescription}</p>
-                        {log.status !== 'Resolved' && (
-                          <button 
-                            onClick={() => handleResolveFault(log.id)}
-                            className="mt-2 text-red-400 hover:text-white transition-colors underline decoration-dotted font-bold"
-                          >
-                            Resolve Incident
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    {filteredLogs.length === 0 && <p className="text-gray-500 italic text-center py-10">System health is 100%. No issues.</p>}
-                  </div>
-                </div>
+                          {open && (
+                            <button onClick={() => handleResolveFault(log.id)} className={`${btn.quiet} shrink-0`}>
+                              Resolve
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
+                    {filteredLogs.length === 0 && <li className="px-5 py-10 text-center text-sm text-muted">No issues. Every panel is healthy.</li>}
+                  </ul>
+                </Box>
               </div>
+            </div>
+            <MaintenanceLog />
+            <RepairLog />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              <BeforeAfter config={config} annualGen={annualGen} />
+              <PanelHealth config={config} annualGen={annualGen} />
+            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              <DustOutlook config={config} />
+              <Alerts config={config} annualGen={annualGen} faults={sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => l.faultDescription || 'Fault reported')} />
+            </div>
             </div>
           )}
 
           {activeTab === 3 && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-white">Bhanu AI Advisor</h3>
-                <button 
-                  onClick={handleFetchAiInsights}
-                  disabled={isAiLoading}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 py-2 rounded-full text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {isAiLoading ? (
-                    <span className="flex items-center gap-2">
-                       <svg className="animate-spin h-4 w-4 text-gray-900" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                       Analyzing Performance...
-                    </span>
-                  ) : 'Generate New Insights'}
-                </button>
+            <div className="space-y-6">
+              <AskAdvisor context={advisorContext} />
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                <Diagnose context={advisorContext} />
+                <WeeklyReport context={advisorContext} school={config.schoolName} />
               </div>
-
-              {aiInsights.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {aiInsights.map((insight, idx) => (
-                    <div key={idx} className="bg-[#161b22] border border-[#30363d] p-6 rounded-xl hover:border-yellow-400/50 transition-all group">
-                      <div className="w-10 h-10 bg-yellow-400/10 rounded-lg flex items-center justify-center mb-4">
-                        <span className="text-yellow-400 text-lg">💡</span>
-                      </div>
-                      <h4 className="font-bold text-white mb-2">{insight.title}</h4>
-                      <p className="text-sm text-gray-400 leading-relaxed">{insight.insight}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-[#161b22] border border-[#30363d] border-dashed rounded-xl p-20 text-center">
-                  <p className="text-gray-500">Run the advisor to generate actionable performance optimization steps based on current telemetry.</p>
-                </div>
-              )}
+              <LessonBuilder context={advisorContext} />
             </div>
           )}
 
-          {activeTab === 4 && (
-            <div className="space-y-12 max-w-5xl mx-auto pb-20">
-              <div className="text-center space-y-4 py-10 relative">
-                <h2 className="text-4xl font-black text-white tracking-tight uppercase italic">The Bhanu AI Mission</h2>
-                <p className="text-xl text-yellow-400 font-medium">Turning Photon Telemetry into Human Potential.</p>
-                <div className="max-w-2xl mx-auto text-gray-400 leading-relaxed italic">
-                  "Data is the sunlight of the modern age. My goal is to ensure it reaches the classrooms of rural India, starting with my father's village."
-                </div>
-              </div>
+          {activeTab === 4 && <LearnTab config={config} annualGen={annualGen} setConfig={setConfig} />}
 
-              <div className="grid grid-cols-1 gap-12">
-                <section className="bg-white/5 p-8 rounded-3xl border border-yellow-400/20 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span className="text-8xl">☀️</span>
-                  </div>
-                  <div className="flex items-center gap-4 mb-6">
-                   <h3 className="text-2xl font-bold text-white uppercase tracking-wider">My "Why" — Sai Karri</h3>
-                  </div>
-                  <div className="space-y-4 relative z-10">
-                    <p className="text-gray-300 leading-relaxed text-lg">
-                      My mission is <strong>helping my dad's village in Ganaparthi</strong> to help teach students about solar energy, data management, and becoming a solar technician. <strong>This is my why.</strong>
-                    </p>
-                    <p className="text-gray-400 leading-relaxed">
-                      Bhanu AI isn't just about efficiency; it's a social framework. We use these assets as educational hubs. By teaching students to analyze local solar data, we are fostering the next generation of local technologists who can maintain their own energy future while unlocking global career paths.
-                    </p>
-                  </div>
-                </section>
+          {activeTab === 5 && (
+            <article className="max-w-3xl mx-auto w-full space-y-12 pb-12">
+              <p className="pt-6 flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1 font-display font-semibold text-[28px] sm:text-4xl tracking-tight text-accent">
+                <span>Same Sun</span>
+                <GlowSun className="h-14 w-14 sm:h-20 sm:w-20 -my-4 -mx-2 sm:-mx-1 shrink-0" />
+                <span>Same Chance</span>
+              </p>
 
-                <section className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">🎒</span>
-                    <h3 className="text-2xl font-bold text-white uppercase tracking-wider">Impact on Student Learning</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-[#161b22] border border-[#30363d] p-6 rounded-2xl space-y-4">
-                      <div className="text-xs font-black text-red-500 uppercase tracking-widest border-b border-red-500/20 pb-2">The Crisis</div>
-                      <p className="text-sm text-gray-300">
-                        <strong className="text-white">65% of rural students</strong> face daily power outages. Without fans, classroom heat leads to thermal fatigue. <strong className="text-white">15% of teachers</strong> cite lack of power as a major learning barrier.
-                      </p>
-                    </div>
-                    <div className="bg-[#1c2128] border border-yellow-400/30 p-6 rounded-2xl space-y-4 shadow-[0_0_30px_rgba(250,204,21,0.05)]">
-                      <div className="text-xs font-black text-yellow-400 uppercase tracking-widest border-b border-yellow-400/20 pb-2">The Bhanu AI Solution</div>
-                      <p className="text-sm text-gray-300">
-                        Ensures stable, off-grid power, keeping fans and lighting active even during load-shedding, and redirecting DISCOM bill savings to village school library resources.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+              <section className="space-y-3 pb-10 border-b border-line">
+                <h3 className="text-xl font-semibold">How it started</h3>
+                <blockquote className="border-l-2 border-line pl-4 text-silver leading-relaxed">
+                  "Sunlight already reaches every school in rural India. Knowledge should too. I'm starting with my father's village."
+                </blockquote>
+                <p className="text-xs text-muted">Sai Karri, founder</p>
+                <p className="text-muted leading-relaxed">
+                  Bhanu AI began with my dad's village in Ganaparthi: teaching students about solar energy, data management and becoming solar technicians. Bhanu AI isn't just about efficiency; it's a social framework. We use these systems as educational hubs, so students who learn to read local solar data grow into the technologists who maintain their own energy future and unlock global career paths. Ganaparthi is the first school. The goal is every school.
+                </p>
+              </section>
 
-                <section className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">⚡</span>
-                    <h3 className="text-2xl font-bold text-white uppercase tracking-wider">The Grid & DISCOM Equation</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-[#161b22] border border-[#30363d] p-6 rounded-2xl space-y-4">
-                      <div className="text-xs font-black text-blue-500 uppercase tracking-widest border-b border-blue-500/20 pb-2">The Crisis</div>
-                      <p className="text-sm text-gray-300">
-                        Transmission losses waste <strong className="text-white">18% of energy</strong> before reaching remote schools. Localized agricultural pump loads often cause hardware-damaging voltage sags.
-                      </p>
-                    </div>
-                    <div className="bg-[#1c2128] border border-blue-400/30 p-6 rounded-2xl space-y-4 shadow-[0_0_30px_rgba(59,130,246,0.05)]">
-                      <div className="text-xs font-black text-blue-400 uppercase tracking-widest border-b border-blue-400/20 pb-2">The Bhanu AI Solution</div>
-                      <p className="text-sm text-gray-300">
-                        Implements decentralized feeder segregation, turning schools into micro-energy hubs that don't burden the rural grid during peak daytime school hours.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+              <header className="space-y-4">
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight [text-wrap:balance]">The Bhanu AI mission</h2>
+                <p className="text-lg text-silver [text-wrap:balance]">Every rural school powered by the sun, and every student able to understand it.</p>
+                <p className="text-muted leading-relaxed">
+                  Over 73,000 schools in India still have no electricity at all, and many rural schools that are connected face long power cuts<Cite id="udise-power" />. Bhanu AI turns a school's rooftop solar system into three things at once: a power plant that runs lights, fans and computers in the daytime and cuts the bill, a classroom where students learn from real data, and a training ground for the jobs a solar powered world needs. It starts in one village and is built to work in any school, in any state, in any country with sun.
+                </p>
+              </header>
 
-                <section className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">🌿</span>
-                    <h3 className="text-2xl font-bold text-white uppercase tracking-wider">Community Resilience</h3>
-                  </div>
-                  <div className="bg-[#161b22] border border-[#30363d] p-8 rounded-2xl shadow-xl">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      <div className="text-center space-y-2">
-                        <div className="text-4xl">🌳</div>
-                        <h5 className="text-xl font-bold text-white">{environmentalMetrics.trees.toLocaleString()}</h5>
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Trees Equivalent</p>
-                      </div>
-                      <div className="text-center space-y-2 border-x border-[#30363d] px-4">
-                        <div className="text-4xl">📚</div>
-                        <h5 className="text-xl font-bold text-white">{schoolSustainabilityImpact.booksEquivalent.toLocaleString()}</h5>
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Books Funded</p>
-                      </div>
-                      <div className="text-center space-y-2">
-                        <div className="text-4xl">💡</div>
-                        <h5 className="text-xl font-bold text-white">99.8%</h5>
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Digital Uptime</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
-            </div>
+              <ThreeJobs onGo={goTab} />
+              <WhoItHelps />
+              <Problems />
+              <ScaleUp annualGen={annualGen} unitPrice={config.unitPrice} co2PerSchool={environmentalMetrics.co2Tonnes} treesPerSchool={environmentalMetrics.trees} />
+              <NextSteps onGo={goTab} />
+            </article>
           )}
-        </div>
-      </main>
+
+          {activeTab === 7 && <SourcesPage />}
+
+          {activeTab === 6 && <ImpactPage config={config} annualGen={annualGen} standalone={false} onOpenDashboard={() => setActiveTab(0)} />}
+        </main>
+      </div>
     </div>
   );
 };

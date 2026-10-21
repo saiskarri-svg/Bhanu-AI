@@ -42,10 +42,9 @@ export const STATE_YIELDS: YieldData = {
 };
 
 export const GRID_STATS = {
-  transmissionLossBypass: 0.18, // 18% average transmission loss avoided
-  dailyOutageRate: 0.65,        // 65% students report outages
-  reliablePowerRate: 0.05,     // Only 5% have reliable power
-  learningImpactRate: 0.15     // 15% teachers cite lack of fans/power as learning barrier
+  transmissionLossBypass: 0.17, // ~17% T&D loss across India, FY 2023-24
+  schoolsWithoutPower: 73000,   // schools with no electricity, UDISE+ 2025-26
+  workingPowerRate: 0.935,      // share of schools with working electricity, UDISE+ 2025-26
 };
 
 export const STATE_TARIFFS: Record<string, number> = {
@@ -139,8 +138,8 @@ export const SCHOOL_DATA: Record<string, string> = {
   "Jaipur": "St. Xavier's High School"
 };
 
-export const EMISSION_FACTOR = 0.82; // kg CO2/kWh
-export const TREE_ABSORPTION = 20;    // kg CO2/year per tree
+export const EMISSION_FACTOR = 0.72; // kg CO2/kWh, CEA CO2 Baseline Database (weighted average, FY 2023-24)
+export const TREE_ABSORPTION = 20;    // kg CO2/year for a grown tree (estimates range from 10 to 40)
 
 export const FAULT_DESCRIPTIONS = [
   "Inverter DC Injection Fault",
@@ -151,6 +150,15 @@ export const FAULT_DESCRIPTIONS = [
   "MC4 Connector Loose",
 ];
 
+// Small system: a fixed handful of open faults, newest first
+const OPEN_FAULTS: Record<number, string> = {
+  3: "Large output drop. Check for heavy dust or a hardware fault.",
+  11: "MC4 Connector Loose",
+  24: "String 2 Isolation Low",
+  47: "Large output drop. Check for heavy dust or a hardware fault.",
+  76: "Inverter DC Injection Fault",
+};
+
 export const generateSensorData = (): SensorLog[] => {
   const data: SensorLog[] = [];
   const now = new Date();
@@ -158,7 +166,7 @@ export const generateSensorData = (): SensorLog[] => {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     
-    const dust = Math.random(); 
+    const dust = OPEN_FAULTS[i] ? 0.6 + Math.random() * 0.35 : Math.random();
     const baseEfficiency = 0.98;
     const penaltyFactor = 0.9;
     const noise = (Math.random() - 0.5) * 0.05;
@@ -170,9 +178,9 @@ export const generateSensorData = (): SensorLog[] => {
     if (i % 30 === 0 && i !== 0) {
       status = 'Resolved';
       faultDescription = FAULT_DESCRIPTIONS[Math.floor(Math.random() * FAULT_DESCRIPTIONS.length)];
-    } else if (pr < 0.4) {
+    } else if (OPEN_FAULTS[i]) {
       status = 'Maintenance Required';
-      faultDescription = "Critical Performance Drop - High Soiling/Hardware Check";
+      faultDescription = OPEN_FAULTS[i];
     } else if (dust > 0.25) {
       status = 'Cleaning Needed';
     } else if (pr < 0.85) {
@@ -202,20 +210,17 @@ export const getHistoricalAverageYield = (state: string): number => {
   return totalYield / 10;
 };
 
-export const calculateIndianSubsidy = (systemSize: number, state: string): SubsidyInfo => {
-  const benchmarkCostPerKw = 55000;
-  const cfaPercentage = 0.30;
-  let centralSubsidy = systemSize * benchmarkCostPerKw * cfaPercentage;
-  let stateBonus = 0;
-  const schoolBonusStates = ["Andhra Pradesh", "Tamil Nadu", "Karnataka", "Gujarat", "Rajasthan"];
-  if (schoolBonusStates.includes(state)) {
-    stateBonus = centralSubsidy * 0.15;
-  }
+// Schools get no central rooftop subsidy: RTS Phase II paid central subsidy
+// only to homes and housing societies, and PM Surya Ghar's subsidy is for homes.
+// Government school buildings are covered through RESCO or DISCOM-led models,
+// state schemes or CSR, so the only money counted here is a grant the user enters.
+export const calculateIndianSubsidy = (_systemSize: number, _state: string, grant = 0): SubsidyInfo => {
+  const g = Number.isFinite(grant) && grant > 0 ? grant : 0;
   return {
-    centralSubsidy,
-    stateBonus,
-    totalSubsidy: centralSubsidy + stateBonus,
-    description: `Institutionally verified under RTS Phase II (Social Sector). Covers ~45% total project cost for educational non-profits.`
+    centralSubsidy: 0,
+    stateBonus: 0,
+    totalSubsidy: g,
+    description: 'No central subsidy for schools. Counts only grants entered for this school (CSR, state scheme).',
   };
 };
 
@@ -242,4 +247,16 @@ export const getBacktestData = (annualGen: number): MonthlyGen[] => {
     value: annualGen * SEASONAL_YIELDS[i],
     isMonsoon: i >= 5 && i <= 8 
   }));
+};
+
+// Approximate latitude (degrees north) of each state's main city, for sun angle
+export const STATE_LAT: Record<string, number> = {
+  "Andaman and Nicobar Islands": 11.7, "Andhra Pradesh": 16.5, "Arunachal Pradesh": 27.1, "Assam": 26.1,
+  "Bihar": 25.6, "Chandigarh": 30.7, "Chhattisgarh": 21.3, "Dadra and Nagar Haveli and Daman and Diu": 20.4,
+  "Delhi": 28.6, "Goa": 15.5, "Gujarat": 23.0, "Haryana": 29.1, "Himachal Pradesh": 31.1,
+  "Jammu and Kashmir": 34.1, "Jharkhand": 23.3, "Karnataka": 13.0, "Kerala": 8.5, "Ladakh": 34.2,
+  "Lakshadweep": 10.6, "Madhya Pradesh": 23.3, "Maharashtra": 19.1, "Manipur": 24.8, "Meghalaya": 25.6,
+  "Mizoram": 23.7, "Nagaland": 25.7, "Odisha": 20.3, "Puducherry": 11.9, "Punjab": 30.9,
+  "Rajasthan": 26.9, "Sikkim": 27.3, "Tamil Nadu": 13.1, "Telangana": 17.4, "Tripura": 23.8,
+  "Uttar Pradesh": 26.8, "Uttarakhand": 30.3, "West Bengal": 22.6
 };

@@ -7,6 +7,12 @@ export interface SystemConfig {
   costPerKw: number;
   unitPrice: number;
   degradation: number;
+  /** Grants the school has secured (CSR, state scheme), in ₹. Schools get no central rooftop subsidy. */
+  grant?: number;
+  /** Street address the technician should go to */
+  address?: string;
+  /** Optional map link (Google Maps share link) for the site */
+  mapLink?: string;
 }
 
 export interface SensorLog {

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Built page for publishing to the claude.ai artifact
+.publish
