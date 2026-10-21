@@ -12,6 +12,8 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Maintenance tab (ideas 32, 33):** new Today strip at the top (high risk count, next cleaning, checks due) with jump links (`TodayStrip` in `SoilingExtras.tsx`, checks count shared via `useDueChecks` in `MaintenanceLog.tsx`); the open items list and Alerts now sit side by side under it, then the cleaning planner; dust outlook moved beside the dust chart.
+- **Top bar (idea 38):** the Sample data badge says "Add readings" and opens the inverter readings box on Overview (`#readings`).
 - **Trust (ideas 29 to 31):** with no real readings, the Maintenance list says "Sample" and explains the faults are for practice, the tab hides its fault count, Alerts tags sample faults and will not send or copy them on WhatsApp; Impact's rooms line no longer suggests power during cuts and the savings and books figures say rough guide; Overview's "Grants" stat is now "Saved a year (rough)".
 - **Motion (ideas 27, 28):** high risk items get a soft red pulsing ring on their dot (Maintenance list and Alerts; `StatusDot pulse`); shimmer placeholders (`SkeletonRows`) replace the empty message while the maintenance log, repair log and savings tracker load shared data.
 - **Overview (idea 25):** new "Where the power goes now" box (`components/EnergyNow.tsx`): panels to school to grid with moving lines sized by power, estimated from the typical day curve and school hours (Mon to Sat, 9:00 to 16:30), updates each minute, labelled as not a live meter.

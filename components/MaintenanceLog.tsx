@@ -5,6 +5,15 @@ import { useCap, setLastClean, downloadCsv } from './runtime';
 interface Task { id: string; title: string; every: number; who: 'Students with a teacher' | 'Teacher' | 'Technician'; tint: string }
 interface Entry { id: string; task: string; at: string; by: string | null; note: string }
 
+// How many checks are due, shared with the Today strip at the top of the tab
+let dueNow: number | null = null;
+const dueListeners = new Set<() => void>();
+const setDue = (n: number) => { if (n !== dueNow) { dueNow = n; dueListeners.forEach(f => f()); } };
+export const useDueChecks = () => React.useSyncExternalStore(
+  f => { dueListeners.add(f); return () => { dueListeners.delete(f); }; },
+  () => dueNow,
+);
+
 const TASKS: Task[] = [
   { id: 'inverter', title: 'Check the inverter display shows no fault', every: 1, who: 'Students with a teacher', tint: TINT.sky },
   { id: 'look', title: 'Look at the panels from the ground for dust, droppings or shade', every: 7, who: 'Students with a teacher', tint: TINT.sun },
@@ -108,6 +117,7 @@ const MaintenanceLog: React.FC = () => {
 
   const who = (e: Entry) => (e.by ? names[e.by] || 'Someone' : mode === 'local' ? 'You' : 'Someone');
   const overdueCount = TASKS.filter(t => { const l = last[t.id]; return !l || Date.now() - new Date(l.at).getTime() > t.every * DAY; }).length;
+  useEffect(() => { if (mode !== 'loading') setDue(overdueCount); }, [overdueCount, mode]);
 
   const isFresh = useFreshIds(entries.map(e => e.id));
   return (

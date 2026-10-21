@@ -41,6 +41,35 @@ function useLastClean() {
   return fromLog;
 }
 
+// ---------- Today: what needs doing, at the top of the Maintenance tab ----------
+export const TodayStrip: React.FC<{ config: SystemConfig; annualGen: number; highRisk: number; sample: boolean; dueChecks: number | null }> = ({ config, annualGen, highRisk, sample, dueChecks }) => {
+  const logged = useLastClean();
+  const last = logged ? new Date(logged) : new Date(Date.now() - 12 * DAY);
+  const plan = bestInterval(annualGen / 365, config.unitPrice, 200);
+  const left = plan.days - daysBetween(last, new Date());
+  const due = new Date(last.getTime() + plan.days * DAY);
+  const tiles = [
+    { href: '#alerts', label: 'High risk items', value: String(highRisk), tone: highRisk ? 'var(--bad)' : 'var(--ok)',
+      note: sample ? 'Sample faults for practice' : highRisk ? 'Fix within a day' : 'Nothing urgent', go: 'See alerts' },
+    { href: '#cleaning', label: 'Next cleaning', value: left <= 0 ? 'Now' : due.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      tone: left <= 0 ? 'var(--warn)' : 'var(--fg)', note: left <= 0 ? 'Cleaning is due' : `In ${left} day${left > 1 ? 's' : ''}`, go: 'Cleaning planner' },
+    { href: '#checks', label: 'Checks due', value: dueChecks === null ? '…' : String(dueChecks), tone: dueChecks ? 'var(--warn)' : 'var(--ok)',
+      note: dueChecks === null ? 'Loading' : dueChecks ? 'Due or never done' : 'All up to date', go: 'Maintenance log' },
+  ];
+  return (
+    <section aria-label="Today" className="grid grid-cols-3 gap-px bg-line border border-line rounded-box overflow-hidden">
+      {tiles.map(t => (
+        <a key={t.href} href={t.href} className="group bg-surface px-4 sm:px-5 py-4 min-w-0 hover:bg-surface-2 transition-colors">
+          <p className="text-xs text-muted truncate">{t.label}</p>
+          <p className="mt-1 font-display font-semibold text-[26px] sm:text-[28px] leading-none tabular-nums truncate" style={{ color: t.tone }}>{t.value}</p>
+          <p className="mt-1.5 text-xs text-muted leading-snug">{t.note}</p>
+          <p className="mt-2 text-xs text-silver group-hover:text-fg">{t.go} →</p>
+        </a>
+      ))}
+    </section>
+  );
+};
+
 const isMonsoon = (d: Date) => d.getMonth() >= 5 && d.getMonth() <= 8;
 
 // ---------- 6 + 7. Cleaning planner and rupees lost to dust ----------

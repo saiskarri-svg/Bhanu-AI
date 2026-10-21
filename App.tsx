@@ -9,7 +9,7 @@ import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT,
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
 import BillCheck from './components/BillCheck';
-import MaintenanceLog from './components/MaintenanceLog';
+import MaintenanceLog, { useDueChecks } from './components/MaintenanceLog';
 import RepairLog from './components/RepairLog';
 import ImpactPage from './components/ImpactPage';
 import GlowSun from './components/GlowSun';
@@ -18,7 +18,7 @@ import { Cite } from './components/Sources';
 import { SOURCES } from './components/sourceList';
 import { ThreeJobs, WhoItHelps, Problems, ScaleUp, NextSteps } from './components/MissionInteractive';
 import { AskAdvisor, WeeklyReport, Diagnose, LessonBuilder } from './components/Advisor';
-import { CleaningPlanner, BeforeAfter, DustOutlook, PanelHealth, Alerts } from './components/SoilingExtras';
+import { CleaningPlanner, BeforeAfter, DustOutlook, PanelHealth, Alerts, TodayStrip } from './components/SoilingExtras';
 import { FundingOptions, WhatIf, SavingsTracker, SavingsSplit, FunderSummary } from './components/ReturnsExtras';
 import { getLastClean, LAST_CLEAN_EVENT } from './components/runtime';
 import { classifyFault, RISK_TONE } from './components/risk';
@@ -477,6 +477,7 @@ const App: React.FC = () => {
   const pageRef = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => revealWithin(pageRef.current), [activeTab]);
   const pageHasMainAction = activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5;
+  const dueChecks = useDueChecks();
   const openFaults = sensorLogs.filter(l => l.status === 'Maintenance Required').length;
   const netInvestment = -roiData[0].cashFlow;
   const finalBalance = roiData[roiData.length - 1].cashFlow;
@@ -599,13 +600,16 @@ const App: React.FC = () => {
           </nav>
 
           <div className="order-2 lg:order-3 ml-auto flex items-center gap-4">
-            <span className="hidden sm:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full border border-line text-xs text-muted">
+            <button
+              onClick={() => { goTab(0); setTimeout(() => document.getElementById('readings')?.scrollIntoView({ block: 'start' }), 80); }}
+              title={realData ? 'See the inverter readings' : 'Add real inverter readings'}
+              className="hidden sm:inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full border border-line text-xs text-muted hover:text-fg hover:border-muted transition-colors">
               <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
                 {realData && <span className="absolute inset-0 rounded-full bg-ok opacity-60 animate-ping" />}
                 <span className={`relative h-1.5 w-1.5 rounded-full ${realData ? 'bg-ok' : 'bg-muted'}`} />
               </span>
-              {realData ? `Real data · ${new Date(lastReading + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : 'Sample data'}
-            </span>
+              {realData ? `Real data · ${new Date(lastReading + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : <>Sample data<span className="text-fg"> · Add readings</span></>}
+            </button>
             <button onClick={handleGenerateReport} className={pageHasMainAction ? btn.secondary : btn.primary}>
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M10 3v9m0 0l-3.5-3.5M10 12l3.5-3.5M4 15.5h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -710,7 +714,7 @@ const App: React.FC = () => {
                   ]}
                 />
               </section>
-              <ConnectData config={config} annualGen={annualGen} data={readingsData} />
+              <div id="readings"><ConnectData config={config} annualGen={annualGen} data={readingsData} /></div>
             </div>
           )}
 
@@ -769,7 +773,43 @@ const App: React.FC = () => {
 
           {activeTab === 2 && (
             <div className="space-y-6">
-            <CleaningPlanner config={config} annualGen={annualGen} />
+            <TodayStrip config={config} annualGen={annualGen} sample={!realData} dueChecks={dueChecks}
+              highRisk={sensorLogs.filter(l => l.status === 'Maintenance Required' && classifyFault(l.faultDescription || '') === 'High').length} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              <Box>
+                <BoxHeader title="Maintenance" meta={`${realData ? '' : 'Sample · '}${openFaults ? `${openFaults} open` : 'All clear'}`} />
+                {!realData && <p className="px-5 -mt-1 pb-3 text-xs text-muted">These are sample faults for practice. Real faults show here once inverter readings are added on the Overview tab.</p>}
+                <ul className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
+                  {filteredLogs.map(log => {
+                    const open = log.status !== 'Resolved';
+                    return (
+                      <li key={log.id} className="px-5 py-3 flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted">
+                            {open ? (() => { const r = classifyFault(log.faultDescription || ''); return (
+                              <StatusDot tone={RISK_TONE[r]} className={`text-${RISK_TONE[r]}`} pulse={r === 'High'}>{r} risk</StatusDot>
+                            ); })() : (
+                              <StatusDot tone="ok" className="text-ok">Resolved</StatusDot>
+                            )}
+                            <span> · {log.date}</span>
+                          </p>
+                          <p className="mt-0.5 text-sm text-fg">{log.faultDescription}</p>
+                          {!open && log.resolvedDate && <p className="text-xs text-muted">Closed {log.resolvedDate}</p>}
+                        </div>
+                        {open && (
+                          <button onClick={() => handleResolveFault(log.id)} className={`${btn.quiet} shrink-0`}>
+                            Resolve
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                  {filteredLogs.length === 0 && <li className="px-5 py-10 text-center text-sm text-muted">No issues. Every panel is healthy.</li>}
+                </ul>
+              </Box>
+              <div id="alerts"><Alerts config={config} annualGen={annualGen} faults={sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => l.faultDescription || 'Fault reported')} sample={!realData} /></div>
+            </div>
+            <div id="cleaning"><CleaningPlanner config={config} annualGen={annualGen} /></div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
               <Box className="xl:col-span-2">
                 <BoxHeader
@@ -819,48 +859,14 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                <Box>
-                  <BoxHeader title="Maintenance" meta={`${realData ? '' : 'Sample · '}${openFaults ? `${openFaults} open` : 'All clear'}`} />
-                  {!realData && <p className="px-5 -mt-1 pb-3 text-xs text-muted">These are sample faults for practice. Real faults show here once inverter readings are added on the Overview tab.</p>}
-                  <ul className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
-                    {filteredLogs.map(log => {
-                      const open = log.status !== 'Resolved';
-                      return (
-                        <li key={log.id} className="px-5 py-3 flex items-center justify-between gap-4">
-                          <div className="min-w-0">
-                            <p className="text-xs text-muted">
-                              {open ? (() => { const r = classifyFault(log.faultDescription || ''); return (
-                                <StatusDot tone={RISK_TONE[r]} className={`text-${RISK_TONE[r]}`} pulse={r === 'High'}>{r} risk</StatusDot>
-                              ); })() : (
-                                <StatusDot tone="ok" className="text-ok">Resolved</StatusDot>
-                              )}
-                              <span> · {log.date}</span>
-                            </p>
-                            <p className="mt-0.5 text-sm text-fg">{log.faultDescription}</p>
-                            {!open && log.resolvedDate && <p className="text-xs text-muted">Closed {log.resolvedDate}</p>}
-                          </div>
-                          {open && (
-                            <button onClick={() => handleResolveFault(log.id)} className={`${btn.quiet} shrink-0`}>
-                              Resolve
-                            </button>
-                          )}
-                        </li>
-                      );
-                    })}
-                    {filteredLogs.length === 0 && <li className="px-5 py-10 text-center text-sm text-muted">No issues. Every panel is healthy.</li>}
-                  </ul>
-                </Box>
+                <DustOutlook config={config} />
               </div>
             </div>
-            <MaintenanceLog />
+            <div id="checks"><MaintenanceLog /></div>
             <RepairLog />
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               <BeforeAfter config={config} annualGen={annualGen} />
               <PanelHealth config={config} annualGen={annualGen} />
-            </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-              <DustOutlook config={config} />
-              <Alerts config={config} annualGen={annualGen} faults={sensorLogs.filter(l => l.status === 'Maintenance Required').map(l => l.faultDescription || 'Fault reported')} sample={!realData} />
             </div>
             </div>
           )}
