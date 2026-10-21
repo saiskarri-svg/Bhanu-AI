@@ -85,7 +85,7 @@ export const VoltageCurrent: React.FC = () => {
         <Legend items={[{ label: 'Current (A)', color: CHART.monsoon }, { label: 'Power (W)', color: CHART.sun }]} />
       </div>
       <div className="h-[280px] px-2 pt-2">
-        <ResponsiveChart>
+        <ResponsiveChart summary={`One 540 W panel: the most power is about ${Math.round(c.mpp.w)} W at ${Math.round(c.mpp.v)} V. With no load the voltage is ${c.voc.toFixed(1)} V; shorted, the current is ${c.isc.toFixed(1)} A.`}>
           <ComposedChart data={c.points} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="v" type="number" domain={[0, 52]} ticks={[0, 10, 20, 30, 40, 50]} {...axisProps} tickFormatter={v => `${v} V`} />

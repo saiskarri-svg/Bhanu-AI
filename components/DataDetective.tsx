@@ -126,7 +126,7 @@ const DataDetective: React.FC<{ config: SystemConfig }> = ({ config }) => {
           <Legend items={[{ label: 'Measured', color: CHART.sun }, { label: 'Healthy system', color: CHART.primary }]} />
         </div>
         <div className="h-[300px] px-2 pt-2">
-          <ResponsiveChart>
+          <ResponsiveChart summary={`Measured output compared with a healthy system. Clue: ${c.clue}`}>
             <ComposedChart data={data} margin={{ top: 10, right: 16, left: -8, bottom: 0 }}>
               <CartesianGrid stroke={CHART.grid} vertical={false} />
               <XAxis dataKey="h" type="number" domain={[6, 19]} ticks={[6, 8, 10, 12, 14, 16, 18]} {...axisProps} tickFormatter={v => `${v}:00`} />

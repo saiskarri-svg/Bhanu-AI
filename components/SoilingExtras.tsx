@@ -151,7 +151,7 @@ export const CleaningPlanner: React.FC<{ config: SystemConfig; annualGen: number
         <Legend items={[{ label: 'Lost per day', color: CHART.negative }, { label: 'Best day to clean', color: CHART.sun }]} />
       </div>
       <div className="h-[200px] px-2 pt-2">
-        <ResponsiveChart>
+        <ResponsiveChart summary={`Money lost each day as dirt builds up: from nothing on cleaning day to about ${inr(curve[60].rupees)} a day after 60 days. The best gap between cleanings is ${plan.days} days.`}>
           <ComposedChart data={curve} margin={{ top: 10, right: 16, left: -4, bottom: 0 }}>
             <defs>
               <linearGradient id="lostFill" x1="0" y1="0" x2="0" y2="1">
@@ -219,7 +219,7 @@ export const BeforeAfter: React.FC<{ config: SystemConfig; annualGen: number }> 
         <Legend items={[{ label: 'Before', color: CHART.faint }, { label: 'After', color: CHART.positive }]} />
       </div>
       <div className="h-[200px] px-2 pt-2">
-        <ResponsiveChart>
+        <ResponsiveChart summary={`Energy each day for six days before and after the last cleaning: about ${before.toFixed(1)} kWh a day before and ${after.toFixed(1)} kWh a day after.`}>
           <ComposedChart data={data.filter(d => !d.future)} margin={{ top: 10, right: 16, left: -4, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="label" {...axisProps} interval={1} />

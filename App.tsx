@@ -5,7 +5,7 @@ import {
   BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ReferenceDot, ComposedChart
 } from 'recharts';
 import { EnergyNow } from './components/EnergyNow';
-import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, useEdgeFade, ResponsiveChart, CountUp } from './components/ui';
+import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, useEdgeFade, monthTick, ResponsiveChart, CountUp } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
 import BillCheck from './components/BillCheck';
@@ -479,6 +479,17 @@ const App: React.FC = () => {
   }, [activeTab]);
   const pageRef = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => revealWithin(pageRef.current), [activeTab]);
+  // Screen reader summaries of the charts
+  const peakHour = forecastData.reduce((b, d) => (d.generation > b.generation ? d : b), forecastData[0]);
+  const monthMax = monthlyBacktestData.reduce((b, d) => (d.value > b.value ? d : b), monthlyBacktestData[0]);
+  const monthMin = monthlyBacktestData.reduce((b, d) => (d.value < b.value ? d : b), monthlyBacktestData[0]);
+  const rs = (n: number) => (n < 0 ? 'minus ' : '') + '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');
+  const chartText = {
+    day: `Typical day: solar output starts about 6:00, peaks at about ${peakHour.generation} kW around ${peakHour.time}, and stops about 18:00.`,
+    month: `Monthly generation: highest in ${monthMax.month} at about ${Math.round(monthMax.value)} kWh, lowest in ${monthMin.month} at about ${Math.round(monthMin.value)} kWh. June to September are monsoon months with less sun.`,
+    cash: `20 year cash flow: starts at ${rs(roiData[0].cashFlow)} after grants, ${typeof paybackYear === 'number' ? `breaks even in year ${paybackYear}` : 'does not break even within 20 years'}, and ends ${rs(roiData[roiData.length - 1].cashFlow)} by year 20.`,
+    dust: 'Dust vs efficiency: each dot is one day from the last 120 days. Efficiency falls steadily as more dust covers the panels.',
+  };
   const pageHasMainAction = activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5;
   const dueChecks = useDueChecks();
   const openFaults = sensorLogs.filter(l => l.status === 'Maintenance Required').length;
@@ -647,7 +658,7 @@ const App: React.FC = () => {
                 <Box>
                   <BoxHeader title="Typical day" meta="kW by hour" />
                   <div className="h-[300px] px-2 pb-3">
-                    <ResponsiveChart>
+                    <ResponsiveChart summary={chartText.day}>
                       <AreaChart data={forecastData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
@@ -677,7 +688,7 @@ const App: React.FC = () => {
                     meta={<Legend items={[{ label: 'Dry season', color: CHART.sun }, { label: 'Monsoon', color: CHART.monsoon }]} />}
                   />
                   <div className="h-[300px] px-2 pb-3">
-                    <ResponsiveChart>
+                    <ResponsiveChart summary={chartText.month}>
                       <BarChart data={monthlyBacktestData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="barSun" x1="0" y1="0" x2="0" y2="1">
@@ -690,7 +701,7 @@ const App: React.FC = () => {
                           </linearGradient>
                         </defs>
                         <CartesianGrid stroke={CHART.grid} vertical={false} />
-                        <XAxis dataKey="month" {...axisProps} />
+                        <XAxis dataKey="month" {...axisProps} interval={0} tickFormatter={monthTick} />
                         <YAxis {...axisProps} width={44} />
                         <Tooltip content={<MonthlyTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
                         <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={28}>
@@ -734,7 +745,7 @@ const App: React.FC = () => {
                 {inr(netInvestment)} after grants · breaks even in year {paybackYear} · {inr(finalBalance)} ahead by year 20
               </p>
               <div className="h-[clamp(380px,62vh,600px)] px-2 pb-3 pt-2">
-                <ResponsiveChart>
+                <ResponsiveChart summary={chartText.cash}>
                   <ComposedChart data={roiData} margin={{ top: 16, right: 16, left: 8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="splitStroke" x1="0" y1="0" x2="0" y2="1">
@@ -821,7 +832,7 @@ const App: React.FC = () => {
                   meta={<Legend items={[{ label: 'Healthy', color: CHART.positive }, { label: 'Losing output', color: CHART.sun }, { label: 'Needs cleaning', color: CHART.negative }, { label: 'Expected', color: CHART.primary }]} />}
                 />
                 <div className="h-[380px] xl:h-[514px] px-2 pb-3">
-                  <ResponsiveChart>
+                  <ResponsiveChart summary={chartText.dust}>
                     <ComposedChart margin={{ top: 16, right: 16, bottom: 0, left: -8 }}>
                       <CartesianGrid stroke={CHART.grid} vertical={false} />
                       <XAxis type="number" dataKey="dust" domain={[0, 1]} {...axisProps} tickFormatter={(v) => (v * 100).toFixed(0) + '%'} />

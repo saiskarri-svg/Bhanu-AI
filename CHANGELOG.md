@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Accessibility (idea 39):** every chart has a screen reader summary built from its own numbers (`ResponsiveChart summary`); the Overview and Impact monthly charts show all 12 months, as first letters on phones (`monthTick`).
 - **AI Advisor (idea 36):** outside claude.ai, one notice at the top (`AdvisorNotice`) with an "Open in claude.ai" button; each card just says "Available on the claude.ai page." Sample answers left out until Sai approves their wording. `PAGE_URL` now lives in `runtime.ts`.
 - **Impact (idea 37):** ends with "Help the next school go solar": Download funder summary (shared `useFunderPdf` hook from `ReturnsExtras.tsx`) and Copy share link (claude.ai address + #impact when inside claude.ai).
 - **Phone layout (ideas 34, 35, 40):** the Ways to pay, battery options and wiring tables become one card per row on phones (`stack-table` class in `index.css`, `data-label` on each cell); the tab strip, the Maintenance open items list and the desktop site sidebar fade at an edge when there is more to scroll (`useEdgeFade` in `ui.tsx`).

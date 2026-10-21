@@ -28,5 +28,5 @@ Written by the `ui-improver` agent so ideas are not repeated. The main session u
 | 36 | 2026-10-21 | AI Advisor | Outside claude.ai: one notice with an Open in claude.ai button, plus a sample answer under each card, instead of the same note four times | built |
 | 37 | 2026-10-21 | Impact | Funder next step at the bottom: Download funder summary and Copy share link (replaces "add #impact to the link") | built |
 | 38 | 2026-10-21 | Top bar, Overview | Make the "Sample data" badge a link to the inverter readings box, with a one-line "add your first reading" prompt | built |
-| 39 | 2026-10-21 | All charts | Text summaries for screen readers on every chart (highest, lowest, payback year); phone monthly chart shows all 12 month letters | suggested |
+| 39 | 2026-10-21 | All charts | Text summaries for screen readers on every chart (highest, lowest, payback year); phone monthly chart shows all 12 month letters | built |
 | 40 | 2026-10-21 | Overview, Maintenance (desktop) | Inner scroll boxes (site sidebar, Maintenance list) cut text mid-line: add a bottom fade and "x more" hint | built |

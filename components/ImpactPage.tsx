@@ -2,7 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, Cell } from 'recharts';
 import { SystemConfig } from '../types';
 import { MONTHS, SEASONAL_YIELDS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { CHART, axisProps, ResponsiveChart, CountUp, btn } from './ui';
+import { CHART, axisProps, ResponsiveChart, CountUp, btn, monthTick } from './ui';
 import { useFunderPdf } from './ReturnsExtras';
 import { PAGE_URL } from './runtime';
 import { Cite } from './Sources';
@@ -71,9 +71,9 @@ const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; payback: n
           <h2 className="text-lg font-semibold text-center">Power through the year</h2>
           <p className="text-sm text-muted text-center">Less in the monsoon months, most in the dry, sunny spring.</p>
           <div className="h-[220px]">
-            <ResponsiveChart>
+            <ResponsiveChart summary={`Power through the year: most in ${months.reduce((b, x) => (x.kwh > b.kwh ? x : b)).m} at about ${Math.max(...months.map(x => x.kwh))} kWh, least in ${months.reduce((b, x) => (x.kwh < b.kwh ? x : b)).m} at about ${Math.min(...months.map(x => x.kwh))} kWh, during the monsoon.`}>
               <BarChart data={months} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                <XAxis dataKey="m" {...axisProps} />
+                <XAxis dataKey="m" {...axisProps} interval={0} tickFormatter={monthTick} />
                 <Bar dataKey="kwh" radius={[3, 3, 0, 0]} maxBarSize={30} isAnimationActive={false} label={{ position: 'top', fill: '#9a9aa3', fontSize: 10 }}>
                   {months.map(m => <Cell key={m.m} fill={m.monsoon ? CHART.monsoon : CHART.sun} />)}
                 </Bar>

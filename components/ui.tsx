@@ -82,16 +82,24 @@ const useFirstSeen = (ref: React.RefObject<Element>, enabled: boolean, onSeen: (
 // Use in place of ResponsiveContainer: the chart is drawn when it scrolls into
 // view, so its draw-in animation is seen instead of finishing off screen.
 // The parent must have a fixed height, as every chart here does.
-export const ResponsiveChart: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+// summary: what the chart shows in one or two sentences, read out by screen
+// readers in place of the drawing.
+export const ResponsiveChart: React.FC<{ children: React.ReactElement; summary?: string }> = ({ children, summary }) => {
   const ref = React.useRef<HTMLDivElement>(null);
   const [seen, setSeen] = React.useState(() => !motionOK());
   useFirstSeen(ref, !seen, () => setTimeout(() => setSeen(true), 120));
   return (
     <div ref={ref} className="h-full w-full">
-      {seen && <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>}
+      {summary && <p className="sr-only">{summary}</p>}
+      <div className="h-full w-full" aria-hidden={summary ? true : undefined}>
+        {seen && <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>}
+      </div>
     </div>
   );
 };
+
+// Month names on wide screens, first letters on phones, so all 12 fit
+export const monthTick = (m: string) => (typeof window !== 'undefined' && window.innerWidth < 640 ? m.slice(0, 1) : m);
 
 // A big number that counts up from zero the first time it is seen. Keeps the
 // text around the number (₹, %, units), its decimals and its commas. Later

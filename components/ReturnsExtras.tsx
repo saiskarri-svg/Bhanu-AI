@@ -154,7 +154,7 @@ export const WhatIf: React.FC<{ config: SystemConfig; annualGen: number }> = ({ 
         <Legend items={[{ label: 'Your scenario', color: CHART.sun }, { label: 'Simple estimate', color: CHART.faint }]} />
       </div>
       <div className="h-[260px] px-2 pt-2 pb-4">
-        <ResponsiveChart>
+        <ResponsiveChart summary={`What if: with these settings the school breaks even in year ${payback('scenario') ?? 'more than 20'}, against year ${payback('base') ?? 'more than 20'} in the simple estimate, and is ${inr(data[20].scenario)} ahead by year 20.`}>
           <ComposedChart data={data} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="year" {...axisProps} />
