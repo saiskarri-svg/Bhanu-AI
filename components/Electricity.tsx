@@ -385,7 +385,7 @@ export const Wiring: React.FC<{ defaultPanels: number }> = ({ defaultPanels }) =
       </div>
 
       <div className="m-5 overflow-x-auto rounded-box border border-line">
-        <table className="w-full min-w-[520px] text-sm tabular-nums">
+        <table className="stack-table w-full min-w-[520px] text-sm tabular-nums">
           <caption className="sr-only">Comparison of wiring options for {n} panels</caption>
           <thead>
             <tr className="text-xs text-muted text-left">
@@ -402,10 +402,10 @@ export const Wiring: React.FC<{ defaultPanels: number }> = ({ defaultPanels }) =
               return (
                 <tr key={key} className={key === mode ? 'bg-surface-2' : ''}>
                   <td className="px-4 py-2.5 text-fg">{label}{key === 'two' && <span className="text-muted"> ({x.strings.join(' + ')})</span>}</td>
-                  <td className="px-4 py-2.5 text-right">{fmt(x.volts, 0)} V</td>
-                  <td className="px-4 py-2.5 text-right">{fmt(x.amps, 1)} A</td>
-                  <td className="px-4 py-2.5 text-right">{fmt((x.cableLossW / x.watts) * 100, 1)}%</td>
-                  <td className="px-4 py-2.5">
+                  <td data-label="Voltage" className="px-4 py-2.5 text-right">{fmt(x.volts, 0)} V</td>
+                  <td data-label="Current" className="px-4 py-2.5 text-right">{fmt(x.amps, 1)} A</td>
+                  <td data-label="Cable loss" className="px-4 py-2.5 text-right">{fmt((x.cableLossW / x.watts) * 100, 1)}%</td>
+                  <td data-label="Inverter" className="px-4 py-2.5">
                     <StatusDot tone={w} className={w === 'ok' ? 'text-ok' : w === 'warn' ? 'text-warn' : 'text-bad'}>
                       {w === 'ok' ? 'Works' : w === 'warn' ? 'Risky' : 'Does not work'}
                     </StatusDot>

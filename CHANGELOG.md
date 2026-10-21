@@ -12,6 +12,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Phone layout (ideas 34, 35, 40):** the Ways to pay, battery options and wiring tables become one card per row on phones (`stack-table` class in `index.css`, `data-label` on each cell); the tab strip, the Maintenance open items list and the desktop site sidebar fade at an edge when there is more to scroll (`useEdgeFade` in `ui.tsx`).
 - **Maintenance tab (ideas 32, 33):** new Today strip at the top (high risk count, next cleaning, checks due) with jump links (`TodayStrip` in `SoilingExtras.tsx`, checks count shared via `useDueChecks` in `MaintenanceLog.tsx`); the open items list and Alerts now sit side by side under it, then the cleaning planner; dust outlook moved beside the dust chart.
 - **Top bar (idea 38):** the Sample data badge says "Add readings" and opens the inverter readings box on Overview (`#readings`).
 - **Trust (ideas 29 to 31):** with no real readings, the Maintenance list says "Sample" and explains the faults are for practice, the tab hides its fault count, Alerts tags sample faults and will not send or copy them on WhatsApp; Impact's rooms line no longer suggests power during cuts and the savings and books figures say rough guide; Overview's "Grants" stat is now "Saved a year (rough)".

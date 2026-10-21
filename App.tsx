@@ -5,7 +5,7 @@ import {
   BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ReferenceDot, ComposedChart
 } from 'recharts';
 import { EnergyNow } from './components/EnergyNow';
-import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, ResponsiveChart, CountUp } from './components/ui';
+import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, useEdgeFade, ResponsiveChart, CountUp } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
 import BillCheck from './components/BillCheck';
@@ -460,6 +460,9 @@ const App: React.FC = () => {
   // The tab underline slides to the active tab; on a phone the tab also scrolls into view
   const navRef = React.useRef<HTMLElement>(null);
   const [ink, setInk] = useState<{ x: number; w: number } | null>(null);
+  useEdgeFade(navRef, 'x');
+  const faultListRef = React.useRef<HTMLUListElement>(null);
+  useEdgeFade(faultListRef, 'y', activeTab);
   React.useLayoutEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
@@ -779,7 +782,7 @@ const App: React.FC = () => {
               <Box>
                 <BoxHeader title="Maintenance" meta={`${realData ? '' : 'Sample · '}${openFaults ? `${openFaults} open` : 'All clear'}`} />
                 {!realData && <p className="px-5 -mt-1 pb-3 text-xs text-muted">These are sample faults for practice. Real faults show here once inverter readings are added on the Overview tab.</p>}
-                <ul className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
+                <ul ref={faultListRef} className="mt-2 border-t border-line divide-y divide-line max-h-[420px] overflow-y-auto">
                   {filteredLogs.map(log => {
                     const open = log.status !== 'Resolved';
                     return (

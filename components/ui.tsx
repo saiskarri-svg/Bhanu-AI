@@ -169,6 +169,30 @@ export const SkeletonRows: React.FC<{ rows?: number; className?: string }> = ({ 
   </div>
 );
 
+// Fades the edge of a scrolling area when there is more to see that way,
+// so a cut-off row or tab reads as "scroll for more". Works on x or y.
+// Pass `key` when the element can appear later (for example on another tab).
+export const useEdgeFade = (ref: React.RefObject<HTMLElement>, axis: 'x' | 'y', key?: unknown) => {
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const pos = axis === 'x' ? el.scrollLeft : el.scrollTop;
+      const room = axis === 'x' ? el.scrollWidth - el.clientWidth : el.scrollHeight - el.clientHeight;
+      const start = pos > 2, end = pos < room - 2;
+      el.dataset.fadeAxis = axis;
+      el.dataset.fade = start && end ? 'both' : start ? 'start' : end ? 'end' : 'none';
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    const mo = new MutationObserver(update);
+    mo.observe(el, { childList: true, subtree: true });
+    return () => { el.removeEventListener('scroll', update); ro.disconnect(); mo.disconnect(); };
+  }, [axis, key]); // eslint-disable-line react-hooks/exhaustive-deps
+};
+
 // Shows after scrolling well down a long page, and takes you back to the top
 export const BackToTop: React.FC = () => {
   const [show, setShow] = React.useState(false);

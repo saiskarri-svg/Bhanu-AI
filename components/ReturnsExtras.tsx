@@ -74,7 +74,7 @@ export const FundingOptions: React.FC<{ config: SystemConfig; annualGen: number 
       </div>
 
       <div className="m-5 overflow-x-auto rounded-box border border-line">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="stack-table w-full min-w-[720px] text-sm">
           <caption className="sr-only">Funding options compared</caption>
           <thead>
             <tr className="text-xs text-muted text-left">
@@ -92,10 +92,10 @@ export const FundingOptions: React.FC<{ config: SystemConfig; annualGen: number 
                   <p className="text-fg">{r.name}</p>
                   <p className="text-xs text-muted max-w-xs">{r.note}</p>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">{r.upfront ? inr(r.upfront) : 'Nothing'}</td>
-                <td className="px-4 py-3 text-right tabular-nums" style={{ color: r.monthly >= 0 ? CHART.positive : CHART.negative }}>{r.monthly >= 0 ? '+' : ''}{inr(r.monthly)}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-fg">{lakh(r.total)}</td>
-                <td className="px-4 py-3 text-muted">{r.owner}</td>
+                <td data-label="School pays upfront" className="px-4 py-3 text-right tabular-nums">{r.upfront ? inr(r.upfront) : 'Nothing'}</td>
+                <td data-label="Each month, year 1" className="px-4 py-3 text-right tabular-nums" style={{ color: r.monthly >= 0 ? CHART.positive : CHART.negative }}>{r.monthly >= 0 ? '+' : ''}{inr(r.monthly)}</td>
+                <td data-label="20 year gain" className="px-4 py-3 text-right tabular-nums text-fg">{lakh(r.total)}</td>
+                <td data-label="Owns the system" className="px-4 py-3 text-muted">{r.owner}</td>
               </tr>
             ))}
           </tbody>

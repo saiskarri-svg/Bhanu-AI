@@ -219,3 +219,24 @@ html { scroll-padding-top: 120px; }
 .shimmer { background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
 @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .risk-pulse, .shimmer { animation: none; } }
+
+/* Wide tables become one card per row on phones; each value keeps its column name */
+@media (max-width: 639px) {
+  .stack-table { min-width: 0 !important; }
+  .stack-table thead { display: none; }
+  .stack-table tbody { border-top: 0; }
+  .stack-table tr, .stack-table td { display: block; }
+  .stack-table tr { padding: 12px 16px; }
+  .stack-table td { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 3px 0 !important; text-align: right; }
+  .stack-table td::before { content: attr(data-label); flex-shrink: 0; max-width: 45%; color: var(--muted); font-size: 12px; text-align: left; }
+  .stack-table td:first-child { display: block; text-align: left; padding-bottom: 6px !important; }
+  .stack-table td:first-child::before { content: none; }
+}
+
+/* Edge fades for scrolling areas (see useEdgeFade in ui.tsx) */
+[data-fade-axis="x"][data-fade="end"] { mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+[data-fade-axis="x"][data-fade="start"] { mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent); }
+[data-fade-axis="x"][data-fade="both"] { mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+[data-fade-axis="y"][data-fade="end"] { mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent); }
+[data-fade-axis="y"][data-fade="start"] { mask-image: linear-gradient(to top, #000 calc(100% - 48px), transparent); }
+[data-fade-axis="y"][data-fade="both"] { mask-image: linear-gradient(to bottom, transparent, #000 48px, #000 calc(100% - 48px), transparent); }

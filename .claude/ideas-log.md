@@ -23,10 +23,10 @@ Written by the `ui-improver` agent so ideas are not repeated. The main session u
 | 31 | 2026-10-21 | Overview | Replace the "Grants ₹0" stat with "Saved a year" (green); show grants in the payback caption only when set | built |
 | 32 | 2026-10-21 | Maintenance | "Today" strip at the top: next cleaning, high risk count, checks due, with jump links (phone page is about 6,800px tall) | built |
 | 33 | 2026-10-21 | Maintenance | Move Alerts and its WhatsApp button up beside the open items list; the one yellow action is now the last box | built |
-| 34 | 2026-10-21 | Returns, Learn (phone) | Ways to pay table (and Size it and Electricity tables) become stacked cards on phone instead of sideways scroll | suggested |
-| 35 | 2026-10-21 | All tabs (phone) | Tab strip is cut off ("AI Advis") with no hint: add edge fades and arrows, or a bottom bar for the main tabs | suggested |
+| 34 | 2026-10-21 | Returns, Learn (phone) | Ways to pay table (and Size it and Electricity tables) become stacked cards on phone instead of sideways scroll | built |
+| 35 | 2026-10-21 | All tabs (phone) | Tab strip is cut off ("AI Advis") with no hint: add edge fades and arrows, or a bottom bar for the main tabs | built |
 | 36 | 2026-10-21 | AI Advisor | Outside claude.ai: one notice with an Open in claude.ai button, plus a sample answer under each card, instead of the same note four times | suggested |
 | 37 | 2026-10-21 | Impact | Funder next step at the bottom: Download funder summary and Copy share link (replaces "add #impact to the link") | suggested |
 | 38 | 2026-10-21 | Top bar, Overview | Make the "Sample data" badge a link to the inverter readings box, with a one-line "add your first reading" prompt | built |
 | 39 | 2026-10-21 | All charts | Text summaries for screen readers on every chart (highest, lowest, payback year); phone monthly chart shows all 12 month letters | suggested |
-| 40 | 2026-10-21 | Overview, Maintenance (desktop) | Inner scroll boxes (site sidebar, Maintenance list) cut text mid-line: add a bottom fade and "x more" hint | suggested |
+| 40 | 2026-10-21 | Overview, Maintenance (desktop) | Inner scroll boxes (site sidebar, Maintenance list) cut text mid-line: add a bottom fade and "x more" hint | built |

@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { useEdgeFade } from './ui';
 import { Cite } from './Sources';
 import { SystemConfig } from '../types';
 import { STATE_YIELDS, VILLAGE_DATA, STATE_TARIFFS, SCHOOL_DATA } from '../constants';
@@ -75,8 +76,11 @@ const Sidebar: React.FC<SidebarProps> = ({ config, setConfig, saveNote }) => {
   const sortedStates = Object.keys(STATE_YIELDS).sort();
   const isDefaultTariff = STATE_TARIFFS[config.state] === config.unitPrice;
 
+  const asideRef = React.useRef<HTMLElement>(null);
+  useEdgeFade(asideRef, 'y');
+
   return (
-    <aside id="sidebar" className="bg-surface border border-line rounded-box lg:sticky lg:top-[88px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto">
+    <aside ref={asideRef} id="sidebar" className="bg-surface border border-line rounded-box lg:sticky lg:top-[88px] lg:max-h-[calc(100vh-112px)] lg:overflow-y-auto">
       {/* Phone: one summary line that opens the full form */}
       <button
         type="button"

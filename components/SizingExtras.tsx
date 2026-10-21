@@ -218,7 +218,7 @@ export const BatteryPlanner: React.FC<{ dailyKwh: number; peakKw: number; kwp: n
       </div>
 
       <div className="m-5 overflow-x-auto rounded-box border border-line">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="stack-table w-full min-w-[640px] text-sm">
           <caption className="sr-only">Comparison of battery options</caption>
           <thead>
             <tr className="text-xs text-muted text-left">
@@ -237,11 +237,11 @@ export const BatteryPlanner: React.FC<{ dailyKwh: number; peakKw: number; kwp: n
                   {o.name}
                   {o.key === pick && <span className="block text-xs" style={{ color: CHART.positive }}>Best fit for this school</span>}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">{o.battery}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{o.cost ? inr(o.cost) : 'None'}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{o.yearly ? inr(o.yearly) : 'None'}</td>
-                <td className="px-4 py-3 text-muted leading-relaxed">{o.outage}</td>
-                <td className="px-4 py-3"><StatusDot tone={o.net ? 'ok' : 'bad'} className={o.net ? 'text-ok' : 'text-bad'}>{o.net ? 'Yes' : 'No'}</StatusDot></td>
+                <td data-label="Battery" className="px-4 py-3 text-right tabular-nums">{o.battery}</td>
+                <td data-label="Extra cost" className="px-4 py-3 text-right tabular-nums">{o.cost ? inr(o.cost) : 'None'}</td>
+                <td data-label="Battery wear a year" className="px-4 py-3 text-right tabular-nums">{o.yearly ? inr(o.yearly) : 'None'}</td>
+                <td data-label="In a power cut" className="px-4 py-3 text-muted leading-relaxed">{o.outage}</td>
+                <td data-label="Net metering" className="px-4 py-3"><StatusDot tone={o.net ? 'ok' : 'bad'} className={o.net ? 'text-ok' : 'text-bad'}>{o.net ? 'Yes' : 'No'}</StatusDot></td>
               </tr>
             ))}
           </tbody>
