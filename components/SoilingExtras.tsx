@@ -545,7 +545,7 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
           <div className="flex flex-wrap items-center gap-3">
             {canSend ? (
               <a href={link} target="_blank" rel="noopener noreferrer" onClick={() => record(sendId, scope)} className={btn.primary}>
-                {sample ? 'Send practice list on WhatsApp' : 'Send list on WhatsApp'} ({alerts.length} {alerts.length === 1 ? 'item' : 'items'})
+                Send list on WhatsApp ({alerts.length} {alerts.length === 1 ? 'item' : 'items'})
               </a>
             ) : (
               <span className="text-xs text-muted">
