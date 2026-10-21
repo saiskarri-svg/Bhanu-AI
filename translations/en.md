@@ -5,9 +5,10 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 ## Top bar
 
 - Bhanu AI
-- Tabs: Overview · Returns · Soiling · AI Advisor · Learn · Mission · Impact · Sources
-- Sample data · Real data · {date}
+- Tabs: Overview · Returns · Maintenance · AI Advisor · Learn · Mission · Impact · Sources
+- Sample data · Add readings · Real data · {date}
 - Export report
+- Bhanu AI, go to Overview (read by screen readers) · Back to top · Saved · Loading
 
 ## Site settings (Overview only)
 
@@ -32,7 +33,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Annual generation · kWh / yr
 - Carbon offset · t CO₂ / yr
 - Payback · years
-- Grants
+- Saved a year (rough)
 - Typical day · kW by hour · Now
 - Monthly generation · Dry season · Monsoon
 - What it means for {school}
@@ -41,6 +42,15 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Classrooms powered: Daytime power for lights and fans, made on the school's own roof.
 - Computer lab time: Daytime solar runs the lab. Add a UPS to ride through cuts and voltage dips.
 - Library budget: Bill savings that can go to library materials instead.
+
+### Where the power goes now
+
+- Where the power goes now · Estimate for {time}
+- Panels · School · Grid · solar · to grid · from grid · none
+- The sun is down, so solar makes nothing. The school takes about {kw} from the grid.
+- Solar makes about {kw}. The school uses about {kw}, so about {kw} goes to the grid and earns credit.
+- Solar makes about {kw}. The school needs about {kw}, so the grid adds about {kw}.
+- Based on a typical day and school hours, not a live meter.
 
 ### Real data from the inverter
 
@@ -77,11 +87,24 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - If the school has no money to spare, {option} gives the most without a large upfront payment.
 - Rough guide. Loan terms, CSR rules and pay-per-unit contracts vary; get written quotes before deciding.
 
+### Funding for schools in {state}
+
+- Funding for schools in {state} · Rough guide · check before applying
+- Schools do not get the household rooftop subsidy, but there are other ways to pay. Start with the state agency, then the national routes. Change the state in the site settings on Overview to see another state.
+- In {state} · State solar agency · Visit the agency's website
+- Running · Past scheme · Check if still open · Ask: · Amount: · Source: {publisher}
+- No school solar scheme was found for {state}. Ask {agency} about rooftop solar for government buildings.
+- Net metering: {text} · Source
+- Across India · Show {n} more ways · Show fewer
+- Gathered in {month} from official pages and news reports. Schemes, amounts and rules change, so open the source and confirm with the office before applying. Once money is promised, enter it as "Grants secured" in the site settings.
+- Scheme names and details come from components/fundingData.ts and stay in English for now.
+
 ### 20 year cash flow
 
 - 20 year cash flow
 - {cost} after grants · breaks even in year {n} · {amount} ahead by year 20
 - Still paying off · In profit · Yearly savings
+- Paid back, year {n}
 
 ### Funder summary
 
@@ -137,7 +160,13 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - System upkeep fund: {n} cleanings, at about ₹200 each · covers monthly cleaning and the yearly service
 - School fund: {amount}, for anything else
 
-## Soiling
+## Maintenance
+
+### Today
+
+- High risk items · Next cleaning · Checks due · Now · In {n} days
+- Sample faults for practice · Fix within a day · Nothing urgent · Cleaning is due · Due or never done · All up to date
+- See alerts · Cleaning planner · Maintenance log
 
 ### Cleaning planner
 
@@ -236,6 +265,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Site address · Open in Maps
 - Add the full school address in the site settings (Overview tab) so the technician can find it.
 - Technician or teacher's WhatsApp number, with country code
+- Country code first, for example 91 98765 43210. · Number looks right. · Add the country code at the start: 91 for India. · This does not look like a WhatsApp number. Use the country code, then the mobile number.
 - {n} of 3 messages sent to this number about this site in the last 24 hours · WhatsApp (no number set)
 - The limit is per phone number and per site: a different number or site has its own count. The same list is not sent again within 24 hours. · Counted for everyone using this page. · Counted on this device.
 - High risk: Safety or fire risk, or the system may stop. Check and repair within a day.
@@ -245,16 +275,20 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 - Preview the message · Send list on WhatsApp ({n} items) · Copy message · Copied
 - Message: Bhanu AI: solar work needed at {school} · Address: {address} · Map: {link} · To fix on this visit ({n}): · 1. [HIGH] {item}. {action}
 - Message end: High risk items need a technician within a day. Do not let students touch the panels, cables or inverter until they are checked. · Please reply when the visit is booked, and log each repair in the Bhanu AI repair log.
+- Message start on sample data: PRACTICE ONLY: these are sample faults from the Bhanu AI demo, not real problems. No visit is needed.
 - No high risk items, so nothing is sent. The list stays here. · This list was already sent. It can be sent again in {n} hours, or straight away if a new high risk item appears. · Limit of 3 messages to this number for this site reached. Next send in {n} hours.
+- Enter a valid WhatsApp number above to send this list. · Sample (tag on sample faults)
 - Nothing needs attention right now.
 - Someone taps to send. Fully automatic messages need a WhatsApp or SMS service connected to the school's account.
 - Maintenance list: High risk · Medium risk · Low risk · Resolved
+- Maintenance list: Sample · {n} open · All clear · These are sample faults for practice. Real faults show here once inverter readings are added on the Overview tab.
 
 ## AI Advisor
 
 - Answers in every part: Answer in English · తెలుగు · हिन्दी
 - Every answer ends with: Based on: (the data it used) · Confidence: high, medium or low
-- AI answers work on the published page in claude.ai. Open the page there to use them.
+- AI answers need the claude.ai page · Open in claude.ai · Available on the claude.ai page.
+- This copy of the site works offline, so it cannot ask the AI. Open the same page on claude.ai to ask questions, diagnose faults, write the weekly report and build lessons.
 - Answers use your own Claude account. The first question asks for your permission.
 - Stop
 
@@ -297,6 +331,7 @@ Source text for translation. Each section matches a tab or lesson on the site. N
 
 - Learn solar
 - Short lessons for students and staff, using this school's own system.
+- {n} of {n} steps to the certificate
 - Lessons: How it works · Components · Size it · Simulator · Safety · Data detective · Careers · Certificate · Teacher guide
 
 ### 1. How it works
@@ -747,12 +782,27 @@ Over 73,000 schools in India still have no electricity at all, and many rural sc
 
 - {school} runs on sunshine
 - {village}, {state}. A {size} kWp rooftop solar system powers our classrooms, fans and computer lab.
-- kWh of clean power a year · saved on electricity bills a year · tonnes of CO₂ avoided a year · trees would be needed to absorb the same · classrooms with steady lights and fans · library books the savings could buy
+- kWh of clean power a year · saved on electricity bills a year (rough guide) · tonnes of CO₂ avoided a year · trees would be needed to absorb the same · classrooms whose daytime lights and fans the solar power covers · library books the savings could buy (rough guide, ₹250 a book)
 - Power through the year: Less in the monsoon months, most in the dry, sunny spring.
 - Students learn solar: Every class learns how the system works, how to keep it safe and how to read its data.
 - Power made at school: Lights and fans run on power made on the school roof, easing the load on the village grid.
 - Savings stay in school: Money not spent on electricity goes to books and learning materials.
+- Help the next school go solar: Send a company's CSR team or a bank the one page summary, or share this page with parents and the village.
+- Download funder summary · Making the PDF… · Copy share link · Link copied
 - Figures are estimates for a typical year from the system size and local sunshine.
+
+## Chart summaries (read by screen readers)
+
+- Typical day: solar output starts about 6:00, peaks at about {kw} around {time}, and stops about 18:00.
+- Monthly generation: highest in {month} at about {n} kWh, lowest in {month} at about {n} kWh. June to September are monsoon months with less sun.
+- 20 year cash flow: starts at minus {cost} after grants, breaks even in year {n}, and ends {amount} by year 20. · does not break even within 20 years
+- Dust vs efficiency: each dot is one day from the last 120 days. Efficiency falls steadily as more dust covers the panels.
+- Measured output compared with a healthy system. Clue: {clue}
+- One 540 W panel: the most power is about {w} W at {v} V. With no load the voltage is {v} V; shorted, the current is {a} A.
+- Power through the year: most in {month} at about {n} kWh, least in {month} at about {n} kWh, during the monsoon.
+- What if: with these settings the school breaks even in year {n}, against year {n} in the simple estimate, and is {amount} ahead by year 20.
+- Money lost each day as dirt builds up: from nothing on cleaning day to about {amount} a day after 60 days. The best gap between cleanings is {n} days.
+- Energy each day for six days before and after the last cleaning: about {n} kWh a day before and {n} kWh a day after.
 
 ## Sources
 
