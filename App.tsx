@@ -5,6 +5,7 @@ import {
   BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ReferenceDot, ComposedChart
 } from 'recharts';
 import { EnergyNow } from './components/EnergyNow';
+import { Funding } from './components/Funding';
 import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, useEdgeFade, monthTick, ResponsiveChart, CountUp } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
@@ -736,6 +737,7 @@ const App: React.FC = () => {
           {activeTab === 1 && (
             <div className="space-y-6">
             <FundingOptions config={config} annualGen={annualGen} />
+            <Funding config={config} />
             <Box>
               <BoxHeader
                 title="20 year cash flow"

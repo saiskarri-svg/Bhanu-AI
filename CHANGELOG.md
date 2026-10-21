@@ -7,11 +7,13 @@ Read this first at the start of a session instead of exploring the code. Newest 
 - **Tabs:** Overview, Returns, Maintenance (was Soiling), AI Advisor, Learn, Mission, Impact, Sources.
 - **Learn lessons:** How it works (energy flow, voltage/current/power, I-V curves, wiring lab), Components (illustrated school, 10 parts), Simulator, Size it (audit + sizing calculator), Safety (Spot the hazard, shutdown order, quiz), Careers, Teacher guide, Certificate. Each lesson ends with a quiz.
 - **Shared data (artifact db):** `log` maintenance, `bills` savings (id YYYY-MM), `repairs`, `readings` inverter (id YYYY-MM-DD), `settings/site`, `whatsapp` alert limits.
-- **Key files:** `App.tsx` (tabs), `components/ui.tsx` (shared pieces, CHART/TINT colours), `index.css` (tokens), `components/risk.ts` (risk + WhatsApp rules), `components/sourceList.ts` (citations), `components/solarModel.ts` (simulator model), `components/runtime.ts` (artifact runtime), `components/useSharedSettings.ts`.
+- **Key files:** `components/fundingData.ts` (funding by state), `App.tsx` (tabs), `components/ui.tsx` (shared pieces, CHART/TINT colours), `index.css` (tokens), `components/risk.ts` (risk + WhatsApp rules), `components/sourceList.ts` (citations), `components/solarModel.ts` (simulator model), `components/runtime.ts` (artifact runtime), `components/useSharedSettings.ts`.
 - **On hold:** language switcher (14), live data hookup (18, needs inverter brand), multi-school view (19, needs school list).
 
 ## 2026-10-21
 
+- **Returns: funding by state.** New "Funding for schools in (state)" box under Ways to pay (`components/Funding.tsx`, data in `components/fundingData.ts`): the state's solar agency, state schemes with status and source links, net metering, and 8 national routes (Samagra Shiksha, PM SHRI, MPLADS, MLA fund, panchayat grants, DMF, CSR, pay per unit). Researched for all 36 states and UTs; research caveats in `research/funding-notes.md`.
+- **WhatsApp:** the button no longer says "practice"; the message still starts PRACTICE ONLY on sample data.
 - **Top bar:** clicking the sun or "Bhanu AI" goes back to Overview, at the top.
 - **WhatsApp:** sending is back on, but only with a valid number (`checkPhone` in `risk.ts`: country code required; India 91 + 10 digits starting 6 to 9, others 11 to 15 digits), with a hint under the box. On sample data it still sends, but the button says "Send practice list" and the message starts "PRACTICE ONLY". Copy message is back. Limits unchanged.
 - **Accessibility (idea 39):** every chart has a screen reader summary built from its own numbers (`ResponsiveChart summary`); the Overview and Impact monthly charts show all 12 months, as first letters on phones (`monthTick`).

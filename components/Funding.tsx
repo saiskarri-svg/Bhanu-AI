@@ -1,6 +1,6 @@
 import React from 'react';
 import { SystemConfig } from '../types';
-import { Box, BoxHeader, StatusDot } from './ui';
+import { Box, BoxHeader, StatusDot, btn } from './ui';
 import { FUNDING_NATIONAL, FUNDING_STATES, FUNDING_CHECKED, FundingItem } from './fundingData';
 
 // Where a school can find money for solar: the selected state's agency and
@@ -41,6 +41,8 @@ const Item: React.FC<{ f: FundingItem }> = ({ f }) => (
 export const Funding: React.FC<{ config: SystemConfig }> = ({ config }) => {
   const st = FUNDING_STATES[config.state];
   const schemes = st?.schemes ?? [];
+  const [allNational, setAllNational] = React.useState(false);
+  const national = allNational ? FUNDING_NATIONAL : FUNDING_NATIONAL.slice(0, 3);
   return (
     <Box>
       <BoxHeader title={`Funding for schools in ${config.state}`} meta="Rough guide · check before applying" />
@@ -79,12 +81,17 @@ export const Funding: React.FC<{ config: SystemConfig }> = ({ config }) => {
 
         <section aria-label="National options" className="px-5 pt-4 pb-2 border-t lg:border-t-0 border-line">
           <h3 className="text-xs text-muted uppercase tracking-wide">Across India</h3>
-          <ul className="mt-1 divide-y divide-line">{FUNDING_NATIONAL.map(f => <Item key={f.name} f={f} />)}</ul>
+          <ul className="mt-1 divide-y divide-line">{national.map(f => <Item key={f.name} f={f} />)}</ul>
+          {FUNDING_NATIONAL.length > 3 && (
+            <button onClick={() => setAllNational(v => !v)} aria-expanded={allNational} className={`${btn.quiet} mb-3 -ml-2`}>
+              {allNational ? 'Show fewer' : `Show ${FUNDING_NATIONAL.length - 3} more ways`}
+            </button>
+          )}
         </section>
       </div>
 
       <p className="px-5 py-3 border-t border-line text-xs text-muted">
-        Checked {FUNDING_CHECKED}. Schemes, amounts and rules change, so confirm with the office before applying. Once money is promised, enter it as "Grants secured" in the site settings.
+        Gathered in {FUNDING_CHECKED} from official pages and news reports. Schemes, amounts and rules change, so open the source and confirm with the office before applying. Once money is promised, enter it as "Grants secured" in the site settings.
       </p>
     </Box>
   );
