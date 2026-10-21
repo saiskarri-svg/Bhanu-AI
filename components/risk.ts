@@ -34,6 +34,17 @@ export const WA_COOLDOWN_H = 24;
 export interface WaSend { alert: string; at: string; phone?: string; site?: string }
 
 export const phoneKey = (p: string) => p.replace(/\D/g, '');
+
+// A WhatsApp number must have its country code. Indian mobiles are 91 then
+// 10 digits starting 6 to 9; other countries 11 to 15 digits in all.
+export type PhoneCheck = 'empty' | 'no-code' | 'invalid' | 'ok';
+export function checkPhone(p: string): PhoneCheck {
+  const d = phoneKey(p);
+  if (!d) return 'empty';
+  if (/^[6-9]\d{9}$/.test(d)) return 'no-code';
+  if (d.startsWith('91')) return /^91[6-9]\d{9}$/.test(d) ? 'ok' : 'invalid';
+  return d.length >= 11 && d.length <= 15 && !d.startsWith('0') ? 'ok' : 'invalid';
+}
 export const siteKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 export function waStatus(all: WaSend[], alertId: string, at = Date.now(), scope?: { phone: string; site: string }) {

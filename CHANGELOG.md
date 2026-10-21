@@ -12,6 +12,8 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Top bar:** clicking the sun or "Bhanu AI" goes back to Overview, at the top.
+- **WhatsApp:** sending is back on, but only with a valid number (`checkPhone` in `risk.ts`: country code required; India 91 + 10 digits starting 6 to 9, others 11 to 15 digits), with a hint under the box. On sample data it still sends, but the button says "Send practice list" and the message starts "PRACTICE ONLY". Copy message is back. Limits unchanged.
 - **Accessibility (idea 39):** every chart has a screen reader summary built from its own numbers (`ResponsiveChart summary`); the Overview and Impact monthly charts show all 12 months, as first letters on phones (`monthTick`).
 - **AI Advisor (idea 36):** outside claude.ai, one notice at the top (`AdvisorNotice`) with an "Open in claude.ai" button; each card just says "Available on the claude.ai page." Sample answers left out until Sai approves their wording. `PAGE_URL` now lives in `runtime.ts`.
 - **Impact (idea 37):** ends with "Help the next school go solar": Download funder summary (shared `useFunderPdf` hook from `ReturnsExtras.tsx`) and Copy share link (claude.ai address + #impact when inside claude.ai).

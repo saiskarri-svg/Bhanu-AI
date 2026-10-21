@@ -583,10 +583,10 @@ const App: React.FC = () => {
       <SolarSky />
       <header className="sticky top-0 z-30 border-b border-line bg-[rgba(11,11,13,0.72)] backdrop-blur-xl backdrop-saturate-150">
         <div className="max-w-page mx-auto px-[var(--gutter)] flex flex-wrap items-center gap-x-8">
-          <div className="order-1 flex items-center gap-2.5 h-14 lg:h-16">
+          <button type="button" onClick={() => goTab(0)} aria-label="Bhanu AI, go to Overview" className="order-1 flex items-center gap-2.5 h-14 lg:h-16 rounded-ctl">
             <GlowSun className="h-12 w-12 lg:h-14 lg:w-14 -mx-2 -my-2 shrink-0" />
             <span className="text-[17px] font-semibold tracking-tight text-fg">Bhanu AI</span>
-          </div>
+          </button>
 
           <nav
             ref={navRef}

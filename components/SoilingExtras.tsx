@@ -4,7 +4,7 @@ import { SystemConfig } from '../types';
 import { Box, BoxHeader, StatusDot, TooltipCard, Legend, CHART, axisProps, btn, ResponsiveChart, CountUp } from './ui';
 import { Cite } from './Sources';
 import { getLastClean, LAST_CLEAN_EVENT, useCap } from './runtime';
-import { Risk, RISK_TONE, RISK_MEANING, classifyFault, waStatus, hoursText, WA_DAILY_CAP, WA_COOLDOWN_H, WaSend, phoneKey, siteKey } from './risk';
+import { Risk, RISK_TONE, RISK_MEANING, classifyFault, waStatus, hoursText, WA_DAILY_CAP, WA_COOLDOWN_H, WaSend, phoneKey, siteKey, checkPhone } from './risk';
 import { soilLossFor } from './solarModel';
 
 const DAY = 86400000;
@@ -421,11 +421,12 @@ export function siteAddress(config: SystemConfig) {
 }
 
 /** One WhatsApp message for the whole site: where to go, then everything to fix there. */
-export function siteMessage(config: SystemConfig, alerts: Alert[]) {
+export function siteMessage(config: SystemConfig, alerts: Alert[], sample = false) {
   const where = siteAddress(config);
   const lines = alerts.map((a, i) => `${i + 1}. [${a.risk.toUpperCase()}] ${a.title}. ${a.action}`);
   const high = alerts.some(a => a.risk === 'High');
   return [
+    sample ? 'PRACTICE ONLY: these are sample faults from the Bhanu AI demo, not real problems. No visit is needed.' : '',
     `Bhanu AI: solar work needed at ${config.schoolName || 'the school'}`,
     `Address: ${where.text}`,
     `Map: ${where.map}`,
@@ -438,7 +439,7 @@ export function siteMessage(config: SystemConfig, alerts: Alert[]) {
   ].filter((l, i, all) => l !== '' || all[i - 1] !== '').join('\n').trim();
 }
 
-// sample: the faults come from sample data, so they are tagged and never sent
+// sample: the faults come from sample data, so they are tagged and any message says PRACTICE ONLY
 export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults: string[]; sample?: boolean }> = ({ config, annualGen, faults, sample = false }) => {
   const logged = useLastClean();
   const [phone, setPhone] = useState(() => { try { return localStorage.getItem(PHONE_KEY) || ''; } catch { return ''; } });
@@ -470,13 +471,14 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
   const counts = { High: 0, Medium: 0, Low: 0 } as Record<Risk, number>;
   alerts.forEach(a => counts[a.risk]++);
   const where = siteAddress(config);
-  const msg = siteMessage(config, alerts);
+  const msg = siteMessage(config, alerts, sample);
   // The same set of high risk problems is not sent twice within the cooldown; a new one can go straight away
   const sendId = 'site:' + alerts.filter(a => a.risk === 'High').map(a => a.id).sort().join('|');
   const scope = { phone: phoneKey(phone), site: siteKey(where.text) };
   const st = waStatus(sends, sendId, now, scope);
   const hasHigh = counts.High > 0;
-  const canSend = hasHigh && st.wait === 0 && !sample;
+  const phoneCheck = checkPhone(phone);
+  const canSend = hasHigh && st.wait === 0 && phoneCheck === 'ok';
 
   const link = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
   const copy = async () => {
@@ -503,7 +505,10 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
       <div className="px-5 pt-4 flex flex-wrap gap-x-6 gap-y-3 items-end">
         <div className="max-w-sm w-full sm:w-auto">
           <label htmlFor="alert-phone" className="block text-xs text-muted mb-1">Technician or teacher's WhatsApp number, with country code</label>
-          <input id="alert-phone" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="91 98765 43210" className="h-9 w-full sm:w-64 bg-bg border border-line rounded-ctl px-3 text-sm text-fg placeholder:text-muted/60 focus:outline-none focus:border-silver" />
+          <input id="alert-phone" aria-invalid={phoneCheck === 'invalid' || phoneCheck === 'no-code'} aria-describedby="alert-phone-hint" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="91 98765 43210" className="h-9 w-full sm:w-64 bg-bg border border-line rounded-ctl px-3 text-sm text-fg placeholder:text-muted/60 focus:outline-none focus:border-silver" />
+          <p id="alert-phone-hint" className={`mt-1 text-xs ${phoneCheck === 'ok' ? 'text-ok' : phoneCheck === 'empty' ? 'text-muted' : 'text-warn'}`}>
+            {phoneCheck === 'ok' ? 'Number looks right.' : phoneCheck === 'no-code' ? 'Add the country code at the start: 91 for India.' : phoneCheck === 'invalid' ? 'This does not look like a WhatsApp number. Use the country code, then the mobile number.' : 'Country code first, for example 91 98765 43210.'}
+          </p>
         </div>
         <div className="text-xs text-muted">
           <p className="text-fg tabular-nums">{st.usedToday} of {WA_DAILY_CAP} messages sent to {scope.phone ? 'this number' : 'WhatsApp (no number set)'} about this site in the last 24 hours</p>
@@ -540,17 +545,17 @@ export const Alerts: React.FC<{ config: SystemConfig; annualGen: number; faults:
           <div className="flex flex-wrap items-center gap-3">
             {canSend ? (
               <a href={link} target="_blank" rel="noopener noreferrer" onClick={() => record(sendId, scope)} className={btn.primary}>
-                Send list on WhatsApp ({alerts.length} {alerts.length === 1 ? 'item' : 'items'})
+                {sample ? 'Send practice list on WhatsApp' : 'Send list on WhatsApp'} ({alerts.length} {alerts.length === 1 ? 'item' : 'items'})
               </a>
             ) : (
               <span className="text-xs text-muted">
-                {sample && hasHigh ? 'These faults are sample data for practice, so nothing is sent. Sending turns on once real inverter readings are added on the Overview tab.'
-                  : !hasHigh ? 'No high risk items, so nothing is sent. The list stays here.'
+                {!hasHigh ? 'No high risk items, so nothing is sent. The list stays here.'
+                  : phoneCheck !== 'ok' ? 'Enter a valid WhatsApp number above to send this list.'
                   : st.cooldownLeft > 0 ? `This list was already sent. It can be sent again ${hoursText(st.cooldownLeft)}, or straight away if a new high risk item appears.`
                   : `Limit of ${WA_DAILY_CAP} messages to this number for this site reached. Next send ${hoursText(st.wait)}.`}
               </span>
             )}
-            {!sample && <button onClick={copy} className={btn.quiet}>{copied ? 'Copied' : 'Copy message'}</button>}
+            <button onClick={copy} className={btn.quiet}>{copied ? 'Copied' : 'Copy message'}</button>
           </div>
         </div>
       )}
