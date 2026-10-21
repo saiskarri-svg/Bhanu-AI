@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { SystemConfig } from '../types';
 import { calculateIndianSubsidy, SEASONAL_YIELDS, MONTHS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn } from './ui';
+import { Box, BoxHeader, StatusDot, Legend, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp } from './ui';
 import { Cite } from './Sources';
 import { useCap, saveFile, downloadCsv } from './runtime';
 
@@ -154,7 +154,7 @@ export const WhatIf: React.FC<{ config: SystemConfig; annualGen: number }> = ({ 
         <Legend items={[{ label: 'Your scenario', color: CHART.sun }, { label: 'Simple estimate', color: CHART.faint }]} />
       </div>
       <div className="h-[260px] px-2 pt-2 pb-4">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveChart>
           <ComposedChart data={data} margin={{ top: 10, right: 16, left: 8, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="year" {...axisProps} />
@@ -164,7 +164,7 @@ export const WhatIf: React.FC<{ config: SystemConfig; annualGen: number }> = ({ 
             <Line type="monotone" dataKey="base" stroke={CHART.faint} strokeDasharray="5 4" strokeWidth={1.5} dot={false} isAnimationActive={false} />
             <Line type="monotone" dataKey="scenario" stroke={CHART.sun} strokeWidth={2.25} dot={false} isAnimationActive={false} />
           </ComposedChart>
-        </ResponsiveContainer>
+        </ResponsiveChart>
       </div>
     </Box>
   );

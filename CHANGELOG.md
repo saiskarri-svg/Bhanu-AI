@@ -4,7 +4,7 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## Site at a glance
 
-- **Tabs:** Overview, Returns, Soiling, AI Advisor, Learn, Mission, Impact, Sources.
+- **Tabs:** Overview, Returns, Maintenance (was Soiling), AI Advisor, Learn, Mission, Impact, Sources.
 - **Learn lessons:** How it works (energy flow, voltage/current/power, I-V curves, wiring lab), Components (illustrated school, 10 parts), Simulator, Size it (audit + sizing calculator), Safety (Spot the hazard, shutdown order, quiz), Careers, Teacher guide, Certificate. Each lesson ends with a quiz.
 - **Shared data (artifact db):** `log` maintenance, `bills` savings (id YYYY-MM), `repairs`, `readings` inverter (id YYYY-MM-DD), `settings/site`, `whatsapp` alert limits.
 - **Key files:** `App.tsx` (tabs), `components/ui.tsx` (shared pieces, CHART/TINT colours), `index.css` (tokens), `components/risk.ts` (risk + WhatsApp rules), `components/sourceList.ts` (citations), `components/solarModel.ts` (simulator model), `components/runtime.ts` (artifact runtime), `components/useSharedSettings.ts`.
@@ -12,6 +12,8 @@ Read this first at the start of a session instead of exploring the code. Newest 
 
 ## 2026-10-21
 
+- **Motion (ideas 20, 21):** charts draw in when scrolled into view (`ResponsiveChart` in `ui.tsx` replaces `ResponsiveContainer`); big numbers count up the first time they are seen (`CountUp`, used by `StatStrip`, Impact, Maintenance, bill check).
+- **Rename:** the Soiling tab is now Maintenance (label only; component files keep their names).
 - **Motion:** boxes fade and rise in as they scroll into view (`revealWithin` in `ui.tsx`, tall boxes pass it to inner boxes); the tab underline slides between tabs and the active tab scrolls into view on phones; a Back to top button appears after 1.5 screens; smooth scrolling for in-page links. All off with reduced motion. Screenshot script now scrolls the page once before shooting.
 - **Fix:** clicking a top tab now opens the new tab at its top, instead of keeping the scroll position from the last tab (`App.tsx` tabs use `goTab`).
 - **Tooling:** added `CHANGELOG.md` (this file) and the rule to keep it current.

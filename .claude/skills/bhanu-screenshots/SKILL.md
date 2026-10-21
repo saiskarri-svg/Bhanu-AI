@@ -16,7 +16,7 @@ Sai reviews designs by seeing them, not by reading descriptions. Every visual ch
    node .claude/skills/bhanu-screenshots/scripts/shoot.mjs --tabs "Learn,Mission" --out <scratchpad>/shots
    ```
    Options:
-   - `--tabs`: tab names as shown in the top bar (Overview, Returns, Soiling, AI Advisor, Learn, Mission, Impact, Sources).
+   - `--tabs`: tab names as shown in the top bar (Overview, Returns, Maintenance, AI Advisor, Learn, Mission, Impact, Sources).
    - `--section "Heading text"`: crop to the box or section that has this exact heading, instead of the whole page.
    - `--click "Button text"`: click a button first (repeatable, comma separated), for example to open a panel.
    - `--url http://localhost:3002`: change the address.

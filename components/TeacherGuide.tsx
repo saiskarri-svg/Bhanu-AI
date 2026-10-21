@@ -39,7 +39,7 @@ const PLANS: Plan[] = [
     goal: 'Students can explain how weather, dust, heat and shade change solar output.',
     steps: [['5', 'Predict: will panels make more on a hot day or a cool day?'], ['15', 'Pairs try the four challenges and note what they changed.'], ['10', 'Share: which challenge was hardest and why?'], ['10', 'Quiz.']],
     discuss: ['Why does a cool, windy day help the panels?', 'What can the school control, and what can it not?'],
-    activity: 'Note the weather each day for a week and compare with the real Soiling tab readings.',
+    activity: 'Note the weather each day for a week and compare with the real Maintenance tab readings.',
   },
   {
     lesson: 'Safety', quiz: 'safety',

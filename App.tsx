@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   BarChart, Bar, Cell, Scatter, Line, ReferenceLine, ComposedChart
 } from 'recharts';
-import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin } from './components/ui';
+import { Box, BoxHeader, StatStrip, StatusDot, TooltipCard, Legend, CHART, TINT, Icons, axisProps, btn, BackToTop, revealWithin, ResponsiveChart, CountUp } from './components/ui';
 import SolarSky from './components/SolarSky';
 import LearnTab from './components/LearnTab';
 import BillCheck from './components/BillCheck';
@@ -490,7 +490,7 @@ const App: React.FC = () => {
   const tabs = [
     { label: 'Overview' },
     { label: 'Returns' },
-    { label: 'Soiling', count: openFaults },
+    { label: 'Maintenance', count: openFaults },
     { label: 'AI Advisor' },
     { label: 'Learn' },
     { label: 'Mission' },
@@ -636,7 +636,7 @@ const App: React.FC = () => {
                 <Box>
                   <BoxHeader title="Typical day" meta="kW by hour" />
                   <div className="h-[300px] px-2 pb-3">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveChart>
                       <AreaChart data={forecastData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
@@ -656,7 +656,7 @@ const App: React.FC = () => {
                         <ReferenceLine x={nowLabel} stroke={CHART.sun} strokeOpacity={0.6} strokeDasharray="3 3" label={{ value: 'Now', position: 'insideTopRight', fill: CHART.sun, fontSize: 11 }} />
                         <Area type="monotone" dataKey="generation" stroke="url(#sunStroke)" strokeWidth={2} fill="url(#colorGen)" activeDot={{ r: 4, fill: CHART.sun, stroke: 'none' }} />
                       </AreaChart>
-                    </ResponsiveContainer>
+                    </ResponsiveChart>
                   </div>
                 </Box>
 
@@ -666,7 +666,7 @@ const App: React.FC = () => {
                     meta={<Legend items={[{ label: 'Dry season', color: CHART.sun }, { label: 'Monsoon', color: CHART.monsoon }]} />}
                   />
                   <div className="h-[300px] px-2 pb-3">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveChart>
                       <BarChart data={monthlyBacktestData} margin={{ top: 16, right: 16, left: -8, bottom: 0 }}>
                         <defs>
                           <linearGradient id="barSun" x1="0" y1="0" x2="0" y2="1">
@@ -688,7 +688,7 @@ const App: React.FC = () => {
                           ))}
                         </Bar>
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveChart>
                   </div>
                 </Box>
               </div>
@@ -723,7 +723,7 @@ const App: React.FC = () => {
                 {inr(netInvestment)} after grants · breaks even in year {paybackYear} · {inr(finalBalance)} ahead by year 20
               </p>
               <div className="h-[clamp(380px,62vh,600px)] px-2 pb-3 pt-2">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveChart>
                   <ComposedChart data={roiData} margin={{ top: 16, right: 16, left: 8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="splitStroke" x1="0" y1="0" x2="0" y2="1">
@@ -745,7 +745,7 @@ const App: React.FC = () => {
                     <Bar dataKey="annualSavings" fill={CHART.faint} fillOpacity={0.6} radius={[2, 2, 0, 0]} maxBarSize={22} />
                     <Area type="monotone" dataKey="cashFlow" stroke="url(#splitStroke)" strokeWidth={2.25} fill="url(#splitFill)" baseValue={0} dot={false} activeDot={{ r: 4, fill: CHART.primary, stroke: 'none' }} />
                   </ComposedChart>
-                </ResponsiveContainer>
+                </ResponsiveChart>
               </div>
             </Box>
             <FunderSummary config={config} annualGen={annualGen} payback={paybackYear} />
@@ -768,7 +768,7 @@ const App: React.FC = () => {
                   meta={<Legend items={[{ label: 'Healthy', color: CHART.positive }, { label: 'Losing output', color: CHART.sun }, { label: 'Needs cleaning', color: CHART.negative }, { label: 'Expected', color: CHART.primary }]} />}
                 />
                 <div className="h-[380px] xl:h-[514px] px-2 pb-3">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveChart>
                     <ComposedChart margin={{ top: 16, right: 16, bottom: 0, left: -8 }}>
                       <CartesianGrid stroke={CHART.grid} vertical={false} />
                       <XAxis type="number" dataKey="dust" domain={[0, 1]} {...axisProps} tickFormatter={(v) => (v * 100).toFixed(0) + '%'} />
@@ -781,7 +781,7 @@ const App: React.FC = () => {
                       </Scatter>
                       <Line data={dustImpactCurve} type="monotone" dataKey="avgEfficiency" stroke={CHART.primary} strokeWidth={2} dot={false} activeDot={false} />
                     </ComposedChart>
-                  </ResponsiveContainer>
+                  </ResponsiveChart>
                 </div>
                 <p className="px-5 pb-4 -mt-1 text-xs text-muted">Horizontal: dust on panels. Vertical: efficiency. From the last 120 days of sensor data.</p>
               </Box>
@@ -794,7 +794,7 @@ const App: React.FC = () => {
                       Soiling loss now
                     </p>
                     <p className="mt-1 flex items-baseline gap-1.5">
-                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums">{currentYieldLoss.percentage}</span>
+                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums"><CountUp value={currentYieldLoss.percentage} /></span>
                       <span className="text-xs text-muted">%</span>
                     </p>
                   </div>
@@ -804,7 +804,7 @@ const App: React.FC = () => {
                       Power blocked
                     </p>
                     <p className="mt-1 flex items-baseline gap-1.5">
-                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums">{currentYieldLoss.kw}</span>
+                      <span className="font-display font-semibold text-[28px] leading-none tabular-nums"><CountUp value={currentYieldLoss.kw} /></span>
                       <span className="text-xs text-muted">kW</span>
                     </p>
                   </div>

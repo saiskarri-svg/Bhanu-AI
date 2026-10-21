@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
-import { Box, BoxHeader, Legend, StatusDot, TooltipCard, CHART, axisProps } from './ui';
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceDot } from 'recharts';
+import { Box, BoxHeader, Legend, StatusDot, TooltipCard, CHART, axisProps, ResponsiveChart, CountUp } from './ui';
 
 // A typical 540 W mono PERC panel (72 cells in series), at 1000 W/m² and 25 °C
 export const PANEL = { watts: 540, vmp: 41.6, imp: 12.98, voc: 49.5, isc: 13.85, cells: 72 };
@@ -85,7 +85,7 @@ export const VoltageCurrent: React.FC = () => {
         <Legend items={[{ label: 'Current (A)', color: CHART.monsoon }, { label: 'Power (W)', color: CHART.sun }]} />
       </div>
       <div className="h-[280px] px-2 pt-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveChart>
           <ComposedChart data={c.points} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="v" type="number" domain={[0, 52]} ticks={[0, 10, 20, 30, 40, 50]} {...axisProps} tickFormatter={v => `${v} V`} />
@@ -105,7 +105,7 @@ export const VoltageCurrent: React.FC = () => {
               label={{ value: 'Maximum power point', position: 'top', fill: CHART.sun, fontSize: 11 }}
             />
           </ComposedChart>
-        </ResponsiveContainer>
+        </ResponsiveChart>
       </div>
 
       <div className="px-5 pt-3 grid sm:grid-cols-2 gap-x-6 gap-y-4">

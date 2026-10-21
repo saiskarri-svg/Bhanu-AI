@@ -1,4 +1,5 @@
 import React from 'react';
+import { ResponsiveContainer } from 'recharts';
 
 // Chart styling shared by every Recharts view
 // Colours carry meaning: sun = solar output, monsoon = rain months,
@@ -64,6 +65,66 @@ export const revealWithin = (root: HTMLElement | null) => {
   return () => els.forEach(el => revealObserver?.unobserve(el));
 };
 
+const motionOK = () =>
+  typeof IntersectionObserver !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Runs once, the first time the element is mostly on screen
+const useFirstSeen = (ref: React.RefObject<Element>, enabled: boolean, onSeen: () => void) => {
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); onSeen(); } }, { rootMargin: '0px 0px -10% 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+};
+
+// Use in place of ResponsiveContainer: the chart is drawn when it scrolls into
+// view, so its draw-in animation is seen instead of finishing off screen.
+// The parent must have a fixed height, as every chart here does.
+export const ResponsiveChart: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = React.useState(() => !motionOK());
+  useFirstSeen(ref, !seen, () => setTimeout(() => setSeen(true), 120));
+  return (
+    <div ref={ref} className="h-full w-full">
+      {seen && <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>}
+    </div>
+  );
+};
+
+// A big number that counts up from zero the first time it is seen. Keeps the
+// text around the number (₹, %, units), its decimals and its commas. Later
+// changes, from a slider say, show straight away.
+export const CountUp: React.FC<{ value: React.ReactNode }> = ({ value }) => {
+  const text = typeof value === 'number' || typeof value === 'string' ? String(value) : '';
+  const m = text.match(/^([^\d-]*)(-?[\d,]*\.?\d+)(.*)$/);
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const format = (n: number) => {
+    if (!m) return text;
+    const decimals = m[2].includes('.') ? m[2].split('.')[1].length : 0;
+    const body = m[2].includes(',')
+      ? n.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+      : n.toFixed(decimals);
+    return m[1] + body + m[3];
+  };
+  const [shown, setShown] = React.useState<string | null>(() => (m && motionOK() ? format(0) : null));
+  const latest = React.useRef(m);
+  latest.current = m;
+  useFirstSeen(ref, shown !== null, () => {
+    const start = performance.now();
+    const step = (t: number) => {
+      const cur = latest.current;
+      const target = cur ? parseFloat(cur[2].replace(/,/g, '')) : 0;
+      const k = Math.min(1, (t - start) / 900);
+      if (k < 1 && cur) { setShown(format(target * (1 - Math.pow(1 - k, 3)))); requestAnimationFrame(step); }
+      else setShown(null);
+    };
+    requestAnimationFrame(step);
+  });
+  return <span ref={ref}>{shown ?? value}</span>;
+};
+
 // Shows after scrolling well down a long page, and takes you back to the top
 export const BackToTop: React.FC = () => {
   const [show, setShow] = React.useState(false);
@@ -121,7 +182,7 @@ export const StatStrip: React.FC<{ stats: Stat[]; cols?: 3 | 4; className?: stri
           {s.label}
         </p>
         <p className="mt-1 flex items-baseline gap-1.5 min-w-0">
-          <span className="font-display font-semibold text-[28px] leading-none text-fg tabular-nums truncate">{s.value}</span>
+          <span className="font-display font-semibold text-[28px] leading-none text-fg tabular-nums truncate"><CountUp value={s.value} /></span>
           {s.unit && <span className="text-xs text-muted whitespace-nowrap">{s.unit}</span>}
         </p>
         {s.note && <p className="mt-2 text-xs text-muted leading-relaxed">{s.note}</p>}

@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, Cell } from 'recharts';
 import { SystemConfig } from '../types';
 import { MONTHS, SEASONAL_YIELDS, EMISSION_FACTOR, TREE_ABSORPTION } from '../constants';
-import { CHART, axisProps } from './ui';
+import { CHART, axisProps, ResponsiveChart, CountUp } from './ui';
 import { Cite } from './Sources';
 import GlowSun from './GlowSun';
 import { FLOW_ART } from './FlowIcons';
@@ -52,7 +52,7 @@ const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; standalone
             { v: books.toLocaleString('en-IN'), u: 'library books the savings could buy' },
           ].map(s => (
             <div key={s.u} className="bg-surface px-5 py-6 text-center">
-              <p className="font-display font-semibold text-[34px] leading-none tabular-nums" style={{ color: s.c }}>{s.v}</p>
+              <p className="font-display font-semibold text-[34px] leading-none tabular-nums" style={{ color: s.c }}><CountUp value={s.v} /></p>
               <p className="mt-2 text-sm text-muted">{s.u}{s.src && <Cite id={s.src} />}</p>
             </div>
           ))}
@@ -62,14 +62,14 @@ const ImpactPage: React.FC<{ config: SystemConfig; annualGen: number; standalone
           <h2 className="text-lg font-semibold text-center">Power through the year</h2>
           <p className="text-sm text-muted text-center">Less in the monsoon months, most in the dry, sunny spring.</p>
           <div className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveChart>
               <BarChart data={months} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
                 <XAxis dataKey="m" {...axisProps} />
                 <Bar dataKey="kwh" radius={[3, 3, 0, 0]} maxBarSize={30} isAnimationActive={false} label={{ position: 'top', fill: '#9a9aa3', fontSize: 10 }}>
                   {months.map(m => <Cell key={m.m} fill={m.monsoon ? CHART.monsoon : CHART.sun} />)}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
+            </ResponsiveChart>
           </div>
         </section>
 

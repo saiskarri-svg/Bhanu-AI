@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { SystemConfig } from '../types';
 import { STATE_LAT } from '../constants';
-import { Box, BoxHeader, Legend, StatusDot, TooltipCard, CHART, axisProps, btn } from './ui';
+import { Box, BoxHeader, Legend, StatusDot, TooltipCard, CHART, axisProps, btn, ResponsiveChart, CountUp } from './ui';
 import { simulate, SimInputs } from './solarModel';
 import { markDone } from './runtime';
 
@@ -126,7 +126,7 @@ const DataDetective: React.FC<{ config: SystemConfig }> = ({ config }) => {
           <Legend items={[{ label: 'Measured', color: CHART.sun }, { label: 'Healthy system', color: CHART.primary }]} />
         </div>
         <div className="h-[300px] px-2 pt-2">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveChart>
             <ComposedChart data={data} margin={{ top: 10, right: 16, left: -8, bottom: 0 }}>
               <CartesianGrid stroke={CHART.grid} vertical={false} />
               <XAxis dataKey="h" type="number" domain={[6, 19]} ticks={[6, 8, 10, 12, 14, 16, 18]} {...axisProps} tickFormatter={v => `${v}:00`} />
@@ -135,7 +135,7 @@ const DataDetective: React.FC<{ config: SystemConfig }> = ({ config }) => {
               <Line type="monotone" dataKey="expected" stroke={CHART.primary} strokeDasharray="5 4" strokeWidth={1.5} dot={false} isAnimationActive={false} />
               <Line type="linear" dataKey="actual" stroke={CHART.sun} strokeWidth={2.25} dot={false} isAnimationActive={false} />
             </ComposedChart>
-          </ResponsiveContainer>
+          </ResponsiveChart>
         </div>
 
         <div className="p-5 grid sm:grid-cols-2 gap-2">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SystemConfig } from '../types';
 import { Cite } from './Sources';
 import { SEASONAL_YIELDS, MONTHS, calculateIndianSubsidy } from '../constants';
-import { Box, BoxHeader, StatusDot, CHART } from './ui';
+import { Box, BoxHeader, StatusDot, CHART, ResponsiveChart, CountUp } from './ui';
 
 const EXPORT_RATE = 3; // ₹ per extra unit credited, varies by DISCOM
 
@@ -56,7 +56,7 @@ const BillCheck: React.FC<{ config: SystemConfig; annualGen: number }> = ({ conf
         ].map(x => (
           <div key={x.l} className="bg-surface px-4 py-3">
             <p className="text-xs text-muted">{x.l}</p>
-            <p className="mt-1 font-display font-semibold text-[22px] leading-none tabular-nums" style={{ color: x.c }}>{x.v}</p>
+            <p className="mt-1 font-display font-semibold text-[22px] leading-none tabular-nums" style={{ color: x.c }}><CountUp value={x.v} /></p>
             <p className="mt-1.5 text-xs text-muted">{x.s}</p>
           </div>
         ))}

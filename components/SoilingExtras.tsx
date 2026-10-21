@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import { ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { SystemConfig } from '../types';
-import { Box, BoxHeader, StatusDot, TooltipCard, Legend, CHART, axisProps, btn } from './ui';
+import { Box, BoxHeader, StatusDot, TooltipCard, Legend, CHART, axisProps, btn, ResponsiveChart, CountUp } from './ui';
 import { Cite } from './Sources';
 import { getLastClean, LAST_CLEAN_EVENT, useCap } from './runtime';
 import { Risk, RISK_TONE, RISK_MEANING, classifyFault, waStatus, hoursText, WA_DAILY_CAP, WA_COOLDOWN_H, WaSend, phoneKey, siteKey } from './risk';
@@ -86,12 +86,12 @@ export const CleaningPlanner: React.FC<{ config: SystemConfig; annualGen: number
         </div>
         <div className="bg-surface px-5 py-4">
           <p className="text-xs text-muted">Lost to dust since cleaning</p>
-          <p className="mt-1 font-display font-semibold text-[28px] leading-none tabular-nums" style={{ color: CHART.negative }}>{inr(lostSoFar * config.unitPrice)}</p>
+          <p className="mt-1 font-display font-semibold text-[28px] leading-none tabular-nums" style={{ color: CHART.negative }}><CountUp value={inr(lostSoFar * config.unitPrice)} /></p>
           <p className="mt-1.5 text-xs text-muted">{Math.round(lostSoFar)} kWh over {days} days</p>
         </div>
         <div className="bg-surface px-5 py-4">
           <p className="text-xs text-muted">Losing today</p>
-          <p className="mt-1 font-display font-semibold text-[28px] leading-none tabular-nums">{inr(perDayNow)}</p>
+          <p className="mt-1 font-display font-semibold text-[28px] leading-none tabular-nums"><CountUp value={inr(perDayNow)} /></p>
           <p className="mt-1.5 text-xs text-muted">{Math.round(loss(days) * 100)}% of output</p>
         </div>
         <div className="bg-surface px-5 py-4">
@@ -122,7 +122,7 @@ export const CleaningPlanner: React.FC<{ config: SystemConfig; annualGen: number
         <Legend items={[{ label: 'Lost per day', color: CHART.negative }, { label: 'Best day to clean', color: CHART.sun }]} />
       </div>
       <div className="h-[200px] px-2 pt-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveChart>
           <ComposedChart data={curve} margin={{ top: 10, right: 16, left: -4, bottom: 0 }}>
             <defs>
               <linearGradient id="lostFill" x1="0" y1="0" x2="0" y2="1">
@@ -138,7 +138,7 @@ export const CleaningPlanner: React.FC<{ config: SystemConfig; annualGen: number
             <ReferenceLine x={plan.days} stroke={CHART.sun} strokeDasharray="4 3" label={{ value: `Clean at day ${plan.days}`, position: 'insideTopRight', fill: CHART.sun, fontSize: 11 }} />
             {days <= 60 && <ReferenceLine x={days} stroke={CHART.primary} strokeOpacity={0.6} label={{ value: 'Today', position: 'insideTopLeft', fill: '#e8e8ea', fontSize: 11 }} />}
           </ComposedChart>
-        </ResponsiveContainer>
+        </ResponsiveChart>
       </div>
 
       <div className="p-5 space-y-1.5 text-sm">
@@ -190,7 +190,7 @@ export const BeforeAfter: React.FC<{ config: SystemConfig; annualGen: number }> 
         <Legend items={[{ label: 'Before', color: CHART.faint }, { label: 'After', color: CHART.positive }]} />
       </div>
       <div className="h-[200px] px-2 pt-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveChart>
           <ComposedChart data={data.filter(d => !d.future)} margin={{ top: 10, right: 16, left: -4, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="label" {...axisProps} interval={1} />
@@ -200,7 +200,7 @@ export const BeforeAfter: React.FC<{ config: SystemConfig; annualGen: number }> 
               {data.filter(d => !d.future).map(d => <Cell key={d.k} fill={d.after ? CHART.positive : CHART.faint} />)}
             </Bar>
           </ComposedChart>
-        </ResponsiveContainer>
+        </ResponsiveChart>
       </div>
       <p className="px-5 pb-5 pt-2 text-xs text-muted">
         {logged ? 'Daily energy in kWh, from the dust model until the sensors report each day.' : 'This is an example. Mark a cleaning in the maintenance log to see your own.'}

@@ -13,7 +13,7 @@ Read `.claude/ideas-log.md`. Do not repeat an idea listed there unless something
 ## 2. Look at the site
 
 1. Start the dev server if needed: `npx vite --port 3002` in the background, then check `curl -s -o /dev/null -w "%{http_code}" localhost:3002`.
-2. Shoot every tab: `node .claude/skills/bhanu-screenshots/scripts/shoot.mjs --tabs "Overview,Returns,Soiling,AI Advisor,Learn,Mission,Impact,Sources" --out <scratchpad>/ideas-shots`.
+2. Shoot every tab: `node .claude/skills/bhanu-screenshots/scripts/shoot.mjs --tabs "Overview,Returns,Maintenance,AI Advisor,Learn,Mission,Impact,Sources" --out <scratchpad>/ideas-shots`.
 3. Look at each desktop and phone image with Read. Skim `App.tsx` and `components/` for anything the screenshots cannot show (empty states, loading, errors, saved data).
 4. Check `git log --oneline -15` to see what was built recently, and favour ideas that build on it.
 

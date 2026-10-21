@@ -40,16 +40,16 @@ The UI follows a clean dark style (see `index.css` for the colour tokens and `ta
 - Every Learn lesson ends with a short quiz (`components/Quiz.tsx`); best scores are kept per device.
 - Safety adds a protective gear guide and a shutdown order drill (`components/SafetyExtras.tsx`). A Careers lesson (`components/Careers.tsx`) covers solar jobs and training routes.
 - Size it adds a roof planner and a battery comparison (`components/SizingExtras.tsx`). Returns adds a bill check with subsidy breakdown (`components/BillCheck.tsx`). The Simulator has four challenges.
-- Soiling has a shared maintenance log (`components/MaintenanceLog.tsx`). On claude.ai it uses the artifact's `db` capability (collection `log`) so everyone sees the same entries and who did them; elsewhere it saves on the device.
+- Maintenance (was Soiling) has a shared maintenance log (`components/MaintenanceLog.tsx`). On claude.ai it uses the artifact's `db` capability (collection `log`) so everyone sees the same entries and who did them; elsewhere it saves on the device.
 - Learn adds Data detective (`components/DataDetective.tsx`), a Certificate lesson with progress tracking (`components/Certificate.tsx`, progress in `components/runtime.ts`) and a Teacher guide with downloadable worksheets and answer keys (`components/TeacherGuide.tsx`). Safety adds Rules and standards (`components/Standards.tsx`).
 - The Impact tab (`components/ImpactPage.tsx`) is a plain page for parents and the village. Adding `#impact` to the link opens it on its own.
 
-## Returns, Soiling and AI Advisor depth (batches A to E)
+## Returns, Maintenance and AI Advisor depth (batches A to E)
 
 - Returns: Ways to pay for it (upfront, bank loan, CSR grant, pay-per-unit), 20 year cash flow, one page funder PDF, savings tracker (shared `bills` collection), bill check, What if? sliders, Where the savings go.
-- Soiling: Cleaning planner with the best interval and rupees lost to dust, dust vs efficiency, maintenance, maintenance log, Did cleaning work? before/after chart, panel health map (sample readings), two week dust risk by region and month, WhatsApp alerts.
+- Maintenance: Cleaning planner with the best interval and rupees lost to dust, dust vs efficiency, maintenance, maintenance log, Did cleaning work? before/after chart, panel health map (sample readings), two week dust risk by region and month, WhatsApp alerts.
 - AI Advisor: chat about the school's own data, photo diagnosis, weekly report for the principal, lesson builder for teachers. Every answer ends with "Based on" and "Confidence", and can be written in English, Telugu or Hindi. Uses the `sample` capability; outside claude.ai it shows a note instead.
-- Soiling: Repair log for technician visits (what was fixed, technician, organisation or "N/A (local trained technician)", cost, Fixed / Needs follow-up), shared `repairs` collection, CSV download.
+- Maintenance: Repair log for technician visits (what was fixed, technician, organisation or "N/A (local trained technician)", cost, Fixed / Needs follow-up), shared `repairs` collection, CSV download.
 - Mission: interactive. One roof, three jobs (tap tiles, jump to a tab), Who it helps (switch Children / Community / Companies and the world), problem cards with "See the fix", a 1 to 1 lakh schools slider with counting numbers (students ~250 and 2 technicians per school, rough), and next-step buttons.
 - Backend: site settings (`settings/site`), maintenance log (`log`), savings tracker (`bills`), repair log (`repairs`), WhatsApp send count (`whatsapp`) and inverter readings (`readings`, one document per date) live in the claude.ai page's shared storage, with device storage as the fallback. The AI Advisor runs on the viewer's own Claude account; no API key is needed.
 - Real data: Overview, "Real data from the inverter". Students type the daily kWh from the inverter display, or anyone uploads a CSV exported from the monitoring portal (any brand; date and daily energy columns are guessed and can be changed, Wh or kWh, hourly rows are added up). Until readings exist, the top bar says "Sample data".
