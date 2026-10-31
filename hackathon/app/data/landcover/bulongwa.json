@@ -1,0 +1,21 @@
+{
+ "site": "bulongwa",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.4614,
+  "Shrubland": 0.2588,
+  "Grassland": 0.0951,
+  "Cropland": 0.1608,
+  "Built-up": 0.0232,
+  "Bare or sparse": 0.0007
+ },
+ "within_5km": {
+  "Trees": 0.6101,
+  "Shrubland": 0.1847,
+  "Grassland": 0.1101,
+  "Cropland": 0.0905,
+  "Built-up": 0.0043,
+  "Bare or sparse": 0.0,
+  "Wetland": 0.0003
+ }
+}

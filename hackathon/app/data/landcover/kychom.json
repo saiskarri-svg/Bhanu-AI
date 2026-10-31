@@ -1,0 +1,26 @@
+{
+ "site": "kychom",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.1395,
+  "Shrubland": 0.0007,
+  "Grassland": 0.102,
+  "Cropland": 0.1071,
+  "Built-up": 0.074,
+  "Bare or sparse": 0.0008,
+  "Water": 0.2635,
+  "Wetland": 0.1148,
+  "Mangroves": 0.1977
+ },
+ "within_5km": {
+  "Trees": 0.1175,
+  "Shrubland": 0.0009,
+  "Grassland": 0.0879,
+  "Cropland": 0.0932,
+  "Built-up": 0.0137,
+  "Bare or sparse": 0.0005,
+  "Water": 0.2054,
+  "Wetland": 0.1506,
+  "Mangroves": 0.3304
+ }
+}

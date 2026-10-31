@@ -120,6 +120,27 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
               <div className="px-5 pb-5"><FootprintBox eng={eng} total={buildings.length} coverage={site.coverage} /></div>
             </Box>
           )}
+          {eng?.landcover && (() => {
+            const C: Record<string, string> = { Trees: '#3f8f4f', Shrubland: '#9aa04a', Grassland: '#c8b45a', Cropland: 'var(--sun)', 'Built-up': 'var(--bad)', 'Bare or sparse': '#b9a48a', Water: 'var(--info)', Wetland: '#4fa3a0', Mangroves: '#2f7a5f' };
+            const bar = (sh: Record<string, number>) => (Object.entries(sh) as [string, number][]).filter(([, v]) => v >= 0.005).sort((x, y) => y[1] - x[1]);
+            const crop = eng.landcover.within_5km['Cropland'] ?? 0;
+            return (
+              <Box>
+                <BoxHeader title="Land around the village" meta="ESA WorldCover 2021, 10 m" />
+                <div className="px-5 pb-5 space-y-3">
+                  {([['Within 1 km', eng.landcover.within_1km], ['Within 5 km', eng.landcover.within_5km]] as const).map(([l, sh]) => (
+                    <div key={l}>
+                      <p className="text-xs text-muted mb-1">{l}</p>
+                      <div className="flex h-2.5 rounded-full overflow-hidden bg-surface-2">{bar(sh).map(([k, v]) => <span key={k} title={`${k} ${pc(v)}`} style={{ width: `${v * 100}%`, background: C[k] ?? 'var(--other)' }} />)}</div>
+                      <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">{bar(sh).slice(0, 4).map(([k, v]) => <li key={k} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: C[k] ?? 'var(--other)' }} />{k} {pc(v)}</li>)}</ul>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted leading-relaxed">{crop >= 0.05 ? `Cropland covers ${pc(crop)} within 5 km: grain mills, irrigation pumps and cold storage are likely early productive loads.` : 'Little open cropland within 5 km (farms under tree cover show as trees), so productive use is more likely shops, welding and cold drinks than mills and pumps.'} Shown for context; the forecast does not use it yet.</p>
+                  <Cite k={['worldcover']} />
+                </div>
+              </Box>
+            );
+          })()}
           <Box>
             <BoxHeader title="Where the data comes from" />
             <ul className="px-5 pb-5 text-sm space-y-2 text-muted">

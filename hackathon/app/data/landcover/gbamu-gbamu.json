@@ -1,0 +1,16 @@
+{
+ "site": "gbamu-gbamu",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.9171,
+  "Shrubland": 0.0006,
+  "Grassland": 0.0081,
+  "Built-up": 0.0742
+ },
+ "within_5km": {
+  "Trees": 0.9887,
+  "Shrubland": 0.0018,
+  "Grassland": 0.0012,
+  "Built-up": 0.0083
+ }
+}

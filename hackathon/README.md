@@ -17,6 +17,7 @@ Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 | `pipeline/gridsight_fetch.py` | Fetch any site: `--lat --lon --radius` to a site file the dashboard can load |
 | `pipeline/fetch_samples.sh` | Rebuild the five sample villages |
 | `pipeline/holdout_tags.py` | Build the held-out test set |
+| `pipeline/landcover.py` | ESA WorldCover land cover within 1 and 5 km of each village |
 | `pipeline/meta_population.py` | Meta population (HRSL) within each village, the second household count |
 | `pipeline/pv_hourly.py` | Hourly solar curve per month from Fereshteh's clear-sky model, scaled by measured weather; altitude from Copernicus DEM |
 | `pipeline/weather.py` | 10 years of daily NASA POWER weather and five CMIP6 models per village; solar output with cloud, heat and dust losses |

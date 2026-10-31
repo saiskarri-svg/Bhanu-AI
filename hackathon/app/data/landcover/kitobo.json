@@ -1,0 +1,23 @@
+{
+ "site": "kitobo",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.0716,
+  "Shrubland": 0.0012,
+  "Grassland": 0.0852,
+  "Cropland": 0.0005,
+  "Built-up": 0.0161,
+  "Bare or sparse": 0.0038,
+  "Water": 0.8215
+ },
+ "within_5km": {
+  "Trees": 0.0215,
+  "Shrubland": 0.0005,
+  "Grassland": 0.0066,
+  "Cropland": 0.0,
+  "Built-up": 0.0009,
+  "Bare or sparse": 0.0004,
+  "Water": 0.9701,
+  "Wetland": 0.0
+ }
+}

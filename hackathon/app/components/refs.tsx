@@ -46,6 +46,8 @@ export const REFS: Record<string, Ref> = {
     feeds: 'Altitude of each village for the clear-sky model (41 m at Benichab to 2,120 m at Bulongwa)' },
   metahrsl: { short: 'Meta population map (HRSL)', full: 'Data for Good at Meta and CIESIN, High Resolution Settlement Layer, general population, 30 m (CC BY 4.0), AWS open data s3://dataforgood-fb-data', url: 'https://dataforgood.facebook.com/dfg/tools/high-resolution-population-density-maps',
     feeds: 'Second household count for each village (population within 1 km divided by household size), shown beside the roof count' },
+  worldcover: { short: 'ESA WorldCover', full: 'ESA WorldCover 2021 v200, 10 m land cover (CC BY 4.0), AWS open data s3://esa-worldcover', url: 'https://esa-worldcover.org/',
+    feeds: 'Land cover within 1 and 5 km of each village: cropland for mills and irrigation, trees, bare ground, water' },
   nasapower: { short: 'NASA POWER', full: 'NASA POWER daily data (CERES SYN1deg sunlight, clear-sky sunlight, cloud and aerosol; MERRA-2 rain and temperature), 2015 to 2024, AWS open data s3://nasa-power', url: 'https://power.larc.nasa.gov/',
     feeds: 'Daily sunlight, cloud, rain, dust and haze, temperature at each village; solar output per kWp; cloudy, rainy and dusty days; the weather settings fed to the engine' },
   cmip6: { short: 'CMIP6 climate models', full: 'CMIP6 (WCRP), monthly surface sunlight (rsds) and temperature (tas), SSP2-4.5, five models: MRI-ESM2-0, MPI-ESM1-2-LR, IPSL-CM6A-LR, ACCESS-CM2, MIROC6; Google Cloud public data gs://cmip6', url: 'https://pcmdi.llnl.gov/CMIP6/',

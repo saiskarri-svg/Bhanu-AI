@@ -1,0 +1,21 @@
+{
+ "site": "talek",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.0886,
+  "Shrubland": 0.1418,
+  "Grassland": 0.6907,
+  "Cropland": 0.0206,
+  "Built-up": 0.0531,
+  "Bare or sparse": 0.0052
+ },
+ "within_5km": {
+  "Trees": 0.0241,
+  "Shrubland": 0.0802,
+  "Grassland": 0.8844,
+  "Cropland": 0.008,
+  "Built-up": 0.0024,
+  "Bare or sparse": 0.0008,
+  "Water": 0.0
+ }
+}

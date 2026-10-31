@@ -264,6 +264,24 @@ def run(path):
                                     households=pick(sm2, 'households'), customers=pick(sm2, 'customers'),
                                     energy_kwh_per_day=pick(sm2, 'energy_kwh_per_day'), peak_kw=pick(sm2, 'peak_kw'),
                                     p50_design=dict(pv_kwp=p50b['pv_kwp'], battery_kwh=p50b['battery_kwh'], capex_usd=p50b['capex_usd']))
+    lc = DATA / 'landcover' / f'{path.stem}.json'
+    if lc.exists():
+        out['landcover'] = json.loads(lc.read_text())
+    # Sizing basis: dull-season month (used) against the yearly average sunlight
+    if w:
+        Z = fc.A['sizing']
+        used_psh = Z['peak_sun_hours']
+        def basis(psh):
+            Z['peak_sun_hours'] = psh
+            dz, rz = dfc.sizing_risk(fc)
+            p = next(x for x in records(dz) if x['design'].startswith('P50'))
+            r5 = next(x for x in records(rz) if x['design'] == p['design'] and x['year'] == 5)
+            sim = simulate(p, w['daily_yield'], w['start'], demand, Z['battery_roundtrip_efficiency'], Z['battery_depth_of_discharge'])
+            return dict(peak_sun_hours=round(psh, 2), pv_kwp=round(p['pv_kwp'], 1), battery_kwh=round(p['battery_kwh'], 1), capex_usd=round(p['capex_usd']),
+                        engine_brownout_y5=round(r5['p_brownouts'], 3), weather_unmet_share=sim['unmet_share'],
+                        weather_short_days=sim['shortfall_days_per_year'], worst_month_unmet=max(sim['monthly_unmet_share']))
+        out['sizing_basis'] = dict(used='dull_season', dull_season=basis(used_psh), yearly_average=basis(round(w['annual']['ghi'], 2)))
+        Z['peak_sun_hours'] = used_psh
     pvp = DATA / 'pvday' / f'{path.stem}.json'
     if pvp.exists():
         import datetime as dt

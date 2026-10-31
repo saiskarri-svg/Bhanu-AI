@@ -106,6 +106,32 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
         { label: 'Risk of this size', value: pc(r5.p_brownouts), unit: 'brownouts, year 5', tint: 'var(--bad)', note: <>{pc(r2.p_underused)} chance it is under 60% used in year 2<Cite className="mt-1" k={['engine', 'assumption']} /></> },
       ]} />
 
+      {eng.sizing_basis && (() => { const a = eng.sizing_basis.dull_season, b = eng.sizing_basis.yearly_average; const row = (k: string, f: (x: typeof a) => string) => (
+        <tr key={k} className="border-b border-line/60"><td className="py-2 pr-3 text-muted">{k}</td><td className="py-2 pr-3 text-right">{f(a)}</td><td className="py-2 text-right">{f(b)}</td></tr>); return (
+        <Box>
+          <BoxHeader title="Size for the dull season or the yearly average?" meta="P50 system, year-5 demand, run through 10 real weather years" />
+          <div className="px-5 pb-5 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm tabular-nums min-w-[420px]">
+                <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-3 font-normal"></th><th className="py-2 pr-3 font-normal text-right">Dull-season month (used)</th><th className="py-2 font-normal text-right">Yearly average</th></tr></thead>
+                <tbody>
+                  {row('Sun hours used for sizing', x => `${n1(x.peak_sun_hours)} kWh/m² a day`)}
+                  {row('Solar and battery', x => `${n0(x.pv_kwp)} kWp · ${n0(x.battery_kwh)} kWh`)}
+                  {row('Build cost (rough)', x => usd(x.capex_usd))}
+                  {row('Demand not served, 10 weather years', x => pc(x.weather_unmet_share))}
+                  {row('Short days a year', x => n0(x.weather_short_days))}
+                  {row('Worst month, demand not served', x => pc(x.worst_month_unmet))}
+                </tbody>
+              </table>
+            </div>
+            <div className="text-sm text-muted space-y-2 min-w-0">
+              <p>Sizing on the yearly average saves {pc(1 - b.capex_usd / a.capex_usd)} of the build cost but misses {pc(b.weather_unmet_share - a.weather_unmet_share)} more of demand, and up to {pc(b.worst_month_unmet)} in the worst month, when rain and cloud are heaviest.</p>
+              <p><span className="text-fg font-medium">Recommendation:</span> size the first stage for the dull season, so evenings stay lit in the rainy months; the staged build already keeps early capital low.</p>
+              <Cite k={['nasapower', 'engine']} />
+            </div>
+          </div>
+        </Box>); })()}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] [&>*]:min-w-0">
         <Box>
           <BoxHeader title="Tariff: demand, bills and cost recovery" meta={`P50 design at each tariff, year 5`} />

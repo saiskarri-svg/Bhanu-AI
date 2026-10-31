@@ -16,6 +16,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **WorldCover, sizing basis, pitch refresh:** `pipeline/landcover.py` (ESA WorldCover 2021, 10 m) adds land cover within 1 and 5 km (Site tab, context only; Meta Relative Wealth Index is not reachable here). `run_engine.py` sizes the P50 system both on the dull-season month (used) and on the yearly average, each run through 10 weather years (Growth and money: "Size for the dull season or the yearly average?"). PITCH.md and IMPACT.md rewritten with current numbers (weather, nearby meters, two household counts, staging at Gbamu Gbamu matching the built 85 kWp at year 2).
+
 - **Two household counts side by side:** `pipeline/meta_population.py` reads Meta's HRSL population (30 m, CC BY 4.0, AWS) within each village radius; `run_engine.py` runs the engine a second time from that population (`by_population`). Demand tab: "Two ways to count households" (households, customers, energy, peak and P50 system from roofs and from Meta); Map panel line with both counts. Roofs stay the main count.
 
 - **Fereshteh's clear-sky PV model:** `forecast/clearsky_pv.py` and `test_clearsky.py` added (her toolkit update; calibration hook kept in demand_forecast.py). New `pipeline/pv_hourly.py` runs it for every village with altitude from Copernicus 30 m elevation and NASA POWER temperatures, and scales each month by measured sunlight against clear sky and by dust on panels (agrees with weather.py within 2 to 10%). `run_engine.py` lays the year-5 hourly demand over the P50 system's typical day per month (battery need against usable size). Sun and weather tab: "A typical day in each month", 12 small charts.

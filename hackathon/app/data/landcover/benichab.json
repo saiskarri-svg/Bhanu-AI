@@ -1,0 +1,18 @@
+{
+ "site": "benichab",
+ "source": "ESA WorldCover 2021 v200, 10 m (CC BY 4.0), AWS open data s3://esa-worldcover",
+ "within_1km": {
+  "Trees": 0.0023,
+  "Shrubland": 0.0069,
+  "Grassland": 0.0025,
+  "Built-up": 0.0009,
+  "Bare or sparse": 0.9874
+ },
+ "within_5km": {
+  "Trees": 0.0001,
+  "Shrubland": 0.0003,
+  "Grassland": 0.0001,
+  "Built-up": 0.0,
+  "Bare or sparse": 0.9994
+ }
+}
