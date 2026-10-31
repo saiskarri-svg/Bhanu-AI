@@ -30,3 +30,11 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 **Decisions for Sai**
 - The P10 to P90 range is about 2x on every site. Without meter data we cannot show it covers 8 in 10 sites; IMPACT.md says so. OK to present it this way?
 - Cost benchmarks (solar $900/kWp, battery $400/kWh, $350 per connection, 10% cost of money) are rough guides. Break-even tariffs come out around $0.60 to $0.75 per kWh without subsidy (Gbamu Gbamu $0.70 at P50, year 3), driven mostly by $350 per connection and 10% cost of money. Want different numbers?
+
+## Held-out building check (2026-10-31)
+
+- 2,256 OSM-tagged buildings from 84 villages (TZ 40, UG 21, NG 9, SL 9, KE 5), classified with the tag hidden.
+- 60% of single buildings agree with the volunteers. Counts: homes 1,846 estimated vs 1,364 tagged; shops 129 vs 376; schools 9 vs 383; clinics 3 vs 40. Volunteers over-tag schools, but the rules clearly miss shops, schools and clinics.
+- Not tuned on this set, so it stays a fair test. Next step: train a small model on a separate tagged set.
+
+**Decision for Sai:** show this weak result as it is on Validation (current choice), or train a model first?

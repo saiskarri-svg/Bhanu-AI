@@ -58,6 +58,7 @@ const ClassCheck: React.FC = () => {
               <li key={c} className="flex justify-between gap-4"><span>{CLS_LABEL[c]}</span><span className="tabular-nums text-muted">tagged <span className="text-fg">{n0(res.act[c])}</span> · estimated <span className="text-fg">{n0(res.exp[c])}</span></span></li>
             ))}
           </ul>
+          <p className="text-sm text-fg leading-relaxed">What we learned: shape rules find homes well but miss most shops, schools and clinics. Those need map tags, the place list, or a model trained on tagged villages like these (next step). Until then the demand range carries this doubt.</p>
           <p className="text-xs text-muted leading-relaxed">Caveat: volunteers tag clinics and schools more often than ordinary houses, so this set has more of them than a real village. Footprints here are OSM polygons, not Open Buildings.</p>
         </div>
       </div>
@@ -88,7 +89,7 @@ export const ValidationPage: React.FC<{ site: SiteData; ds: Draw[] }> = ({ site,
             <p className="text-fg font-medium">Status</p>
             <ul className="mt-2 space-y-2 text-muted">
               <li><StatusDot tone="warn">Metered site data: not yet available.</StatusDot> <span className="block text-xs mt-0.5">Needs a partner operator or a data trust (see Data sharing).</span></li>
-              <li><StatusDot tone="ok">Building classifier: tested below on held-out tagged buildings.</StatusDot></li>
+              <li><StatusDot tone="warn">Building classifier: tested below; misses most shops, schools and clinics.</StatusDot></li>
               <li><StatusDot tone="ok">Plant size sanity check: below, from a plant mapped on OpenStreetMap.</StatusDot></li>
               <li><StatusDot tone="info">Retraining: when meters arrive, the hand-set ranges on the Method tab are replaced by ranges fitted to them; the scoring above runs again.</StatusDot></li>
             </ul>
