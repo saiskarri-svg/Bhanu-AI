@@ -11,10 +11,11 @@ import { GrowthPage } from './components/GrowthPage';
 import { ValidationPage } from './components/ValidationPage';
 import { SharingPage } from './components/SharingPage';
 import { MapView } from './components/MapView';
+import { WeatherPage } from './components/WeatherPage';
 import { MethodPage } from './components/MethodPage';
 
-const TABS = ['Map', 'Site', 'Demand', 'Growth and money', 'Validation', 'Data sharing', 'Method'] as const;
-const HASH = ['map', 'site', 'demand', 'growth', 'validation', 'data-sharing', 'method'];
+const TABS = ['Map', 'Site', 'Demand', 'Growth and money', 'Sun and weather', 'Validation', 'Data sharing', 'Method'] as const;
+const HASH = ['map', 'site', 'demand', 'growth', 'weather', 'validation', 'data-sharing', 'method'];
 
 type Theme = 'system' | 'light' | 'dark';
 const store = {
@@ -41,8 +42,9 @@ const STEPS = [
   { t: 'Count the roofs', tab: 1 },
   { t: 'Forecast demand', tab: 2 },
   { t: 'Size and tariff', tab: 3 },
-  { t: 'Check it', tab: 4 },
-  { t: 'Share meter data', tab: 5 },
+  { t: 'Sun and weather', tab: 4 },
+  { t: 'Check it', tab: 5 },
+  { t: 'Share meter data', tab: 6 },
 ];
 
 const NoEngine: React.FC = () => (
@@ -115,7 +117,7 @@ const App: React.FC = () => {
           {tab === 1 && <p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p>}
         </section>
         {tab === 1 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
-        {tab > 1 && tab < 5 && (
+        {tab > 1 && tab < 6 && (
           <div className="flex items-center gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
             <span className="text-muted mr-1 shrink-0">Village</span>
             {SITES.map(s => (
@@ -128,12 +130,13 @@ const App: React.FC = () => {
           </div>
         )}
         {tab === 1 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(2)} />}
-        {tab >= 2 && tab <= 4 && !eng && <NoEngine />}
+        {(tab === 2 || tab === 3 || tab === 5) && !eng && <NoEngine />}
         {tab === 2 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(3)} />}
         {tab === 3 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(4)} />}
-        {tab === 4 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(5)} />}
-        {tab === 5 && <SharingPage />}
-        {tab === 6 && <MethodPage />}
+        {tab === 4 && <WeatherPage site={site} siteId={siteId} eng={eng} onNext={() => goTab(5)} />}
+        {tab === 5 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(6)} />}
+        {tab === 6 && <SharingPage />}
+        {tab === 7 && <MethodPage />}
       </main>}
       {tab > 0 && <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
         GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Demand engine by Fereshteh (forecast/demand_forecast.py); map, data pipeline and dashboard by GridSight. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.

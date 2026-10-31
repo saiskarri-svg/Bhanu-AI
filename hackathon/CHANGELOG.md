@@ -4,7 +4,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## Site at a glance
 
-- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Map (landing), Site, Demand, Growth and money, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
+- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Map (landing), Site, Demand, Growth and money, Sun and weather, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
 - **Data:** `app/data/*.json`, one per sample village (Gbamu Gbamu NG, Kychom SL, Benichab MR, Talek KE, Kitobo UG, Bulongwa TZ), 1 km radius, made by `pipeline/gridsight_fetch.py` (`pipeline/fetch_samples.sh` rebuilds all).
 - **Demand engine (main model):** Fereshteh's `forecast/demand_forecast.py`, run on every village by `pipeline/run_engine.py` into `app/data/engine/*.json`; read by `app/components/engine.ts`.
 - **Building-level model (second opinion):** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
@@ -15,6 +15,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
 
 ## 2026-10-31
+
+- **Sun and weather:** `pipeline/weather.py` pulls 10 years of daily NASA POWER data per village (sunlight, clear-sky sunlight, cloud, dust and haze AOD, rain, temperature; AWS open data) and five CMIP6 models (SSP2-4.5, 2027 to 2036 against 2015 to 2024; Google Cloud). Solar output per kWp includes system, heat and dust-on-panel losses (washed by rain or monthly cleaning). Fed into the engine: monthly temperature, design sun hours (third-worst month), performance ratio, day-to-day swing, battery days. `run_engine.py` runs each P25 to P90 system day by day through the 10 weather years (and the outlook) for unserved demand and short days. New tab Sun and weather; weather line on the Map panel; NASA POWER and CMIP6 in Sources.
 
 - **Satellite pictures:** `pipeline/satellite.py` picks the most recent cloud-free Copernicus Sentinel-2 picture (10 m, AWS open data, checked cloud-free over the village itself) and cuts it to each village (`app/data/imagery/`, Feb to Oct 2026). Shown under the Map view (Flat and 3D, Satellite switch) and the Site map, with date and Copernicus credit; inlined into the build. Google satellite imagery is not open, so not used.
 

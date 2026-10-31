@@ -8,6 +8,7 @@ import { btn, StatusDot } from './ui';
 import { n0, n1, pc, usd } from './format';
 import { Map3D } from './Map3D';
 import { IMAGERY, fmtDate } from './imagery';
+import { WEATHER } from './WeatherPage';
 import type { Map3DHandle, Projected } from './Map3D';
 
 const useThemeKey = () => {
@@ -210,6 +211,8 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
                 {t85 && <div className="flex justify-between gap-2"><span className="text-muted">Covers cost at $0.85/kWh (P50 size)</span><StatusDot tone={t85.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : 'warn'}>{pc(t85.p_revenue_covers_cost_year5)}</StatusDot></div>}
               </div>
             )}
+            {WEATHER[siteId] && (() => { const wa = WEATHER[siteId].annual; return (
+              <p className="text-xs text-muted">Weather 2015 to 2024: {n1(wa.yield_kwh_kwp_day)} kWh per kWp a day; {wa.days.cloudy} cloudy, {wa.days.rainy} rainy, {wa.days.dusty} dusty days a year. <button onClick={() => goTab(4)} className="underline underline-offset-2 hover:text-fg">Sun and weather</button></p>); })()}
             <p className="text-xs text-muted">Grid: {site.grid.dist_km != null ? `mapped line ${site.grid.dist_km} km away` : 'no mapped line within 40 km'}{eng?.nearby?.sites.length ? ` · ${eng.nearby.sites.length} metered ${eng.nearby.sites.length === 1 ? 'site' : 'sites'} within 1,000 miles` : ' · no metered site within 1,000 miles'}. Rough guide.</p>
             <button onClick={() => goTab(2)} className={`${btn.primary} w-full h-10`}>See the forecast</button>
           </>

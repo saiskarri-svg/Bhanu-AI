@@ -95,12 +95,12 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
             </tbody>
           </table>
           <p className="text-sm mt-4 max-w-prose"><span className="text-fg font-medium">Build in stages.</span> <span className="text-muted">A system big enough for year 5 sits mostly idle in year 2, and one sized for today browns out later. Size for year 2 or 3 and add panels and batteries as metered demand shows up.</span></p>
-          <Cite className="mt-2" label="Costs, sun hours and thresholds" k={site.country === 'MR' ? ['omorate', 'wbsplit', 'assumption'] : ['omorate', 'wbsplit', 'gsrough', 'assumption']} />
+          <Cite className="mt-2" label="Costs, sun hours and thresholds" k={eng.weather_inputs ? ['omorate', 'wbsplit', 'nasapower', 'assumption'] : ['omorate', 'wbsplit', 'gsrough', 'assumption']} />
         </div>
       </Box>
 
       <StatStrip cols={4} stats={[
-        { label: 'Solar', value: n0(d.pv_kwp), unit: 'kWp', tint: 'var(--sun)', note: <>{eng.peak_sun_hours} sun hours a day (rough), 75% performance ratio<Cite className="mt-1" k={site.country === 'MR' ? ['omorate'] : ['gsrough']} /></> },
+        { label: 'Solar', value: n0(d.pv_kwp), unit: 'kWp', tint: 'var(--sun)', note: <>{n1(eng.weather_inputs?.peak_sun_hours ?? eng.peak_sun_hours)} sun hours a day (dull-season month), {Math.round((eng.weather_inputs?.performance_ratio ?? 0.75) * 100)}% of sunlight used<Cite className="mt-1" k={eng.weather_inputs ? ['nasapower'] : site.country === 'MR' ? ['omorate'] : ['gsrough']} /></> },
         { label: 'Battery', value: n0(d.battery_kwh), unit: 'kWh', tint: 'var(--info)', note: <>Inverter {n0(d.inverter_kw)} kW<Cite className="mt-1" k={['omorate']} /></> },
         { label: 'Build cost', value: usd(d.capex_usd), unit: 'rough guide', note: <>{usd(d.capex_per_customer_usd)} per customer<Cite className="mt-1" k={['omorate', 'wbsplit']} /></> },
         { label: 'Risk of this size', value: pc(r5.p_brownouts), unit: 'brownouts, year 5', tint: 'var(--bad)', note: <>{pc(r2.p_underused)} chance it is under 60% used in year 2<Cite className="mt-1" k={['engine', 'assumption']} /></> },
@@ -144,7 +144,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
         Costs: Omorate mini-grid, Ethiopia, 2021 contract prices (Wassie and Ahlgren 2023), generation only plus a share for distribution and soft costs. Likely above today's prices: replace with current quotes before quoting dollars. Grants and subsidies are not included.
         {plantKw ? ` Solar for the most likely demand: year 1 about ${n0(kwpFor(S.energy_kwh_per_day[0].p50, eng.peak_sun_hours))} kWp, year 3 about ${n0(kwpFor(S.energy_kwh_per_day[2].p50, eng.peak_sun_hours))} kWp.` : ''}
       </p>
-      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: does it work?</button></div>
+      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: sun and weather</button></div>
     </>
   );
 };

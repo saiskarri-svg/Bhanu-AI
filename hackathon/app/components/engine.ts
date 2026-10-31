@@ -20,6 +20,11 @@ export interface Engine {
   nearby?: { radius_km: number; weight: number; factor: number; factor_lo: number; factor_hi: number;
     sites: { site_id: string; name: string; country: string; d_km: number; metric: string; year: number; observed: number; predicted: number; ratio: number; weight: number; quality: string; precision: string; source: string; url: string; note: string }[] };
   uncalibrated?: Record<string, Q[]>;
+  weather_inputs?: { monthly_mean_temp_c: number[]; peak_sun_hours: number; performance_ratio: number; daily_pv_variability: number; autonomy_days: number } | null;
+  weather_sim?: { year: number; outlook_factor: number;
+    designs: { design: string; unmet_share: number; worst_year_unmet_share: number; shortfall_days_per_year: number; worst_year_shortfall_days: number; monthly_unmet_share: number[] }[];
+    designs_outlook: { design: string; unmet_share: number; worst_year_unmet_share: number; shortfall_days_per_year: number; worst_year_shortfall_days: number; monthly_unmet_share: number[] }[];
+    monthly: { demand: number[]; gen_p10: number[]; gen_p50: number[]; gen_p90: number[]; gen_outlook: number[] } };
 }
 
 const files = import.meta.glob('../data/engine/*.json', { eager: true, import: 'default' }) as Record<string, Engine>;

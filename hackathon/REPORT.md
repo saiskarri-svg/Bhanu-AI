@@ -65,3 +65,15 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 - Zenodo (Kenya and Nigeria smart-meter data, 24 mini-grids) and MDPI are blocked from this cloud box. Download the Zenodo dataset on a laptop, or allow zenodo.org in the environment's network settings, and I will add its sites to measured_sites.csv.
 - Fereshteh: the engine has one new opt-in hook (`calibration.usage_multiplier`), three lines after the tariff factor. Please review.
 - The North Central Nigeria figure (1 to 3 kWh a day per home) is ten times other sites; it has low weight. Keep or drop?
+
+## Sun and weather (2026-10-31)
+
+**Done**
+- 10 years (2015 to 2024) of daily NASA POWER weather per village; solar output per kWp with cloud, heat and dust-on-panel losses. Gbamu Gbamu 3.5 kWh/kWp/day (90 cloudy, 131 rainy, 143 dusty or hazy days a year); Benichab 4.5 (99 dusty days, heat loss 10%); Talek 4.7.
+- Fereshteh's engine now uses each village's monthly temperature, dull-season sun hours, measured performance ratio, day-to-day swing and battery days (the settings her README invites).
+- Every P25 to P90 system is run day by day through the 10 real weather years: the P50 system misses 2 to 5% of year-5 demand; P75 about 1%.
+- Five CMIP6 models: solar output change for 2027 to 2036 is small (about -2% to +2%), far smaller than year-to-year swings.
+
+**Decisions for Sai (and Fereshteh)**
+- Dust-on-panel model (0.15% a day plus 0.6% per unit of AOD, washed by 5 mm of rain, cleaned every 30 days) is an assumption; a field cleaning log would replace it.
+- Sizing now uses the third-worst month's sunlight, which makes systems larger in cloudy places (Gbamu Gbamu P50: 230 kWp). Keep, or size on the annual average and accept more dull-season shortfall?

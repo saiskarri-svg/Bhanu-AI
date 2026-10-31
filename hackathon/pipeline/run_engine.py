@@ -33,6 +33,63 @@ QUALITY = {'high': 1.0, 'medium': 0.6, 'low': 0.2}
 PRECISION = {'site': 1.0, 'district': 1.0, 'region': 0.7, 'country': 0.5}
 PRIOR_WEIGHT = 1.0  # the published ranges count as much as one good nearby site
 MEASURED = HERE / 'measured_sites.csv'
+WEATHER = DATA / 'weather'
+
+
+def weather_for(sid):
+    p = WEATHER / f'{sid}.json'
+    return json.loads(p.read_text()) if p.exists() else None
+
+
+def apply_weather(A, w):
+    """Feed the village's own weather into the engine's settings."""
+    ghi = sorted(w['monthly']['ghi'])
+    spell = w['annual']['longest_low_spell_days']['median']
+    used = dict(
+        monthly_mean_temp_c=w['monthly']['t'],
+        peak_sun_hours=round(ghi[2], 2),                      # third-worst month: size for the dull season
+        performance_ratio=w['annual']['performance_ratio'],  # heat and dust on panels included
+        daily_pv_variability=w['annual']['two_day_cv'],      # day-to-day swing after a day of battery
+        autonomy_days=round(min(2.0, max(1.0, 1 + (spell - 2) * 0.25)), 2),
+    )
+    A['seasonality']['monthly_mean_temp_c'] = used['monthly_mean_temp_c']
+    for k in ('peak_sun_hours', 'performance_ratio', 'daily_pv_variability', 'autonomy_days'):
+        A['sizing'][k] = used[k]
+    return used
+
+
+def simulate(design, yields, start, demand_daily, rt, dod, factor=1.0):
+    """Day by day over the weather years: solar in, battery, demand out."""
+    import datetime as dt
+    kwp, usable, night = design['pv_kwp'], design['battery_kwh'] * dod, design['night_share']
+    d0 = dt.date.fromisoformat(start)
+    soc, unmet, served, short_days = usable, 0.0, 0.0, 0
+    by_month_unmet, by_month_dem = [0.0] * 12, [0.0] * 12
+    years = {}
+    for i, y in enumerate(yields):
+        day = d0 + dt.timedelta(days=i)
+        dem = demand_daily[min(364, day.timetuple().tm_yday - 1)]
+        pv = kwp * y * factor
+        day_load, night_load = dem * (1 - night), dem * night
+        direct = min(pv, day_load)
+        spare = pv - direct
+        miss_day = day_load - direct
+        soc = min(usable, soc + spare * math.sqrt(rt))
+        need = (miss_day + night_load) / math.sqrt(rt)
+        take = min(soc, need)
+        soc -= take
+        miss = (need - take) * math.sqrt(rt)
+        unmet += miss; served += dem
+        by_month_unmet[day.month - 1] += miss; by_month_dem[day.month - 1] += dem
+        yr = years.setdefault(day.year, [0.0, 0.0, 0])
+        yr[0] += miss; yr[1] += dem
+        if miss > 0.10 * dem:  # same threshold as the engine: more than 10% of the day unserved
+            short_days += 1; yr[2] += 1
+    n = len(years)
+    shares = [v[0] / v[1] for v in years.values()]
+    return dict(design=design['design'], unmet_share=round(unmet / served, 4), worst_year_unmet_share=round(max(shares), 4),
+                shortfall_days_per_year=round(short_days / n, 1), worst_year_shortfall_days=max(v[2] for v in years.values()),
+                monthly_unmet_share=[round(u / d, 4) if d else 0 for u, d in zip(by_month_unmet, by_month_dem)])
 
 
 def km(a_lat, a_lon, b_lat, b_lon):
@@ -142,6 +199,8 @@ def run(path):
     A = dfc.load_assumptions(country=COUNTRY_NAME.get(site['country']))
     A = copy.deepcopy(A)
     A['sizing']['peak_sun_hours'] = PSH.get(site['country'], 5.0)
+    w = weather_for(path.stem)
+    w_used = apply_weather(A, w) if w else None
     # First pass with the published ranges alone, to compare with nearby meters
     base = dfc.run_forecast(s, A, n_draws=4000, seed=42).summary()
     nb = nearby(site, base)
@@ -164,10 +223,32 @@ def run(path):
                      for r in summ[summ.metric == m].to_dict('records')] for m in summ.metric.unique()},
         sectors=records(sect), drivers1=records(d1.head(8)), drivers5=records(d5.head(8)),
         designs=records(designs), risk=records(risk), tariffs=records(tar), profile=prof,
-        age=site.get('_age'), nearby=nb,
+        age=site.get('_age'), nearby=nb, weather_inputs=w_used,
         uncalibrated={m: [dict(year=int(r['year']), p10=round(r['p10'], 3), p50=round(r['p50'], 3), p90=round(r['p90'], 3))
                           for r in base[base.metric == m].to_dict('records')] for m in ('energy_kwh_per_day', 'kwh_per_household_month', 'peak_kw')},
     )
+    if w:
+        Z = A['sizing']
+        d = fc.representative_draw(5, 0.5)
+        demand = dfc.hourly_8760(fc, 5, d).reshape(365, 24).sum(axis=1)
+        ch = (w.get('outlook') or {}).get('yield_change') or {}
+        sims = [simulate(x, w['daily_yield'], w['start'], demand, Z['battery_roundtrip_efficiency'], Z['battery_depth_of_discharge']) for x in out['designs']]
+        fut = [simulate(x, w['daily_yield'], w['start'], demand, Z['battery_roundtrip_efficiency'], Z['battery_depth_of_discharge'], 1 + ch.get('mid', 0))
+               for x in out['designs']]
+        p50 = next(x for x in out['designs'] if x['design'].startswith('P50'))
+        import datetime as dt
+        mdem = [0.0] * 12; mn = [0] * 12
+        for i in range(365):
+            m = (dt.date(2027, 1, 1) + dt.timedelta(days=i)).month - 1
+            mdem[m] += demand[i]; mn[m] += 1
+        out['weather_sim'] = dict(
+            year=5, demand='P50 year-5 demand, day by day, from the engine', designs=sims, designs_outlook=fut,
+            outlook_factor=round(1 + ch.get('mid', 0), 4),
+            monthly=dict(demand=[round(a / b, 1) for a, b in zip(mdem, mn)],
+                         gen_p10=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p10']],
+                         gen_p50=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p50']],
+                         gen_p90=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p90']],
+                         gen_outlook=[round(p50['pv_kwp'] * v * (1 + ch.get('mid', 0)), 1) for v in w['monthly']['yield_p50']]))
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f'{path.stem}.json').write_text(json.dumps(out, separators=(',', ':'), default=float))
     y = out['summary']['energy_kwh_per_day']
