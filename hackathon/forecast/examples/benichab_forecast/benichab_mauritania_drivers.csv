@@ -1,0 +1,73 @@
+year,input,label,rank_correlation,share_of_uncertainty,effect
+1,buildings_per_household,Buildings per household,-0.5025937105371069,0.4048028706048014,higher -> less demand
+1,use_store,Shops: kWh per day each,0.2652172813885801,0.1127231515835687,higher -> more demand
+1,prior_store,Shops: number (not mapped),0.2032609192038074,0.06620903453819499,higher -> more demand
+1,connection_speed,Speed of connection roll-out,0.17544021290251327,0.04932507745937944,higher -> more demand
+1,use_lights,LED lights: kWh per day,0.15363506235219138,0.03782597808036057,higher -> more demand
+1,prior_restaurant,Restaurants & food: number (not mapped),0.13435235452202215,0.028926777042120728,higher -> more demand
+1,use_unverified_large,Large untagged buildings: kWh per day each,0.13343272940204556,0.02853213196230654,higher -> more demand
+1,connection_share,Share of households that connect,0.11979006954937933,0.02299593744916546,higher -> more demand
+1,prior_health,Clinics & health posts: number (not mapped),0.11791131230695699,0.022280269020833795,higher -> more demand
+1,appliance_appetite,Overall appetite for appliances,0.10956781884798866,0.019238690902360796,higher -> more demand
+1,own_tv,TV + decoder: ownership,0.10853944840871552,0.01887924858531456,higher -> more demand
+1,own_fridge,Refrigerator: ownership,0.10402320312645019,0.017340831960896114,higher -> more demand
+1,own_iron_kitchen,Iron / blender: ownership,0.0997638384852399,0.01594981998031757,higher -> more demand
+1,own_fan,Fan: ownership,0.09963992085249504,0.015910221735660316,higher -> more demand
+1,own_radio,Radio / speaker: ownership,0.0948314290519643,0.014411662228825539,higher -> more demand
+1,adoption_midpoint,Timing of appliance buying,-0.09403432112714506,0.014170405286421486,higher -> less demand
+1,productive_rate,Number of new mills / workshops,0.09396541993533875,0.014149646905852006,higher -> more demand
+1,use_restaurant,Restaurants & food: kWh per day each,0.08822401882650116,0.012473351435917476,higher -> more demand
+1,use_other_nonres,"Worship, offices & other: kWh per day each",0.08641530877595678,0.011967153363591505,higher -> more demand
+1,own_cooking,Electric cooking: ownership,0.07956551822284487,0.010145168767684072,higher -> more demand
+1,own_phones,Phone charging: ownership,0.07748451015528188,0.009621422106260337,higher -> more demand
+1,use_education,Schools: kWh per day each,0.07696061149753822,0.009491754657700885,higher -> more demand
+1,use_health,Clinics & health posts: kWh per day each,0.07646257509141093,0.00936930387263303,higher -> more demand
+1,prior_education,Schools: number (not mapped),0.0740214016263376,0.00878059797766179,higher -> more demand
+1,use_tv,TV + decoder: kWh per day,0.06556247003515438,0.006888427607299141,higher -> more demand
+1,early_adopter_share,Share of early-adopter households,0.049620951663809476,0.0039458417434811025,higher -> more demand
+1,p_nonres_unverified,Large untagged buildings that are businesses,0.04871646416977901,0.003803303683858333,higher -> more demand
+1,use_fan,Fan: kWh per day,0.04358896847431052,0.0030448273206311054,higher -> more demand
+1,productive_size,Size of each mill / workshop,0.040807050862940675,0.002668578011298727,higher -> more demand
+1,use_fridge,Refrigerator: kWh per day,0.034227579639223724,0.0018774218317662748,higher -> more demand
+1,use_radio,Radio / speaker: kWh per day,0.021555836472239777,0.0007446277981276898,higher -> more demand
+1,prior_other_nonres,"Worship, offices & other: number (not mapped)",0.01917681476105092,0.0005893352669887341,higher -> more demand
+1,use_iron_kitchen,Iron / blender: kWh per day,0.017857349053584312,0.0005110265451714709,higher -> more demand
+1,use_phones,Phone charging: kWh per day,0.013716767919797992,0.0003015178765243804,higher -> more demand
+1,use_cooking,Electric cooking: kWh per day,-0.007795763174735199,9.739277923875224e-05,higher -> less demand
+1,population_growth,Population growth,0.0021184632574039533,7.19202778504966e-06,higher -> more demand
+5,buildings_per_household,Buildings per household,-0.566903456993966,0.4049031670884165,higher -> less demand
+5,productive_rate,Number of new mills / workshops,0.4032511609531975,0.20487275889988055,higher -> more demand
+5,productive_size,Size of each mill / workshop,0.2518099548631222,0.07988748581506927,higher -> more demand
+5,appliance_appetite,Overall appetite for appliances,0.15392478980779933,0.029850396315374828,higher -> more demand
+5,connection_share,Share of households that connect,0.14702810943925682,0.02723539691666595,higher -> more demand
+5,own_fridge,Refrigerator: ownership,0.14248289409268086,0.02557751916981389,higher -> more demand
+5,own_fan,Fan: ownership,0.1358929251183078,0.023266264289933444,higher -> more demand
+5,use_lights,LED lights: kWh per day,0.13499674799979675,0.022960406699089785,higher -> more demand
+5,use_store,Shops: kWh per day each,0.13426501251656325,0.022712172416774156,higher -> more demand
+5,own_tv,TV + decoder: ownership,0.12609909338119332,0.020033502812207366,higher -> more demand
+5,own_iron_kitchen,Iron / blender: ownership,0.12401812900113306,0.01937774842233382,higher -> more demand
+5,own_cooking,Electric cooking: ownership,0.12181155948822245,0.018694332791883858,higher -> more demand
+5,own_radio,Radio / speaker: ownership,0.10794960487185029,0.014681657117584025,higher -> more demand
+5,own_phones,Phone charging: ownership,0.10790718036919876,0.014670119518928031,higher -> more demand
+5,use_tv,TV + decoder: kWh per day,0.1011844400115275,0.012899130249352917,higher -> more demand
+5,prior_store,Shops: number (not mapped),0.08910286531892908,0.010002678338633253,higher -> more demand
+5,use_fan,Fan: kWh per day,0.08801900706368793,0.009760810765256764,higher -> more demand
+5,early_adopter_share,Share of early-adopter households,0.06535102945943932,0.0053806882423177455,higher -> more demand
+5,use_unverified_large,Large untagged buildings: kWh per day each,0.06362943791433986,0.005100927333243817,higher -> more demand
+5,prior_restaurant,Restaurants & food: number (not mapped),0.0594486976530436,0.0044526407127091034,higher -> more demand
+5,use_fridge,Refrigerator: kWh per day,0.05813109963319372,0.004257454739840477,higher -> more demand
+5,use_iron_kitchen,Iron / blender: kWh per day,0.05033512364594522,0.0031920908451150923,higher -> more demand
+5,use_health,Clinics & health posts: kWh per day each,0.048861556928847305,0.003007928894465034,higher -> more demand
+5,population_growth,Population growth,0.044081720005107496,0.002448217660938679,higher -> more demand
+5,connection_speed,Speed of connection roll-out,0.04279112986194561,0.002306962158008461,higher -> more demand
+5,adoption_midpoint,Timing of appliance buying,-0.04011792288237017,0.0020277286690877725,higher -> less demand
+5,use_radio,Radio / speaker: kWh per day,0.03789714218107138,0.0018094470769449483,higher -> more demand
+5,prior_health,Clinics & health posts: number (not mapped),0.03449581434348839,0.0014992213791214083,higher -> more demand
+5,prior_education,Schools: number (not mapped),0.02648210546763159,0.0008835639433530444,higher -> more demand
+5,use_other_nonres,"Worship, offices & other: kWh per day each",0.025819255613703473,0.0008398861067775371,higher -> more demand
+5,use_restaurant,Restaurants & food: kWh per day each,0.02459397697462356,0.0007620623177729404,higher -> more demand
+5,use_education,Schools: kWh per day each,0.01784232467764529,0.000401084463199425,higher -> more demand
+5,use_cooking,Electric cooking: kWh per day,0.008282060580128786,8.641910591825374e-05,higher -> more demand
+5,prior_other_nonres,"Worship, offices & other: number (not mapped)",-0.007104325381520335,6.358851037694245e-05,higher -> less demand
+5,use_phones,Phone charging: kWh per day,-0.006631224039451502,5.5401352240058275e-05,higher -> less demand
+5,p_nonres_unverified,Large untagged buildings that are businesses,0.005573623285851454,3.9138861370750453e-05,higher -> more demand

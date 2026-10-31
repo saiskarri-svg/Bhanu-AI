@@ -1,0 +1,98 @@
+{
+  "headline": {
+    "location": "Benichab, Mauritania",
+    "lat": 19.47116,
+    "lon": -15.42852,
+    "extent_mode": "settlement",
+    "extent_area_m2": 529000,
+    "n_buildings": 325,
+    "built_area_m2": 14417,
+    "built_density_pct": 2.7,
+    "pct_residential": 89.5,
+    "pct_business_services": 0.0,
+    "pct_other_nonres": 1.5,
+    "pct_unverified_large": 9.0,
+    "pct_buildings_with_use_evidence": 1.0,
+    "pct_area_with_use_evidence": 2.0,
+    "footprint_sources_pct": {
+      "OpenStreetMap": 58,
+      "Microsoft ML Buildings": 25,
+      "Google Open Buildings": 17
+    },
+    "note": "Reconstructed from the user's village_landuse.py console output (31 Oct 2026)."
+  },
+  "categories": [
+    {
+      "category": "residential",
+      "label": "Residential houses",
+      "group": "residential",
+      "buildings": 320,
+      "footprint_m2": 12900,
+      "pct_of_built_area": 89.48
+    },
+    {
+      "category": "health",
+      "label": "Hospitals & clinics",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "education",
+      "label": "Schools",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "market_mall",
+      "label": "Markets & malls",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "store",
+      "label": "Stores & shops",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "restaurant",
+      "label": "Restaurants & food",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "industrial",
+      "label": "Industrial & workshops",
+      "group": "business",
+      "buildings": 0,
+      "footprint_m2": 0,
+      "pct_of_built_area": 0.0
+    },
+    {
+      "category": "other_nonres",
+      "label": "Other non-residential",
+      "group": "other",
+      "buildings": 2,
+      "footprint_m2": 219,
+      "pct_of_built_area": 1.52
+    },
+    {
+      "category": "unverified_large",
+      "label": "Large untagged (unverified)",
+      "group": "unverified",
+      "buildings": 3,
+      "footprint_m2": 1298,
+      "pct_of_built_area": 9.0
+    }
+  ]
+}

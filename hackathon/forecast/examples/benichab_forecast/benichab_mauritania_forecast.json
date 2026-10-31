@@ -1,0 +1,649 @@
+{
+  "site": {
+    "label": "Benichab, Mauritania",
+    "lat": 19.47116,
+    "lon": -15.42852,
+    "residential_buildings": 320.0,
+    "households": null,
+    "population": null,
+    "counts": {
+      "health": 0.0,
+      "education": 0.0,
+      "market_mall": 0.0,
+      "store": 0.0,
+      "restaurant": 0.0,
+      "industrial": 0.0,
+      "other_nonres": 2.0,
+      "unverified_large": 3.0
+    },
+    "evidence_pct": 1.0,
+    "source": "examples/benichab_landuse_summary.json"
+  },
+  "tariff_usd_per_kwh": 0.45,
+  "country_overrides": "Mauritania",
+  "draws": 4000,
+  "seed": 42,
+  "notes": [
+    "Business and institution counts include regional priors (only 1% of buildings have use information); mapped counts are used where higher."
+  ],
+  "business_and_institution_counts": {
+    "store": {
+      "label": "Shops",
+      "mapped": 0.0,
+      "p10": 6.452799492582875,
+      "p50": 10.524948098570867,
+      "p90": 16.36043064794118
+    },
+    "restaurant": {
+      "label": "Restaurants & food",
+      "mapped": 0.0,
+      "p10": 1.0240806048649618,
+      "p50": 2.4176452876120678,
+      "p90": 4.444086418601851
+    },
+    "market_mall": {
+      "label": "Market stalls",
+      "mapped": 0.0,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 0.0
+    },
+    "health": {
+      "label": "Clinics & health posts",
+      "mapped": 0.0,
+      "p10": 0.19930575346435084,
+      "p50": 0.47535690282095,
+      "p90": 0.8941315143057832
+    },
+    "education": {
+      "label": "Schools",
+      "mapped": 0.0,
+      "p10": 0.8368695423391499,
+      "p50": 1.3161656706452765,
+      "p90": 2.037253702510402
+    },
+    "other_nonres": {
+      "label": "Worship, offices & other",
+      "mapped": 2.0,
+      "p10": 2.0,
+      "p50": 2.0,
+      "p90": 2.000396246155046
+    },
+    "industrial": {
+      "label": "Workshops & mills",
+      "mapped": 0.0,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 0.0
+    },
+    "unverified_large": {
+      "label": "Large untagged buildings",
+      "mapped": 3.0,
+      "p10": 1.1754796119538102,
+      "p50": 1.4995384047553517,
+      "p90": 1.8177420423515607
+    }
+  },
+  "summary": [
+    {
+      "metric": "households",
+      "year": 1,
+      "p10": 150.35340080443973,
+      "p50": 189.92920730565345,
+      "p90": 244.69427423690084
+    },
+    {
+      "metric": "households",
+      "year": 2,
+      "p10": 155.283679522626,
+      "p50": 196.3013689157359,
+      "p90": 253.30323923837614
+    },
+    {
+      "metric": "households",
+      "year": 3,
+      "p10": 160.3790964309664,
+      "p50": 202.69676918949827,
+      "p90": 261.7984539124446
+    },
+    {
+      "metric": "households",
+      "year": 4,
+      "p10": 165.65586823233323,
+      "p50": 209.398592689436,
+      "p90": 270.980175548402
+    },
+    {
+      "metric": "households",
+      "year": 5,
+      "p10": 171.42573952943425,
+      "p50": 216.26993172308008,
+      "p90": 280.66299078139565
+    },
+    {
+      "metric": "population",
+      "year": 1,
+      "p10": 907.3417081527795,
+      "p50": 1165.9226446324278,
+      "p90": 1520.8306068999646
+    },
+    {
+      "metric": "population",
+      "year": 2,
+      "p10": 938.342027145831,
+      "p50": 1204.3817742054448,
+      "p90": 1569.8731586665015
+    },
+    {
+      "metric": "population",
+      "year": 3,
+      "p10": 969.4730193491295,
+      "p50": 1245.7893421414242,
+      "p90": 1622.4026590361022
+    },
+    {
+      "metric": "population",
+      "year": 4,
+      "p10": 1002.6719938284926,
+      "p50": 1286.0519374402338,
+      "p90": 1677.655111837949
+    },
+    {
+      "metric": "population",
+      "year": 5,
+      "p10": 1034.5331434883688,
+      "p50": 1328.739836128355,
+      "p90": 1734.554166128617
+    },
+    {
+      "metric": "connected_households",
+      "year": 1,
+      "p10": 22.15977529986338,
+      "p50": 37.824324445069195,
+      "p90": 59.79707306162987
+    },
+    {
+      "metric": "connected_households",
+      "year": 2,
+      "p10": 65.88522119959666,
+      "p50": 90.88407430261358,
+      "p90": 125.98228210566872
+    },
+    {
+      "metric": "connected_households",
+      "year": 3,
+      "p10": 90.9448862597841,
+      "p50": 120.78666293161115,
+      "p90": 163.92954872653897
+    },
+    {
+      "metric": "connected_households",
+      "year": 4,
+      "p10": 110.02522494935819,
+      "p50": 143.85084464694373,
+      "p90": 192.9810941601364
+    },
+    {
+      "metric": "connected_households",
+      "year": 5,
+      "p10": 122.05038211229386,
+      "p50": 158.09379120783728,
+      "p90": 210.93038104369137
+    },
+    {
+      "metric": "customers",
+      "year": 1,
+      "p10": 32.36134458248893,
+      "p50": 49.30725940435889,
+      "p90": 72.54936006160686
+    },
+    {
+      "metric": "customers",
+      "year": 2,
+      "p10": 76.47810473346972,
+      "p50": 103.31313305037096,
+      "p90": 141.34643238642215
+    },
+    {
+      "metric": "customers",
+      "year": 3,
+      "p10": 103.79900450342603,
+      "p50": 135.53150464758693,
+      "p90": 181.91524092531503
+    },
+    {
+      "metric": "customers",
+      "year": 4,
+      "p10": 124.50781765211927,
+      "p50": 161.37710824763997,
+      "p90": 214.21151006267309
+    },
+    {
+      "metric": "customers",
+      "year": 5,
+      "p10": 137.14403193335266,
+      "p50": 176.33972552638787,
+      "p90": 234.07255374017427
+    },
+    {
+      "metric": "energy_kwh_per_day",
+      "year": 1,
+      "p10": 18.572821560150697,
+      "p50": 26.595373570460872,
+      "p90": 39.62265213450012
+    },
+    {
+      "metric": "energy_kwh_per_day",
+      "year": 2,
+      "p10": 32.70554014849453,
+      "p50": 47.38610047089678,
+      "p90": 72.37421732469971
+    },
+    {
+      "metric": "energy_kwh_per_day",
+      "year": 3,
+      "p10": 49.00364170905495,
+      "p50": 74.1443699615601,
+      "p90": 113.39388023497337
+    },
+    {
+      "metric": "energy_kwh_per_day",
+      "year": 4,
+      "p10": 68.28081420265742,
+      "p50": 102.81971756462673,
+      "p90": 155.99100164869228
+    },
+    {
+      "metric": "energy_kwh_per_day",
+      "year": 5,
+      "p10": 82.2489786031909,
+      "p50": 121.53198876296523,
+      "p90": 180.79858576529966
+    },
+    {
+      "metric": "energy_mwh_per_year",
+      "year": 1,
+      "p10": 6.779079869455005,
+      "p50": 9.70731135321822,
+      "p90": 14.462268029092543
+    },
+    {
+      "metric": "energy_mwh_per_year",
+      "year": 2,
+      "p10": 11.937522154200503,
+      "p50": 17.295926671877325,
+      "p90": 26.4165893235154
+    },
+    {
+      "metric": "energy_mwh_per_year",
+      "year": 3,
+      "p10": 17.886329223805056,
+      "p50": 27.062695035969433,
+      "p90": 41.38876628576528
+    },
+    {
+      "metric": "energy_mwh_per_year",
+      "year": 4,
+      "p10": 24.922497183969963,
+      "p50": 37.52919691108876,
+      "p90": 56.93671560177268
+    },
+    {
+      "metric": "energy_mwh_per_year",
+      "year": 5,
+      "p10": 30.02087719016468,
+      "p50": 44.359175898482306,
+      "p90": 65.99148380433437
+    },
+    {
+      "metric": "peak_kw",
+      "year": 1,
+      "p10": 2.7652877702791474,
+      "p50": 3.998446522556013,
+      "p90": 7.3573981130614925
+    },
+    {
+      "metric": "peak_kw",
+      "year": 2,
+      "p10": 5.391603546558333,
+      "p50": 7.787907707797645,
+      "p90": 12.067283776060796
+    },
+    {
+      "metric": "peak_kw",
+      "year": 3,
+      "p10": 7.896373753322196,
+      "p50": 11.349097724999641,
+      "p90": 18.71716527774926
+    },
+    {
+      "metric": "peak_kw",
+      "year": 4,
+      "p10": 10.488540011587952,
+      "p50": 15.220373754968033,
+      "p90": 24.391167055957755
+    },
+    {
+      "metric": "peak_kw",
+      "year": 5,
+      "p10": 12.21240356240195,
+      "p50": 17.5482056603823,
+      "p90": 27.500404721541713
+    },
+    {
+      "metric": "load_factor",
+      "year": 1,
+      "p10": 0.22055725347818925,
+      "p50": 0.2720903975329787,
+      "p90": 0.31010384635356897
+    },
+    {
+      "metric": "load_factor",
+      "year": 2,
+      "p10": 0.2210994906099083,
+      "p50": 0.2526858748580626,
+      "p90": 0.287009535731794
+    },
+    {
+      "metric": "load_factor",
+      "year": 3,
+      "p10": 0.2264097627577361,
+      "p50": 0.26273364579459557,
+      "p90": 0.30687233551179677
+    },
+    {
+      "metric": "load_factor",
+      "year": 4,
+      "p10": 0.23566498592833093,
+      "p50": 0.27583595750395645,
+      "p90": 0.31821827461207447
+    },
+    {
+      "metric": "load_factor",
+      "year": 5,
+      "p10": 0.24480513166156473,
+      "p50": 0.28447503806591684,
+      "p90": 0.3256011618991117
+    },
+    {
+      "metric": "kwh_per_household_month",
+      "year": 1,
+      "p10": 6.1175922255740645,
+      "p50": 7.718732850845507,
+      "p90": 9.69698725914513
+    },
+    {
+      "metric": "kwh_per_household_month",
+      "year": 2,
+      "p10": 6.456499168266037,
+      "p50": 8.146958304750285,
+      "p90": 10.209620636881079
+    },
+    {
+      "metric": "kwh_per_household_month",
+      "year": 3,
+      "p10": 7.218767098026353,
+      "p50": 9.125949038552806,
+      "p90": 11.465137765606599
+    },
+    {
+      "metric": "kwh_per_household_month",
+      "year": 4,
+      "p10": 8.254589429377976,
+      "p50": 10.421942807592238,
+      "p90": 13.065359016505003
+    },
+    {
+      "metric": "kwh_per_household_month",
+      "year": 5,
+      "p10": 9.296470188104621,
+      "p50": 11.637312465060917,
+      "p90": 14.488577221436529
+    },
+    {
+      "metric": "kwh_per_customer_month",
+      "year": 1,
+      "p10": 12.46962119435002,
+      "p50": 16.324928682779664,
+      "p90": 22.940804960831926
+    },
+    {
+      "metric": "kwh_per_customer_month",
+      "year": 2,
+      "p10": 10.702458526758774,
+      "p50": 13.71866469945181,
+      "p90": 19.404801359165305
+    },
+    {
+      "metric": "kwh_per_customer_month",
+      "year": 3,
+      "p10": 11.982570412286334,
+      "p50": 16.231418980829844,
+      "p90": 23.399337745213693
+    },
+    {
+      "metric": "kwh_per_customer_month",
+      "year": 4,
+      "p10": 14.085119509279279,
+      "p50": 18.938780602848748,
+      "p90": 26.841228832491904
+    },
+    {
+      "metric": "kwh_per_customer_month",
+      "year": 5,
+      "p10": 15.538288474562792,
+      "p50": 20.456540143267645,
+      "p90": 28.561013965034054
+    },
+    {
+      "metric": "business_and_productive_share",
+      "year": 1,
+      "p10": 0.4864865366192512,
+      "p50": 0.6346567868216806,
+      "p90": 0.7755777688053556
+    },
+    {
+      "metric": "business_and_productive_share",
+      "year": 2,
+      "p10": 0.3359441107931988,
+      "p50": 0.47148101199045644,
+      "p90": 0.6382556872114898
+    },
+    {
+      "metric": "business_and_productive_share",
+      "year": 3,
+      "p10": 0.3362710844702718,
+      "p50": 0.4881980135408606,
+      "p90": 0.6597000136926167
+    },
+    {
+      "metric": "business_and_productive_share",
+      "year": 4,
+      "p10": 0.34401808130053485,
+      "p50": 0.5032557755229379,
+      "p90": 0.6642001284687447
+    },
+    {
+      "metric": "business_and_productive_share",
+      "year": 5,
+      "p10": 0.32737886110923453,
+      "p50": 0.4839461006801543,
+      "p90": 0.6435661543185764
+    },
+    {
+      "metric": "household_bill_usd_month",
+      "year": 1,
+      "p10": 2.752916501508329,
+      "p50": 3.473429782880478,
+      "p90": 4.363644266615309
+    },
+    {
+      "metric": "household_bill_usd_month",
+      "year": 2,
+      "p10": 2.9054246257197165,
+      "p50": 3.6661312371376287,
+      "p90": 4.594329286596485
+    },
+    {
+      "metric": "household_bill_usd_month",
+      "year": 3,
+      "p10": 3.248445194111859,
+      "p50": 4.1066770673487625,
+      "p90": 5.15931199452297
+    },
+    {
+      "metric": "household_bill_usd_month",
+      "year": 4,
+      "p10": 3.714565243220089,
+      "p50": 4.689874263416508,
+      "p90": 5.879411557427251
+    },
+    {
+      "metric": "household_bill_usd_month",
+      "year": 5,
+      "p10": 4.18341158464708,
+      "p50": 5.2367906092774135,
+      "p90": 6.519859749646438
+    }
+  ],
+  "drivers_year5": [
+    {
+      "year": 5,
+      "input": "buildings_per_household",
+      "label": "Buildings per household",
+      "rank_correlation": -0.566903456993966,
+      "share_of_uncertainty": 0.4049031670884165,
+      "effect": "higher -> less demand"
+    },
+    {
+      "year": 5,
+      "input": "productive_rate",
+      "label": "Number of new mills / workshops",
+      "rank_correlation": 0.4032511609531975,
+      "share_of_uncertainty": 0.20487275889988055,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "productive_size",
+      "label": "Size of each mill / workshop",
+      "rank_correlation": 0.2518099548631222,
+      "share_of_uncertainty": 0.07988748581506927,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "appliance_appetite",
+      "label": "Overall appetite for appliances",
+      "rank_correlation": 0.15392478980779933,
+      "share_of_uncertainty": 0.029850396315374828,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "connection_share",
+      "label": "Share of households that connect",
+      "rank_correlation": 0.14702810943925682,
+      "share_of_uncertainty": 0.02723539691666595,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "own_fridge",
+      "label": "Refrigerator: ownership",
+      "rank_correlation": 0.14248289409268086,
+      "share_of_uncertainty": 0.02557751916981389,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "own_fan",
+      "label": "Fan: ownership",
+      "rank_correlation": 0.1358929251183078,
+      "share_of_uncertainty": 0.023266264289933444,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "use_lights",
+      "label": "LED lights: kWh per day",
+      "rank_correlation": 0.13499674799979675,
+      "share_of_uncertainty": 0.022960406699089785,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "use_store",
+      "label": "Shops: kWh per day each",
+      "rank_correlation": 0.13426501251656325,
+      "share_of_uncertainty": 0.022712172416774156,
+      "effect": "higher -> more demand"
+    },
+    {
+      "year": 5,
+      "input": "own_tv",
+      "label": "TV + decoder: ownership",
+      "rank_correlation": 0.12609909338119332,
+      "share_of_uncertainty": 0.020033502812207366,
+      "effect": "higher -> more demand"
+    }
+  ],
+  "sizing": [
+    {
+      "design": "P25 of year-5 demand",
+      "design_quantile": 0.25,
+      "design_kwh_day": 97.762250234497,
+      "capacity_kwh_day": 107.53847525794671,
+      "pv_kwp": 25.23003606517824,
+      "battery_kwh": 67.46272916166129,
+      "inverter_kw": 17.94630377753231,
+      "night_share": 0.501868593541741,
+      "capex_usd": 139704.663073846,
+      "capex_per_customer_usd": 792.2472526075259,
+      "annual_cost_usd": 19554.857186198948,
+      "breakeven_utilisation_at_tariff": 1.1070962910211806
+    },
+    {
+      "design": "P50 of year-5 demand",
+      "design_quantile": 0.5,
+      "design_kwh_day": 121.53198876296523,
+      "capacity_kwh_day": 133.68518763926176,
+      "pv_kwp": 31.364421872528364,
+      "battery_kwh": 83.86549637235004,
+      "inverter_kw": 21.935257075477878,
+      "night_share": 0.5018685935417411,
+      "capex_usd": 173475.6033721615,
+      "capex_per_customer_usd": 983.7579300655214,
+      "annual_cost_usd": 24279.879419232853,
+      "breakeven_utilisation_at_tariff": 1.105752315265033
+    },
+    {
+      "design": "P75 of year-5 demand",
+      "design_quantile": 0.75,
+      "design_kwh_day": 149.4564722262043,
+      "capacity_kwh_day": 164.40211944882475,
+      "pv_kwp": 38.57104532062887,
+      "battery_kwh": 103.13532557882873,
+      "inverter_kw": 27.307491376447913,
+      "night_share": 0.501868593541741,
+      "capex_usd": 213509.5866440661,
+      "capex_per_customer_usd": 1210.7855221319148,
+      "annual_cost_usd": 29884.858481076957,
+      "breakeven_utilisation_at_tariff": 1.106721668933726
+    },
+    {
+      "design": "P90 of year-5 demand",
+      "design_quantile": 0.9,
+      "design_kwh_day": 180.79858576529966,
+      "capacity_kwh_day": 198.87844434182963,
+      "pv_kwp": 46.65967516551815,
+      "battery_kwh": 124.76355643450434,
+      "inverter_kw": 34.37550590192714,
+      "night_share": 0.5018685935417411,
+      "capex_usd": 258988.3589333556,
+      "capex_per_customer_usd": 1468.689815413147,
+      "annual_cost_usd": 36257.64299836105,
+      "breakeven_utilisation_at_tariff": 1.109957821985534
+    }
+  ]
+}

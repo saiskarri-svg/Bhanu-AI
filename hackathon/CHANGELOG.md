@@ -9,9 +9,12 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 - **Model:** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
 - **Held-out test:** `pipeline/holdout_tags.py` writes `app/data/holdout/tags.json` (OSM-tagged buildings from other villages) for the Validation tab.
 - **Pitch kit:** `PITCH.md` (3-minute script), `IMPACT.md` (one-page impact estimate).
+- **Fereshteh's toolkit:** `forecast/` (village_landuse.py maps a village, demand_forecast.py gives a 5-year forecast with ranges, HOMER 8760 files, sizing and tariff risk, validate command; ranges in assumptions.yaml). Benichab, Mauritania example in `forecast/examples/`.
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
 
 ## 2026-10-31
+
+- **Toolkit:** added Fereshteh's mini-grid demand toolkit as `forecast/` (unchanged). All 11 forecast tests pass here and the Benichab run reproduces her numbers (year 5 peak 17.6 kW, load factor 28%).
 
 - **Validation:** held-out class check now uses 2,256 OSM-tagged buildings from 84 villages in all five countries (60% single-building agreement; shops, schools and clinics under-counted), with a plain "what we learned" line.
 

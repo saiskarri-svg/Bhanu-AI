@@ -1,0 +1,304 @@
+# =============================================================================
+# assumptions.yaml: every number the demand forecast uses.
+#
+# Uncertain values are written as [low, most likely, high]. The model draws
+# from a triangular distribution over that range, so wider ranges mean wider
+# forecast intervals. A single number means "fixed".
+#
+# Each entry notes where it comes from. "Assumption" means no published
+# source was found; those are the first numbers to check locally.
+# =============================================================================
+version: 1
+
+# --- Households and population ------------------------------------------------
+households:
+  # Residential buildings per household. Family compounds often have several
+  # buildings; tents are not visible. Assumption: check on satellite imagery or
+  # ask someone local how many families live in the village.
+  buildings_per_household: [1.0, 1.6, 2.5]
+  # People per household (used for population and institution priors only).
+  household_size: [4.0, 5.0, 6.5]
+  # Annual growth in the number of households.
+  population_growth: [0.02, 0.03, 0.045]
+
+# Country-specific values that replace the ones above (--country NAME).
+country_overrides:
+  Mauritania:
+    household_size: [5.0, 6.2, 7.2]        # DHS 2019-21: 6.2 persons per household
+    population_growth: [0.02, 0.031, 0.05] # census 2013 -> 2023: 3.1 %/yr nationally
+
+# --- Tariff -------------------------------------------------------------------
+tariff:
+  site_usd_per_kwh: 0.45        # the tariff you plan to charge (override with --tariff)
+  # The appliance usage below is set for this tariff: the average mini-grid
+  # tariff in 2019 (ESMAP, Mini Grids for Half a Billion People).
+  reference_usd_per_kwh: 0.45
+  # Price elasticity of consumption. Sierra Leone: a 41 % tariff cut raised use
+  # by 58 % vs 6 % without a cut (about -0.75). Rwanda: low users barely react.
+  elasticity: [-0.8, -0.4, -0.1]
+  # What households spend today on candles, kerosene, batteries, diesel
+  # (Brief 03 / ESMAP). Used as an affordability check on the bills.
+  current_energy_spend_usd_month: [5, 20]
+
+# --- Connections --------------------------------------------------------------
+connections:
+  # Share of households connected by the end of year 5. Rwanda: 82 % of
+  # households directly under the grid connect. Assumption range.
+  share_connected_by_year5: [0.55, 0.75, 0.90]
+  # Share of all year-5 connections made in years 1..5.
+  # Faza mini-grid, Kenya (Tomas Fillol et al. 2025): 28/36/18/12/6 %.
+  cohort_shares: [0.28, 0.36, 0.18, 0.12, 0.06]
+  # How closely other villages follow the Faza ramp (higher = closer).
+  cohort_certainty: 25
+
+# --- Appliance adoption ---------------------------------------------------------
+adoption:
+  # Share of "early adopter" households (faster appliance buying, more often a
+  # home business and prior solar). Faza: 29 %.
+  early_adopter_share: [0.15, 0.29, 0.45]
+  # Ownership moves from year-1 to year-5 levels along an S-curve whose middle
+  # falls in this year after connection (Faza late adopters: rise starts in year 4).
+  s_curve_midpoint_year: [2.0, 3.0, 4.0]
+  s_curve_steepness: 1.5
+  # Households that buy one appliance quickly tend to buy the others quickly too.
+  appliance_correlation: 0.7
+
+# --- Seasonality ----------------------------------------------------------------
+seasonality:
+  # Fan use by month (1 = hottest). Generic hot Sahel/Sahara pattern.
+  # Better: set monthly_mean_temp_c (12 values, e.g. NASA POWER T2M) and the
+  # factor is computed as (T - 20) / (32 - 20), clipped to 0.15..1.
+  cooling_factor_by_month: [0.35, 0.45, 0.65, 0.85, 1.0, 1.0, 0.9, 0.85, 0.9, 0.85, 0.6, 0.4]
+  monthly_mean_temp_c: null
+  school_term_months: [1, 2, 3, 4, 5, 6, 10, 11, 12]
+  school_weekdays: [0, 1, 2, 3, 4]          # Monday = 0
+  # Day-to-day variation in demand (Omorate study used 10 %).
+  day_to_day_variability: 0.10
+
+# --- Household appliances -------------------------------------------------------
+# For each appliance: power (watts) x hours per day for an owning household, or
+# daily_wh directly. Ownership is the share of connected households owning it
+# in their 1st and 5th year after connection, for late and early adopters.
+# Profile: [start hour, end hour, weight] windows when it is used.
+# Year-1 ladder calibrated to measured use: ~5-10 kWh/month per household
+# (Rwanda 8.1, Malawi 7-8; ESMAP survey 5-35 kWh per customer per month).
+household_appliances:
+  - name: lights
+    label: LED lights
+    units: [3, 4, 6]
+    watts: [3, 5, 8]
+    hours: [4, 5, 6]
+    owned_by_late_adopters:  {year1: [1.0, 1.0, 1.0], year5: [1.0, 1.0, 1.0]}
+    owned_by_early_adopters: {year1: [1.0, 1.0, 1.0], year5: [1.0, 1.0, 1.0]}
+    profile: [[5, 7, 0.1], [18, 19, 0.15], [19, 22, 0.6], [22, 24, 0.15]]
+
+  - name: phones
+    label: Phone charging
+    daily_wh: [8, 15, 30]
+    watts: [5, 10, 20]
+    # Mauritania DHS: 90 % of households own a mobile phone before any grid.
+    owned_by_late_adopters:  {year1: [0.80, 0.90, 0.95], year5: [0.85, 0.92, 0.98]}
+    owned_by_early_adopters: {year1: [0.90, 0.95, 1.00], year5: [0.92, 0.97, 1.00]}
+    profile: [[12, 16, 0.2], [18, 23, 0.6], [23, 6, 0.2]]
+
+  - name: radio
+    label: Radio / speaker
+    watts: [3, 5, 10]
+    hours: [2, 4, 6]
+    owned_by_late_adopters:  {year1: [0.20, 0.35, 0.50], year5: [0.30, 0.45, 0.60]}
+    owned_by_early_adopters: {year1: [0.40, 0.55, 0.70], year5: [0.50, 0.65, 0.80]}
+    profile: [[6, 9, 0.4], [18, 22, 0.6]]
+
+  - name: tv
+    label: TV + decoder
+    watts: [25, 45, 80]
+    hours: [2, 4, 6]
+    owned_by_late_adopters:  {year1: [0.03, 0.10, 0.20], year5: [0.15, 0.30, 0.45]}
+    owned_by_early_adopters: {year1: [0.25, 0.45, 0.65], year5: [0.60, 0.80, 0.95]}
+    profile: [[12, 15, 0.15], [19, 23, 0.85]]
+
+  - name: fan
+    label: Fan
+    watts: [15, 25, 50]
+    hours: [4, 8, 12]          # in the hottest months; scaled by cooling factor
+    seasonal: cooling
+    owned_by_late_adopters:  {year1: [0.05, 0.12, 0.25], year5: [0.20, 0.40, 0.60]}
+    owned_by_early_adopters: {year1: [0.30, 0.45, 0.60], year5: [0.70, 0.85, 0.95]}
+    profile: [[12, 17, 0.4], [20, 2, 0.6]]
+
+  - name: fridge
+    label: Refrigerator
+    # Efficient ~100 L fridge draws under 40 W (ESMAP); runs much of the day in heat.
+    daily_wh: [300, 500, 900]
+    watts: [40, 70, 120]
+    seasonal: cooling_partial
+    # Fewer than 4 % of rural Africans own a fridge (CLASP). Biggest swing factor.
+    owned_by_late_adopters:  {year1: [0.00, 0.01, 0.03], year5: [0.02, 0.06, 0.12]}
+    owned_by_early_adopters: {year1: [0.02, 0.06, 0.12], year5: [0.15, 0.30, 0.45]}
+    profile: [[0, 24, 0.8], [10, 18, 0.2]]
+
+  - name: iron_kitchen
+    label: Iron / blender
+    watts: [300, 1000, 1200]
+    hours: [0.1, 0.25, 0.5]
+    owned_by_late_adopters:  {year1: [0.00, 0.03, 0.08], year5: [0.05, 0.12, 0.25]}
+    owned_by_early_adopters: {year1: [0.05, 0.15, 0.30], year5: [0.20, 0.35, 0.50]}
+    profile: [[6, 9, 0.5], [17, 20, 0.5]]
+
+  - name: cooking
+    label: Electric cooking
+    # About 1 kWh (~$0.85) per hour of cooking in West Africa: rare at mini-grid tariffs.
+    watts: [800, 1000, 1500]
+    hours: [0.3, 0.7, 1.2]
+    owned_by_late_adopters:  {year1: [0.0, 0.0, 0.0], year5: [0.00, 0.01, 0.03]}
+    owned_by_early_adopters: {year1: [0.0, 0.0, 0.01], year5: [0.00, 0.03, 0.08]}
+    profile: [[11, 13, 0.4], [18, 20, 0.6]]
+
+# --- Businesses and institutions (per building from the land-use model) --------
+# kwh_day_year1: use per connected building in year 1; growth_by_year5: multiplier
+# reached by year 5. Commercial customers in Myanmar averaged 0.70 kWh/day, and
+# about 75 % used under 2 kWh/day (Rockefeller Foundation, 2020).
+businesses_and_institutions:
+  store:
+    label: Shops
+    kwh_day_year1: [0.3, 0.7, 2.0]
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.3, 0.5, 0.8]     # assumption: shops connect faster than homes, not all at once
+    connect_year5: [0.6, 0.85, 1.0]
+    active_hours: [6, 10, 14]
+    profile: [[7, 12, 0.3], [12, 18, 0.3], [18, 23, 0.4]]
+  restaurant:
+    label: Restaurants & food
+    kwh_day_year1: [0.5, 1.2, 3.0]
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.3, 0.5, 0.8]
+    connect_year5: [0.6, 0.85, 1.0]
+    active_hours: [5, 8, 12]
+    profile: [[6, 10, 0.3], [11, 15, 0.3], [18, 22, 0.4]]
+  market_mall:
+    label: Market stalls
+    kwh_day_year1: [0.1, 0.3, 1.0]
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.3, 0.5, 0.8]
+    connect_year5: [0.5, 0.75, 0.95]
+    active_hours: [6, 10, 12]
+    profile: [[8, 19, 1.0]]
+  health:
+    label: Clinics & health posts
+    kwh_day_year1: [1.0, 3.0, 8.0]       # assumption: vaccine fridge, lights, fans
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.7, 0.9, 1.0]
+    connect_year5: [0.9, 1.0, 1.0]
+    active_hours: [10, 16, 24]
+    profile: [[0, 24, 0.5], [8, 17, 0.5]]
+  education:
+    label: Schools
+    kwh_day_year1: [0.5, 1.5, 5.0]       # per school day; assumption
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.5, 0.8, 1.0]
+    connect_year5: [0.8, 0.95, 1.0]
+    active_hours: [4, 6, 8]
+    seasonal: school
+    profile: [[8, 13, 0.7], [14, 17, 0.3]]
+  other_nonres:
+    label: Worship, offices & other
+    kwh_day_year1: [0.3, 1.0, 3.0]
+    growth_by_year5: [1.0, 1.2, 1.8]
+    connect_year1: [0.6, 0.8, 0.95]
+    connect_year5: [0.8, 0.95, 1.0]
+    active_hours: [4, 6, 10]
+    seasonal: cooling_partial
+    profile: [[4, 7, 0.25], [12, 15, 0.2], [18, 23, 0.55]]
+  industrial:
+    label: Workshops & mills
+    # Share of mapped workshops that run electric machines once connected.
+    probability_electric: [0.3, 0.5, 0.8]
+    kwh_day_year1: [3, 8, 25]
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.3, 0.5, 0.8]
+    connect_year5: [0.6, 0.8, 1.0]
+    kw: [2, 5, 7.5]                      # grinders ~5 kW, welders 3-7.5 kW (ESMAP)
+    profile: [[8, 12, 0.5], [14, 18, 0.5]]
+  unverified_large:
+    label: Large untagged buildings
+    probability_non_residential: [0.3, 0.5, 0.7]
+    kwh_day_year1: [0.3, 1.5, 6.0]
+    growth_by_year5: [1.0, 1.3, 2.0]
+    connect_year1: [0.5, 0.7, 0.9]
+    connect_year5: [0.7, 0.9, 1.0]
+    active_hours: [6, 10, 14]
+    profile: [[8, 18, 0.6], [18, 22, 0.4]]
+
+# Used only when few mapped buildings carry use information (the land-use
+# report's "use evidence" is below the threshold). Then the count for each
+# category is max(mapped, prior). All assumptions; Omorate (a small town) had
+# 37 businesses per 100 households, an upper reference.
+unmapped_business_priors:
+  apply_if_evidence_below_pct: 30
+  store_per_100_households: [2, 5, 10]
+  restaurant_per_100_households: [0, 1, 3]
+  education_per_1000_people: [0.5, 1.0, 2.0]
+  health_per_1000_people: [0.0, 0.3, 1.0]
+  other_nonres_per_1000_people: [0.5, 1.0, 2.0]
+
+# --- Productive use that appears after connection --------------------------------
+# New electric enterprises (grain mill, welding, cold drinks, ice) per 100
+# households by year 5. Productive use can double or triple demand (ESMAP),
+# but is often far lower than planned (Peters et al. 2019). Assumption range.
+productive_use:
+  label: New productive-use enterprises
+  new_enterprises_per_100_households_by_year5: [0, 1, 3]
+  kwh_day_each: [4, 10, 25]
+  kw_each: [2, 5, 7.5]
+  profile: [[8, 12, 0.5], [14, 18, 0.5]]
+
+# Known or candidate anchor loads at this site (water pumping, telecom tower,
+# cold room...). Empty by default. Example:
+#  - name: water_pump
+#    label: Water pumping station
+#    probability: 0.5          # chance it connects at all
+#    start_year: 1
+#    kwh_day: [20, 50, 120]
+#    kw: [5, 10, 20]
+#    profile: [[9, 16, 1.0]]
+anchor_loads: []
+
+# --- System sizing and "how wrong can the forecast be" ---------------------------
+sizing:
+  design_year: 5                         # size for demand in this year
+  design_quantiles: [0.25, 0.5, 0.75, 0.9]
+  headroom: 0.10                         # capacity = (1 + headroom) x design demand
+  peak_sun_hours: 6.0                    # kWh/m2/day; Omorate 6.0. Use NASA POWER for your site
+  performance_ratio: 0.75
+  battery_depth_of_discharge: 0.8
+  battery_roundtrip_efficiency: 0.9
+  autonomy_days: 1.0
+  inverter_margin: 1.25
+  daily_pv_variability: 0.15             # day-to-day variation of solar supply after battery buffering
+  brownout_unmet_threshold: 0.10         # "undersized": >10 % of demand unserved
+  low_utilisation_threshold: 0.60        # "oversized": <60 % of capacity used
+  # Costs: Omorate mini-grid, Ethiopia, 2021 contract data (Wassie & Ahlgren 2023).
+  # Generation only and likely above today's prices: replace with current quotes.
+  costs:
+    pv_usd_per_kw: 2133
+    battery_usd_per_kwh: 361
+    inverter_usd_per_kw: 315
+    replacement_cost_factor: 0.9
+    om_pv_usd_per_kw_year: 13.5
+    om_inverter_usd_per_kw_year: 4.3
+    om_battery_usd_per_kwh_year: 22.3
+    # Distribution, meters, logistics and project development as a share of
+    # total capex (World Bank survey split, about 36-46 %).
+    non_generation_share_of_capex: 0.40
+    discount_rate: 0.10
+    project_life_years: 20
+    battery_life_years: 10
+    inverter_life_years: 10
+
+# --- Published measurements for the reality check on the chart --------------------
+benchmarks:
+  - {name: "Rwanda, rural grid", kwh_month: 8.1, year: 5, note: "flat since 2013 (IGC 2024)"}
+  - {name: "Malawi, Sitolo mini-grid", kwh_month: 7.4, year: 3, note: "domestic customers (Frame et al. 2023)"}
+  - {name: "Myanmar, 8 mini-grids", kwh_month: 20.4, year: 1.5, note: "0.67 kWh/day, 40 % of forecast"}
+  - {name: "Faza, Kenya (modelled)", kwh_month: 31, year: 5, note: "read from Fig. 9, Tomas Fillol et al. 2025"}
+esmap_range_kwh_per_customer_month: [5, 35]
