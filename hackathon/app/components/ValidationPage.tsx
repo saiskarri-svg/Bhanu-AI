@@ -1,9 +1,12 @@
 import React from 'react';
 import { Box, BoxHeader, StatusDot } from './ui';
-import type { Cls, Draw, RawBuilding, SiteData } from './model';
-import { CLASSES, CLS_LABEL, classify, COSTS, pct, PSH, yearScenario } from './model';
+import type { Cls, RawBuilding, SiteData } from './model';
+import { CLASSES, CLS_LABEL, classify } from './model';
+import type { Engine } from './engine';
+import { kwpFor } from './engine';
+import { btn } from './ui';
 import { SITES } from './sites';
-import { n0, pc, round2 } from './format';
+import { n0, pc } from './format';
 
 // Held-out OSM-tagged buildings, made by pipeline/holdout_tags.py
 const holdFiles = import.meta.glob('../data/holdout/*.json', { eager: true, import: 'default' }) as Record<string, { made: string; villages: { name: string; country: string; buildings: number; tagged: number }[]; buildings: { c: string; truth: string; f: RawBuilding }[] }>;
@@ -33,7 +36,7 @@ const ClassCheck: React.FC = () => {
   return (
     <div className="px-5 pb-5 space-y-4">
       <p className="text-sm text-muted max-w-prose">
-        {n0(res.n)} buildings that OpenStreetMap volunteers tagged, in {HOLD.villages.length} villages across Nigeria, Sierra Leone, Kenya, Uganda and Tanzania that are not among the sample sites. We hide the tag, classify each building from its footprint and surroundings only, and compare.
+        {n0(res.n)} buildings that OpenStreetMap volunteers tagged as a home, shop, school, clinic or other use ({n0(HOLD.buildings.length - res.n)} more carry tags such as "roof" that name no use and are left out), in {HOLD.villages.length} villages across Nigeria, Sierra Leone, Kenya, Uganda and Tanzania that are not among the sample sites. We hide the tag, classify each building from its footprint and surroundings only, and compare.
       </p>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="min-w-0 overflow-x-auto">
@@ -66,12 +69,10 @@ const ClassCheck: React.FC = () => {
   );
 };
 
-export const ValidationPage: React.FC<{ site: SiteData; ds: Draw[] }> = ({ site, ds }) => {
-  // Public check: mapped plant size against our suggested solar size
+export const ValidationPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => void }> = ({ site, eng, onNext }) => {
+  // Public check: mapped plant size against the solar needed for each year's forecast
   const plantRows = SITES.map(s => ({ s, plant: (s.data.grid.plants ?? []).find(p => p.cls === 'plant' && p.output) })).filter(r => r.plant);
-  const y1 = ds.map(d => yearScenario(d, 1).monthly);
-  const psh = PSH[site.country] ?? 5;
-  const kwp = (m: number) => m / 30 / (psh * COSTS.pr) * 1.1;
+  const kwp = eng.summary.energy_kwh_per_day.map(r => ({ year: r.year, p10: kwpFor(r.p10, eng.peak_sun_hours), p50: kwpFor(r.p50, eng.peak_sun_hours), p90: kwpFor(r.p90, eng.peak_sun_hours) }));
   return (
     <>
       <Box>
@@ -112,17 +113,25 @@ export const ValidationPage: React.FC<{ site: SiteData; ds: Draw[] }> = ({ site,
               <div key={s.id} className="max-w-prose">
                 <p><span className="text-fg font-medium">{s.data.name}, {s.data.region}.</span> <span className="text-muted">OpenStreetMap maps a solar plant rated {plant!.output} ({n0(kw)} kWp), {Math.round(plant!.d_km * 1000)} m from the village point.</span></p>
                 {here ? (
-                  <p className="text-muted mt-2">
-                    From roofs alone, GridSight suggests {n0(round2(kwp(pct(y1, 0.1))))} to {n0(round2(kwp(pct(y1, 0.9))))} kWp for year 1 demand (P10 to P90), most likely {n0(round2(kwp(pct(y1, 0.5))))} kWp.
-                    The built plant {kw >= kwp(pct(y1, 0.1)) && kw <= kwp(pct(y1, 0.9)) ? 'falls inside that range' : kw < kwp(pct(y1, 0.1)) ? 'is below that range, so the developer either built for early, low demand or the model runs high here' : 'is above that range'}.
-                    This is a sanity check, not validation: plant size reflects the developer's budget and staging, not measured use.
-                  </p>
+                  <div className="mt-2 space-y-2">
+                    <p className="text-muted">Solar needed for the forecast demand each year (most likely, with P10 to P90 below):</p>
+                    <ul className="grid grid-cols-5 gap-2 text-center tabular-nums max-w-xl">
+                      {kwp.map(k => { const inside = kw >= k.p10 && kw <= k.p90; return (
+                        <li key={k.year} className={`rounded-ctl border px-1 py-2 ${inside ? 'border-ok' : 'border-line'}`}>
+                          <span className="block text-[11px] text-muted">Year {k.year}</span>
+                          <span className="block font-semibold">{n0(k.p50)}</span>
+                          <span className="block text-[11px] text-muted">{n0(k.p10)} to {n0(k.p90)}</span>
+                        </li>); })}
+                    </ul>
+                    <p className="text-muted">The built {n0(kw)} kWp sits inside the range for {kwp.filter(k => kw >= k.p10 && kw <= k.p90).map(k => `year ${k.year}`).join(' and ') || 'none of the years'} (green outline). That fits a developer sizing for the first few years and expanding later. This is a sanity check, not validation: plant size reflects budget and staging, not measured use.</p>
+                  </div>
                 ) : <p className="text-muted mt-2">Pick {s.data.name} above to compare.</p>}
               </div>
             );
           }) : <p className="text-muted">No mapped plants with a rating among the sample sites.</p>}
         </div>
       </Box>
+      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: sharing meter data</button></div>
     </>
   );
 };

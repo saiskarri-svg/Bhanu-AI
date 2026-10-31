@@ -2,7 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { BackToTop, useEdgeFade, SunMark } from './components/ui';
 import { SITES } from './components/sites';
 import type { SiteData } from './components/model';
-import { classify, draws, drivers, estimate, summarise } from './components/model';
+import { classify, draws, estimate, growth, summarise } from './components/model';
+import { ENGINE } from './components/engine';
+import { FLAG } from './components/sites';
 import { SitePage, SitePicker } from './components/SitePage';
 import { DemandPage } from './components/DemandPage';
 import { GrowthPage } from './components/GrowthPage';
@@ -34,6 +36,20 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
+const STEPS = [
+  { t: 'Count the roofs', tab: 0 },
+  { t: 'Forecast demand', tab: 1 },
+  { t: 'Size and tariff', tab: 2 },
+  { t: 'Check it', tab: 3 },
+  { t: 'Share meter data', tab: 4 },
+];
+
+const NoEngine: React.FC = () => (
+  <div className="bg-surface border border-line rounded-box px-5 py-4 text-sm text-muted max-w-3xl">
+    The demand forecast for a loaded site file runs on a laptop: <code className="text-fg">python pipeline/run_engine.py</code> after copying the file into app/data. Pick a sample village to see a full forecast.
+  </div>
+);
+
 const App: React.FC = () => {
   const fromHash = () => Math.max(0, HASH.indexOf(location.hash.slice(1)));
   const [tab, setTab] = useState(fromHash);
@@ -49,7 +65,8 @@ const App: React.FC = () => {
   const sum = useMemo(() => summarise(buildings), [buildings]);
   const ds = useMemo(() => draws(sum), [sum]);
   const est = useMemo(() => estimate(sum, ds), [sum, ds]);
-  const drv = useMemo(() => drivers(sum), [sum]);
+  const ours5 = useMemo(() => growth(ds)[4], [ds]);
+  const eng = siteId === 'upload' ? undefined : ENGINE[siteId];
 
   const navRef = React.useRef<HTMLElement>(null);
   const [ink, setInk] = useState<{ x: number; w: number } | null>(null);
@@ -81,16 +98,43 @@ const App: React.FC = () => {
       </header>
 
       <main className="max-w-page mx-auto px-[var(--gutter)] py-6 space-y-6">
-        {tab < 4 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
+        <section className="space-y-3">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-balance">How much power will a village use, before anyone builds there?</h1>
+          <ol className="flex gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible" aria-label="Steps">
+            {STEPS.map((st, i) => (
+              <li key={st.t} className="shrink-0">
+                <button onClick={() => goTab(st.tab)} aria-current={tab === st.tab ? 'step' : undefined}
+                  className={`h-9 pl-1.5 pr-3 inline-flex items-center gap-2 rounded-ctl border transition ${tab === st.tab ? 'border-fg/40 bg-surface text-fg font-medium' : 'border-line bg-surface-2 text-muted hover:text-fg'}`}>
+                  <span className={`h-6 w-6 grid place-items-center rounded-full text-xs tabular-nums ${tab === st.tab ? 'bg-accent text-[#131316]' : 'bg-line text-muted'}`}>{i + 1}</span>{st.t}
+                </button>
+              </li>
+            ))}
+          </ol>
+          {tab === 0 && <p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p>}
+        </section>
+        {tab === 0 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
+        {tab > 0 && tab < 4 && (
+          <div className="flex items-center gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
+            <span className="text-muted mr-1 shrink-0">Village</span>
+            {SITES.map(s => (
+              <button key={s.id} onClick={() => pick(s.id)} aria-pressed={siteId === s.id}
+                className={`shrink-0 h-9 px-3 rounded-ctl border transition ${siteId === s.id ? 'bg-line border-line text-fg font-medium' : 'bg-surface-2 border-line text-muted hover:text-fg'}`}>
+                {s.data.name} <span className="text-muted font-normal">· {FLAG[s.data.country] ?? s.data.country}</span>
+              </button>
+            ))}
+            <button onClick={() => goTab(0)} className="shrink-0 h-9 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
+          </div>
+        )}
         {tab === 0 && <SitePage site={site} buildings={buildings} sum={sum} onNext={() => goTab(1)} />}
-        {tab === 1 && <DemandPage site={site} est={est} drv={drv} />}
-        {tab === 2 && <GrowthPage site={site} ds={ds} />}
-        {tab === 3 && <ValidationPage site={site} ds={ds} />}
+        {tab >= 1 && tab <= 3 && !eng && <NoEngine />}
+        {tab === 1 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(2)} />}
+        {tab === 2 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(3)} />}
+        {tab === 3 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(4)} />}
         {tab === 4 && <SharingPage />}
         {tab === 5 && <MethodPage />}
       </main>
       <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
-        GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
+        GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Demand engine by Fereshteh (forecast/demand_forecast.py); map, data pipeline and dashboard by GridSight. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
       </footer>
       <BackToTop />
     </div>

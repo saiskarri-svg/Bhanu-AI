@@ -85,7 +85,7 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
         { label: 'Buildings in 1 km', value: n0(total), unit: 'roofs', note: `${n0(sum.tagged)} tagged on the map, the rest estimated` },
         { label: 'Residential', value: n0(sum.expected.res), unit: 'buildings', tint: 'var(--res)', note: `Commercial ${n0(sum.expected.com)} · Other ${n0(sum.expected.other)} (estimated)` },
         { label: 'Health and schools', value: n0(sum.expected.health + sum.expected.school), unit: 'buildings', tint: 'var(--health)', note: `${n0(sum.expected.health)} health (${n0(sum.count.health)} mapped or likely), ${n0(sum.expected.school)} school` },
-        { label: 'Roof area', value: n0(roof), unit: 'm²', tint: 'var(--sun)', note: site.grid.dist_km != null ? `Nearest mapped grid line ${site.grid.dist_km} km away` : 'No mapped grid line within 40 km' },
+        { label: 'Roof area', value: n0(roof), unit: 'm²', tint: 'var(--sun)', note: site.grid.dist_km != null ? `Nearest mapped grid line ${site.grid.dist_km} km away${site.grid.dist_km < 5 ? '. Check whether the village is already connected or the grid will arrive soon.' : ''}` : 'No mapped grid line within 40 km' },
       ]} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Box>

@@ -10,16 +10,17 @@ export const MethodPage: React.FC = () => (
     <Box>
       <BoxHeader title="How GridSight works" />
       <ol className="px-5 pb-5 space-y-3 text-sm max-w-3xl">
-        <li><span className="text-fg font-medium">1. Count roofs.</span> <span className="text-muted">Every building within the radius from Google Open Buildings: centre point, footprint area and how sure the satellite model is.</span></li>
-        <li><span className="text-fg font-medium">2. Say what each one is.</span> <span className="text-muted">Use the OpenStreetMap tag or a mapped place (clinic, school, shop) when there is one. Otherwise score it from size, shape, road frontage, crowding and nearby markets, and keep the doubt as a probability.</span></li>
-        <li><span className="text-fg font-medium">3. Turn buildings into customers and kWh.</span> <span className="text-muted">Each class gets a range of households per roof, sign-up rate and monthly use, taken from the sources below.</span></li>
-        <li><span className="text-fg font-medium">4. Simulate 1,500 futures.</span> <span className="text-muted">Draw every input from its range at once, and the building classes from their probabilities. Report P10, P50 and P90, not one number.</span></li>
-        <li><span className="text-fg font-medium">5. Explain it.</span> <span className="text-muted">Swing each input alone from low to high to show which ones move the answer most.</span></li>
-        <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The ranges are set by hand today. With metered sites they become fitted distributions, checked on sites held back from fitting (see Validation).</span></li>
+        <li><span className="text-fg font-medium">1. Count roofs.</span> <span className="text-muted">Every building within the radius from Google Open Buildings: centre point, footprint area and detection confidence. Tags, places, roads and power lines from OpenStreetMap through Overture Maps.</span></li>
+        <li><span className="text-fg font-medium">2. Say what each one is.</span> <span className="text-muted">Use the map tag or a nearby mapped place where there is one. Where the map is thin, shops, schools and clinics come from regional averages per household, and the building-level model keeps each roof's doubt as a probability.</span></li>
+        <li><span className="text-fg font-medium">3. Forecast five years.</span> <span className="text-muted">The demand engine turns roofs into households, connects them at the pace measured at the Faza mini-grid in Kenya, adds appliances along S-curves for early and late adopters, mills and workshops one at a time, and the effect of the tariff. Household use is calibrated to measured sites (Rwanda, Malawi), not surveys, which overstate use.</span></li>
+        <li><span className="text-fg font-medium">4. Simulate 4,000 futures.</span> <span className="text-muted">Every input is a range with its source. Report P10, P50 and P90, not one number, and rank which inputs drive the range.</span></li>
+        <li><span className="text-fg font-medium">5. Test system sizes.</span> <span className="text-muted">Size solar and battery for P25 to P90 demand and test each against every future: brownouts, idle capacity, cost per kWh and whether revenue covers cost at each tariff.</span></li>
+        <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The engine's validate command scores coverage and error on held-out metered sites and calibrates from them (see Validation and Data sharing).</span></li>
+        <li><span className="text-fg font-medium">Why independent matters.</span> <span className="text-muted">Demand projections are often overstated, especially for productive use, and should come from parties without an incentive to overstate growth (Peters, Sievert and Toman 2019). GridSight is open: every input, source and building class can be traced.</span></li>
       </ol>
     </Box>
     <Box>
-      <BoxHeader title="Inputs and their ranges" meta="Low, likely, high. Rough guides." />
+      <BoxHeader title="Building-level model: inputs and ranges" meta="The second opinion on Demand. The engine\u2019s inputs are in forecast/assumptions.yaml" />
       <div className="px-5 pb-5 overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Input</th><th className="py-2 pr-4 font-normal">Low</th><th className="py-2 pr-4 font-normal">Likely</th><th className="py-2 pr-4 font-normal">High</th><th className="py-2 pr-4 font-normal">Unit</th><th className="py-2 font-normal">Source</th></tr></thead>

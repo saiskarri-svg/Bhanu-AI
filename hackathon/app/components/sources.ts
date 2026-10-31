@@ -16,4 +16,10 @@ export const SOURCES: Source[] = [
     used: 'Planned input: signal of existing activity (not loaded in this prototype)' },
   { id: 8, title: 'GridFinder', who: 'Arderne et al., 2020', url: 'https://gridfinder.org/',
     used: 'Planned input: predicted grid lines where OpenStreetMap has none' },
+  { id: 9, title: 'Rural electrification through mini-grids: Challenges ahead', who: 'Peters, Sievert and Toman, Energy Policy, 2019', url: 'https://scholar.google.com/scholar?q=Rural+electrification+through+mini-grids%3A+Challenges+ahead+Peters+Sievert+Toman',
+    used: 'Low rural demand, overstated productive use, tariff politics, grid-arrival risk; forecasts should come from parties without incentives to overstate growth' },
+  { id: 10, title: 'State-of-the-Art of Mini Grids for Rural Electrification in West Africa', who: 'Antonanzas-Torres et al., Energies, 2021', url: 'https://scholar.google.com/scholar?q=State-of-the-Art+of+Mini+Grids+for+Rural+Electrification+in+West+Africa',
+    used: 'Mini-grid and grid tariffs in West Africa (2020 data)' },
+  { id: 11, title: 'Demand engine: demand_forecast.py and assumptions.yaml', who: 'Fereshteh, GridSight team, 2026', url: 'https://github.com/saiskarri-svg/bhanu-ai/tree/global-hackathon/hackathon/forecast',
+    used: 'Five-year forecast: Faza connection and appliance data, calibration to Rwanda and Malawi meters, tariff elasticity, sizing and tariff risk. Every input with its source in assumptions.yaml' },
 ];

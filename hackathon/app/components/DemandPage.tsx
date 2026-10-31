@@ -1,11 +1,10 @@
 import React from 'react';
-import { Area, CartesianGrid, Line, ComposedChart, Tooltip, XAxis, YAxis } from 'recharts';
-import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend } from './ui';
-import type { Driver, Estimate, SiteData, Seg } from './model';
-import { SHAPES, SEG_LABEL } from './model';
-import { n0, n1, pc, round2 } from './format';
-
-const SEG_COLOR: Record<Seg, string> = { res: 'var(--res)', com: 'var(--com)', pue: 'var(--pue)', health: 'var(--health)', school: 'var(--school)', other: 'var(--other)' };
+import { Area, CartesianGrid, Line, ComposedChart, Tooltip, XAxis, YAxis, Bar, BarChart } from 'recharts';
+import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, btn } from './ui';
+import type { Estimate, SiteData } from './model';
+import type { Engine } from './engine';
+import { MEASURED } from './engine';
+import { n0, n1, pc } from './format';
 
 // A range bar: P10 to P90 band with the P50 mark, on a shared scale
 export const RangeBar: React.FC<{ lo: number; mid: number; hi: number; max: number; color?: string; marks?: { at: number; label: string }[] }> = ({ lo, mid, hi, max, color = 'var(--sun)', marks = [] }) => (
@@ -35,104 +34,150 @@ const Figure: React.FC<{ label: string; p10: number; p50: number; p90: number; u
     </div>
   );
 
-export const DemandPage: React.FC<{ site: SiteData; est: Estimate; drv: Driver[] }> = ({ site, est, drv }) => {
-  const segs = (Object.keys(SHAPES) as Seg[]).filter(s => est.mid.segs[s] > 0.5);
-  const prof = Array.from({ length: 24 }, (_, h) => {
-    const row: Record<string, number | string> = { h: `${String(h).padStart(2, '0')}:00`, p10: est.hourlyP10[h], p90: est.hourlyP90[h] };
-    segs.forEach(s => { row[s] = (est.mid.segs[s] / 30) * SHAPES[s][h]; });
-    return row;
-  });
-  const tot = (r: Record<string, number | string>) => segs.reduce((x, s) => x + Number(r[s]), 0);
-  const peakH = prof.reduce((a, r, h) => (tot(r) > tot(prof[a]) ? h : a), 0);
-  const share = segs.map(s => ({ s, v: est.mid.segs[s] / est.mid.monthly })).sort((a, b) => b.v - a.v);
-  const top = drv.slice(0, 7);
-  const x0 = Math.min(...top.map(d => Math.min(d.high, d.low))) * 0.97;
-  const x1 = Math.max(...top.map(d => Math.max(d.high, d.low))) * 1.02;
-  const X = (v: number) => `${((v - x0) / (x1 - x0)) * 100}%`;
-  const base = est.mid.monthly;
+const SECT = [
+  { k: 'Households', c: 'var(--res)' },
+  { k: 'Businesses', c: 'var(--com)' },
+  { k: 'Institutions', c: 'var(--school)' },
+  { k: 'Productive use', c: 'var(--pue)' },
+] as const;
+
+export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; ours5: { p10: number; p50: number; p90: number }; onNext: () => void }> = ({ site, eng, est, ours5, onNext }) => {
+  const S = eng.summary;
+  const e1 = S.energy_kwh_per_day[0], e5 = S.energy_kwh_per_day[4];
+  const pk5 = S.peak_kw[4], lf5 = S.load_factor[4];
+  const hh1 = S.kwh_per_household_month[0], hh5 = S.kwh_per_household_month[4];
+  const cu1 = S.customers[0], cu5 = S.customers[4];
+  const [yr, setYr] = React.useState<1 | 5>(5);
+  const prof = Array.from({ length: 24 }, (_, h) => ({
+    h: `${String(h).padStart(2, '0')}:00`,
+    y1: eng.profile.y1.p50[h], y5: eng.profile.y5.p50[h],
+    base: eng.profile.y5.p10[h], band: eng.profile.y5.p90[h] - eng.profile.y5.p10[h],
+  }));
+  const peakH = prof.reduce((a, r, h) => (r.y5 > prof[a].y5 ? h : a), 0);
+  const drv = (yr === 1 ? eng.drivers1 : eng.drivers5).slice(0, 6);
+  const maxShare = Math.max(...drv.map(d => d.share_of_uncertainty));
+  const biz = (Object.entries(eng.business) as [string, Engine['business'][string]][]).filter(([, b]) => b.p90 > 0.05);
+  const ours = est.monthly; // the building-level model, kWh a month in year 1
+
   return (
     <>
+      <Box>
+        <div className="px-5 py-4">
+          <p className="text-xs text-muted">The answer for {site.name}</p>
+          <p className="mt-1 text-lg leading-snug max-w-4xl text-balance">
+            About <b className="font-semibold tabular-nums">{n0(e1.p50)} kWh a day</b> in the first year (range {n0(e1.p10)} to {n0(e1.p90)}),
+            growing to <b className="font-semibold tabular-nums">{n0(e5.p50)} kWh a day</b> by year 5 ({n0(e5.p10)} to {n0(e5.p90)}) as homes connect and buy appliances.
+            The evening peak reaches about <b className="font-semibold tabular-nums">{n0(pk5.p50)} kW</b>.
+          </p>
+        </div>
+      </Box>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-px bg-line border border-line rounded-box overflow-hidden">
-        <Figure label="Energy demand, year 1" p10={est.monthly.p10} p50={est.monthly.p50} p90={est.monthly.p90} unit="kWh a month" fmt={x => n0(round2(x))}
-          note={`About ${n0(round2(est.monthly.p50 / 30))} kWh a day.`} />
-        <Figure label="Peak load" p10={est.peakKw.p10} p50={est.peakKw.p50} p90={est.peakKw.p90} unit="kW" fmt={n1} color="var(--bad)" note="Usually just after dark, when every home switches on lights and TV." />
-        <Figure label="Use per customer" p10={est.perCustomer.p10} p50={est.perCustomer.p50} p90={est.perCustomer.p90} unit="kWh a month" fmt={n1} color="var(--res)" max={40}
-          marks={[{ at: 5, label: '5' }, { at: 35, label: '35' }]} note="Dashed lines: the 5 to 35 kWh range seen across surveyed African mini-grids (ESMAP 2022)." />
-        <Figure label="Load factor" p10={est.loadFactor.p10 * 100} p50={est.loadFactor.p50 * 100} p90={est.loadFactor.p90 * 100} unit="%" color="var(--ok)" max={60}
-          marks={[{ at: 22, label: '22%' }, { at: 40, label: '40%' }]} note="Homes only run near 22%; daytime business use toward 40% cut the cost of power by about 25% (ESMAP 2022)." />
+        <Figure label="Energy, year 1" p10={e1.p10} p50={e1.p50} p90={e1.p90} unit="kWh a day" note={`${n0(cu1.p50)} customers in year 1 (early adopters).`} />
+        <Figure label="Energy, year 5" p10={e5.p10} p50={e5.p50} p90={e5.p90} unit="kWh a day" note={`${n0(cu5.p50)} customers by year 5.`} />
+        <Figure label="Use per household, year 5" p10={hh5.p10} p50={hh5.p50} p90={hh5.p90} unit="kWh a month" fmt={n1} color="var(--res)" max={36}
+          marks={[{ at: 8.1, label: 'Rwanda 8.1' }, { at: 35, label: '35' }]}
+          note={`${n1(hh1.p50)} in year 1. Calibrated to measured sites (Rwanda 8.1, Malawi 7 to 8), inside ESMAP's 5 to 35 range.`} />
+        <Figure label="Evening peak and load factor, year 5" p10={pk5.p10} p50={pk5.p50} p90={pk5.p90} unit="kW" fmt={n1} color="var(--bad)"
+          note={`Load factor ${pc(lf5.p50)}. Homes-only grids run near 22%; daytime business use toward 40% cut the cost of power by about 25% (ESMAP 2022).`} />
       </div>
-      <p className="text-xs text-muted -mt-3">
-        {n0(est.customers.p50)} likely customers (range {n0(est.customers.p10)} to {n0(est.customers.p90)}). P10 means 1 in 10 futures come in lower; P90 means 1 in 10 come in higher. From 1,500 simulated futures that vary building classes and every assumption at once. Rough guide.
-      </p>
+      <p className="text-xs text-muted -mt-3">P10 means 1 in 10 simulated futures come in lower; P90 means 1 in 10 come in higher. 4,000 futures. Rough guide, not a site survey.</p>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Box>
-          <BoxHeader title="A typical day, year 1" meta="kW, most likely mix, with the P10 to P90 band" />
+          <BoxHeader title="An average day" meta="kW, most likely in year 1 and year 5, with the year 5 range" />
           <div className="px-3 pb-2 h-[300px]">
-            <ResponsiveChart summary={`Most likely load peaks around ${peakH}:00 at about ${n1(est.mid.peakKw)} kW.`}>
+            <ResponsiveChart summary={`Load peaks around ${peakH}:00 at about ${n1(prof[peakH].y5)} kW on an average day in year 5.`}>
               <ComposedChart data={prof} margin={{ top: 10, right: 12, left: -8, bottom: 0 }}>
                 <CartesianGrid stroke={CHART.grid} vertical={false} />
                 <XAxis dataKey="h" {...axisProps} interval={3} />
                 <YAxis {...axisProps} width={44} />
                 <Tooltip content={({ active, payload, label }) => active && payload?.length ? (
                   <TooltipCard title={String(label)} rows={[
-                    ...segs.map(s => ({ label: SEG_LABEL[s], value: `${n1(Number(payload.find(p => p.dataKey === s)?.value ?? 0))} kW`, color: SEG_COLOR[s] })),
-                    { label: 'Range', value: `${n1(Number(prof.find(r => r.h === label)?.p10))} to ${n1(Number(prof.find(r => r.h === label)?.p90))} kW` },
+                    { label: 'Year 5', value: `${n1(Number(payload[0].payload.y5))} kW`, color: 'var(--sun)' },
+                    { label: 'Year 5 range', value: `${n1(Number(payload[0].payload.base))} to ${n1(Number(payload[0].payload.base) + Number(payload[0].payload.band))} kW` },
+                    { label: 'Year 1', value: `${n1(Number(payload[0].payload.y1))} kW`, color: 'var(--info)' },
                   ]} />) : null} />
-                {segs.map(s => <Area key={s} type="monotone" dataKey={s} stackId="1" stroke="none" fill={SEG_COLOR[s]} fillOpacity={0.75} isAnimationActive />)}
-                <Line type="monotone" dataKey="p90" stroke={CHART.axis} strokeDasharray="4 4" dot={false} strokeWidth={1.2} />
-                <Line type="monotone" dataKey="p10" stroke={CHART.axis} strokeDasharray="4 4" dot={false} strokeWidth={1.2} />
+                <Area dataKey="base" stackId="b" stroke="none" fill="transparent" isAnimationActive={false} />
+                <Area dataKey="band" stackId="b" stroke="none" fill="var(--sun)" fillOpacity={0.18} />
+                <Line type="monotone" dataKey="y5" stroke="var(--sun)" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="y1" stroke="var(--info)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveChart>
           </div>
-          <div className="px-5 pb-4"><Legend items={[...segs.map(s => ({ label: SEG_LABEL[s], color: SEG_COLOR[s] })), { label: 'P10 and P90 total', color: 'var(--muted)' }]} /></div>
+          <div className="px-5 pb-4"><Legend items={[{ label: 'Year 5, most likely', color: 'var(--sun)' }, { label: 'Year 5, P10 to P90', color: 'color-mix(in srgb, var(--sun) 30%, transparent)' }, { label: 'Year 1, most likely', color: 'var(--info)' }]} /></div>
         </Box>
         <Box>
-          <BoxHeader title="Who uses the power" meta="Share of monthly kWh, most likely" />
-          <div className="px-5 pb-5 space-y-3">
-            {share.map(({ s, v }) => (
-              <div key={s}>
-                <div className="flex justify-between text-sm"><span>{SEG_LABEL[s]}</span><span className="tabular-nums">{pc(v)} <span className="text-xs text-muted">{n0(est.mid.segs[s])} kWh</span></span></div>
-                <div className="mt-1 h-1.5 rounded-full bg-surface-2 overflow-hidden"><div className="h-full rounded-full" style={{ width: `${v * 100}%`, background: SEG_COLOR[s] }} /></div>
-              </div>
-            ))}
-            <p className="text-xs text-muted leading-relaxed pt-1">Machines and shops run in daylight, when solar is cheapest. Growing them is the lever that brings the tariff down.</p>
+          <BoxHeader title="Who uses the energy" meta="kWh a day, most likely" />
+          <div className="px-3 pb-2 h-[260px]">
+            <ResponsiveChart summary={`In year 5 households use ${n0(eng.sectors[4].Households)} kWh a day and productive use ${n0(eng.sectors[4]['Productive use'])}.`}>
+              <BarChart data={eng.sectors.map(s => ({ ...s, y: `Year ${s.year}` }))} margin={{ top: 10, right: 12, left: -8, bottom: 0 }}>
+                <CartesianGrid stroke={CHART.grid} vertical={false} />
+                <XAxis dataKey="y" {...axisProps} />
+                <YAxis {...axisProps} width={44} />
+                <Tooltip cursor={{ fill: 'var(--surface-2)' }} content={({ active, payload, label }) => active && payload?.length ? (
+                  <TooltipCard title={String(label)} rows={SECT.map(s => ({ label: s.k, value: `${n0(Number(payload[0].payload[s.k]))} kWh`, color: s.c }))} />) : null} />
+                {SECT.map(s => <Bar key={s.k} dataKey={s.k} stackId="s" fill={s.c} />)}
+              </BarChart>
+            </ResponsiveChart>
           </div>
+          <div className="px-5 pb-4"><Legend items={SECT.map(s => ({ label: s.k, color: s.c }))} /></div>
         </Box>
       </div>
 
       <Box>
-        <BoxHeader title="Why this number" meta="What moves the estimate most, for a lender to review" />
+        <BoxHeader title="Why this number" meta={
+          <span className="inline-flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Year">
+            {([1, 5] as const).map(y => <button key={y} role="radio" aria-checked={yr === y} onClick={() => setYr(y)} className={`h-8 px-3 text-xs ${yr === y ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>Year {y}</button>)}
+          </span>} />
         <div className="px-5 pb-5">
           <p className="text-sm text-muted max-w-prose mb-4">
-            Each bar shows how far the monthly demand moves when one input goes from its low to its high end and everything else stays at its most likely value. Most likely: {n0(round2(base))} kWh a month. The longest bars are where a site visit or meter data pays off most.
+            Share of the forecast's uncertainty that each input explains. The longest bars are where a short site visit narrows the range most.
           </p>
-          <ol className="space-y-4">
-            {top.map((d, i) => {
-              const lo = Math.min(d.low, d.high), hi = Math.max(d.low, d.high);
-              return (
-                <li key={d.key} className="grid gap-x-6 gap-y-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-                  <div className="min-w-0">
-                    <p className="text-sm text-fg"><span className="text-muted tabular-nums mr-2">{i + 1}</span>{d.label}</p>
-                    <p className="text-xs text-muted leading-relaxed mt-0.5">{d.plain}</p>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="relative h-6 mt-1" aria-hidden="true">
-                      <div className="absolute inset-y-0 border-l border-muted/50" style={{ left: X(base) }} />
-                      <div className="absolute top-1.5 h-3 rounded-sm" style={{ left: X(lo), width: `${Math.max(0.5, ((hi - lo) / (x1 - x0)) * 100)}%`, background: 'color-mix(in srgb, var(--sun) 55%, transparent)' }} />
-                    </div>
-                    <p className="text-xs text-muted tabular-nums">{n0(round2(lo))} to {n0(round2(hi))} kWh a month (±{Math.round((d.swing / 2 / base) * 100)}%)</p>
-                  </div>
-                </li>
-              );
-            })}
+          <ol className="space-y-3">
+            {drv.map((d, i) => (
+              <li key={d.input} className="grid gap-x-6 gap-y-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center">
+                <p className="text-sm text-fg min-w-0"><span className="text-muted tabular-nums mr-2">{i + 1}</span>{d.label}
+                  <span className="block text-xs text-muted ml-5">{d.effect.replace('->', 'means')}</span></p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex-1 h-3 rounded-sm bg-surface-2 overflow-hidden"><div className="h-full rounded-sm" style={{ width: `${(d.share_of_uncertainty / maxShare) * 100}%`, background: 'color-mix(in srgb, var(--sun) 65%, transparent)' }} /></div>
+                  <span className="text-sm tabular-nums w-10 text-right">{pc(d.share_of_uncertainty)}</span>
+                </div>
+              </li>
+            ))}
           </ol>
-          <p className="text-xs text-muted mt-4 leading-relaxed">
-            Ranges for each input and their sources are listed on the Method tab. With metered data from nearby mini-grids, the household use and connection inputs would be learned from data instead of set by hand.
-          </p>
+          {drv[0]?.input === 'buildings_per_household' && (
+            <p className="text-sm mt-4 max-w-prose"><span className="text-fg font-medium">Field check that pays most:</span> <span className="text-muted">count households on the ground. Satellites count roofs, and a family compound often has several.</span></p>
+          )}
         </div>
       </Box>
-      <p className="text-xs text-muted">{site.name}: estimate from public data only. Rough guide, not a substitute for a site survey.</p>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <Box>
+          <BoxHeader title="What the map gave the model" meta={`${eng.landuse.evidence_pct}% of buildings carry a use tag`} />
+          <div className="px-5 pb-5 overflow-x-auto">
+            <table className="w-full text-sm tabular-nums">
+              <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Type</th><th className="py-2 pr-4 font-normal text-right">Mapped</th><th className="py-2 font-normal text-right">Used (P10 to P90)</th></tr></thead>
+              <tbody>
+                <tr className="border-b border-line/60"><td className="py-1.5 pr-4">Residential buildings</td><td className="py-1.5 pr-4 text-right">{n0(eng.landuse.residential_buildings)}</td><td className="py-1.5 text-right text-muted">{n0(S.households[0].p10)} to {n0(S.households[0].p90)} households</td></tr>
+                {biz.map(([k, b]) => (
+                  <tr key={k} className="border-b border-line/60"><td className="py-1.5 pr-4">{b.label}</td><td className="py-1.5 pr-4 text-right">{n0(b.mapped)}</td><td className="py-1.5 text-right text-muted">{n1(b.p10)} to {n1(b.p90)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-xs text-muted mt-3 leading-relaxed">Where few buildings are tagged, shops, schools and clinics come from regional averages per household; mapped counts are used where higher. Check them on site.</p>
+          </div>
+        </Box>
+        <Box>
+          <BoxHeader title="Second opinion" meta="Two models, built separately" />
+          <div className="px-5 pb-5 text-sm space-y-3">
+            <p className="text-muted">GridSight's building-level model classes every roof and assumes most homes connect in year 1. It gives <span className="text-fg tabular-nums">{n0(ours.p10 / 30)} to {n0(ours.p90 / 30)} kWh a day</span> for year 1.</p>
+            <p className="text-muted">The demand engine follows the connection pace measured at the Faza mini-grid in Kenya, so year 1 starts lower ({n0(e1.p10)} to {n0(e1.p90)}) and grows faster. By year 5 the building model says {n0(ours5.p10 / 30)} to {n0(ours5.p90 / 30)} kWh a day and the engine {n0(e5.p10)} to {n0(e5.p90)}.</p>
+            <p className="text-xs text-muted">Demand engine by Fereshteh (forecast/demand_forecast.py); every input and its source in forecast/assumptions.yaml.</p>
+          </div>
+        </Box>
+      </div>
+      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: growth, size and tariff</button></div>
     </>
   );
 };

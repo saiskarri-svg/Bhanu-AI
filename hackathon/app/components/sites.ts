@@ -5,8 +5,8 @@ import type { SiteData } from './model';
 // covers a 1 km radius around the village point.
 const files = import.meta.glob('../data/*.json', { eager: true, import: 'default' }) as Record<string, SiteData>;
 
-export const ORDER = ['gbamu-gbamu', 'kychom', 'talek', 'kitobo', 'bulongwa'];
-export const FLAG: Record<string, string> = { NG: 'Nigeria', KE: 'Kenya', UG: 'Uganda', TZ: 'Tanzania', SL: 'Sierra Leone' };
+export const ORDER = ['gbamu-gbamu', 'kychom', 'benichab', 'talek', 'kitobo', 'bulongwa'];
+export const FLAG: Record<string, string> = { NG: 'Nigeria', KE: 'Kenya', UG: 'Uganda', TZ: 'Tanzania', SL: 'Sierra Leone', MR: 'Mauritania' };
 export const WEST = ['NG', 'SL', 'GH', 'LR', 'SN', 'ML', 'BF', 'NE', 'CI', 'GN', 'TG', 'BJ'];
 
 export const SITES: { id: string; data: SiteData }[] = Object.entries(files)
