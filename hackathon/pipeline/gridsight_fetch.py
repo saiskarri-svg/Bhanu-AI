@@ -144,9 +144,36 @@ def main():
         if g.is_empty:
             continue
         srcs = sorted({s['dataset'] for s in (r['sources'] or []) if s.get('dataset')})
+        s0 = (r['sources'] or [{}])[0]
         polys.append(g)
-        pmeta.append(dict(subtype=r['subtype'], cls=r['class'], name=(r['names'] or {}).get('primary'), src=srcs))
+        pmeta.append(dict(subtype=r['subtype'], cls=r['class'], name=(r['names'] or {}).get('primary'), src=srcs,
+                          src0=s0.get('dataset'), year=int(s0['update_time'][:4]) if s0.get('update_time') else None,
+                          conf=s0.get('confidence')))
     tree = STRtree(polys) if polys else None
+
+    # One building list from all footprint sources: Overture's merged set
+    # (Google, Microsoft, OpenStreetMap, duplicates removed), plus Open
+    # Buildings points that no Overture footprint covers. Google alone misses
+    # buildings where its imagery is old or missing.
+    SRC = {'Google Open Buildings': 'G', 'Microsoft ML Buildings': 'M', 'OpenStreetMap': 'O'}
+    merged = []  # (lat, lon, area, conf, x, y, poly_index, src, year)
+    for i, (g, m) in enumerate(zip(polys, pmeta)):
+        c = g.centroid
+        if math.hypot(c.x, c.y) > a.radius:
+            continue
+        lo_, la_ = c.x / (111320 * math.cos(math.radians(a.lat))) + a.lon, c.y / 110574 + a.lat
+        merged.append((la_, lo_, g.area, m['conf'], c.x, c.y, i, SRC.get(m['src0'], 'X'), m['year']))
+    extra = 0
+    for la, lo, area, conf, x, y in pts:
+        pt = Point(x, y)
+        # Same house drawn a few metres off by another source counts once
+        if tree is not None and any(polys[i].distance(pt) <= 6 for i in tree.query(pt.buffer(6))):
+            continue
+        merged.append((la, lo, area, conf, x, y, None, 'G', 2023))
+        extra += 1
+    print(f'  {len(merged)} buildings from all sources ({extra} Google-only points added)', file=sys.stderr)
+    google_alone = len(pts)
+    pts = merged
 
     print('Overture places ...', file=sys.stderr)
     places = []
@@ -205,12 +232,12 @@ def main():
     allpts = STRtree([Point(p[4], p[5]) for p in pts]) if pts else None
     markets = [p for p in places if p['cat'] and any(k in p['cat'] for k in ('market', 'shopping'))]
     out_b = []
-    for la, lo, area, conf, x, y in pts:
+    for la, lo, area, conf, x, y, pidx, src, year in pts:
         pt = Point(x, y)
         osm, shape = None, None
         if tree is not None:
-            for i in tree.query(pt):
-                if polys[i].contains(pt):
+            for i in ([pidx] if pidx is not None else tree.query(pt)):
+                if pidx is not None or polys[i].contains(pt):
                     m = pmeta[i]
                     if m['cls'] or m['subtype']:
                         osm = m['cls'] or m['subtype']
@@ -233,8 +260,8 @@ def main():
         d_main = round(mains[mtree.nearest(pt)].distance(pt), 1) if mtree is not None else None
         near = len(allpts.query(pt.buffer(50))) - 1
         d_mkt = round(min(math.hypot(m['x'] - x, m['y'] - y) for m in markets), 0) if markets else None
-        out_b.append([round(la, 6), round(lo, 6), round(area, 1), round(conf, 3), osm, poi[0] if poi else None,
-                      poi[1] if poi else None, d_road, d_main, near, shape[0] if shape else None, shape[1] if shape else None, d_mkt])
+        out_b.append([round(la, 6), round(lo, 6), round(area, 1), round(conf, 3) if conf is not None else None, osm, poi[0] if poi else None,
+                      poi[1] if poi else None, d_road, d_main, near, shape[0] if shape else None, shape[1] if shape else None, d_mkt, src, year])
 
     src_count = {}
     for m in pmeta:
@@ -250,7 +277,9 @@ def main():
         grid=dict(dist_km=round(grid_d / 1000, 2) if grid_d is not None else None, nearest=grid_cls,
                   searched_km=a.grid_search_km, plants=plants, note='Distance to nearest power line, cable, substation or transformer mapped in OpenStreetMap (via Overture). Unmapped lines are missed.'),
         viirs=viirs,
-        fields=['lat', 'lon', 'area_m2', 'ob_conf', 'osm_class', 'poi_cat', 'poi_conf', 'd_road_m', 'd_main_road_m', 'n_within_50m', 'elongation', 'compactness', 'd_market_m'],
+        coverage=dict(google_alone=google_alone, merged=len(out_b)),
+        fields=['lat', 'lon', 'area_m2', 'ob_conf', 'osm_class', 'poi_cat', 'poi_conf', 'd_road_m', 'd_main_road_m', 'n_within_50m', 'elongation', 'compactness', 'd_market_m', 'source', 'source_year'],
+        footprint_note='source: G Google Open Buildings, M Microsoft ML Buildings, O OpenStreetMap; source_year: date of that source record (Google dataset release, OSM last edit), not the photo date',
         buildings=out_b,
         places=[{k: v for k, v in p.items() if k not in ('x', 'y')} for p in places if math.hypot(p['x'], p['y']) <= a.radius + 300],
         roads=roads,

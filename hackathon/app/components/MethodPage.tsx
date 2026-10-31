@@ -5,13 +5,13 @@ import { REFS } from './refs';
 
 const GROUPS = [
   { t: 'Map data', k: ['openbuildings', 'overture'] },
-  { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'rockefeller', 'sltariff', 'clasp'] },
+  { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'scottcoley', 'ngrea', 'rockefeller', 'sltariff', 'clasp'] },
   { t: 'Benchmarks and context', k: ['esmap', 'peters', 'antonanzas'] },
   { t: 'Costs and sun', k: ['omorate', 'wbsplit', 'gsrough'] },
   { t: 'Population (Benichab)', k: ['dhs', 'census'] },
   { t: 'Building-level model (second opinion)', k: ['mtf', 'who', 'amda'] },
   { t: 'Model and assumptions', k: ['engine', 'assumption'] },
-  { t: 'Planned inputs', k: ['viirs', 'gridfinder'] },
+  { t: 'Planned inputs', k: ['zenodo', 'viirs', 'gridfinder'] },
 ];
 
 const fmt = (x: number, unit: string) => (unit === '%' ? `${Math.round(x * 100)}%` : `${x}`);
@@ -21,11 +21,12 @@ export const MethodPage: React.FC = () => (
     <Box>
       <BoxHeader title="How GridSight works" />
       <ol className="px-5 pb-5 space-y-3 text-sm max-w-3xl">
-        <li><span className="text-fg font-medium">1. Count roofs.</span> <span className="text-muted">Every building within the radius from Google Open Buildings: centre point, footprint area and detection confidence. Tags, places, roads and power lines from OpenStreetMap through Overture Maps.</span></li>
+        <li><span className="text-fg font-medium">1. Count roofs.</span> <span className="text-muted">Every building within the radius from three footprint sources merged by Overture Maps (Google Open Buildings, Microsoft ML Buildings, OpenStreetMap), because any one source can have old or missing pictures. Homes built since each record's date are added at the local household growth rate. Tags, places, roads and power lines come from OpenStreetMap.</span></li>
         <li><span className="text-fg font-medium">2. Say what each one is.</span> <span className="text-muted">Use the map tag or a nearby mapped place where there is one. Where the map is thin, shops, schools and clinics come from regional averages per household, and the building-level model keeps each roof's doubt as a probability.</span></li>
         <li><span className="text-fg font-medium">3. Forecast five years.</span> <span className="text-muted">The demand engine turns roofs into households, connects them at the pace measured at the Faza mini-grid in Kenya, adds appliances along S-curves for early and late adopters, mills and workshops one at a time, and the effect of the tariff. Household use is calibrated to measured sites (Rwanda, Malawi), not surveys, which overstate use.</span></li>
         <li><span className="text-fg font-medium">4. Simulate 4,000 futures.</span> <span className="text-muted">Every input is a range with its source. Report P10, P50 and P90, not one number, and rank which inputs drive the range.</span></li>
         <li><span className="text-fg font-medium">5. Test system sizes.</span> <span className="text-muted">Size solar and battery for P25 to P90 demand and test each against every future: brownouts, idle capacity, cost per kWh and whether revenue covers cost at each tariff.</span></li>
+        <li><span className="text-fg font-medium">Use measured load nearby.</span> <span className="text-muted">Metered sites within 1,000 miles pull the forecast toward what they actually use, weighted by distance, data quality and location accuracy. The published ranges count as one good site, so one weak number cannot swing the answer.</span></li>
         <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The engine's validate command scores coverage and error on held-out metered sites and calibrates from them (see Validation and Data sharing).</span></li>
         <li><span className="text-fg font-medium">Why independent matters.</span> <span className="text-muted">Demand projections are often overstated, especially for productive use, and should come from parties without an incentive to overstate growth (Peters, Sievert and Toman 2019). GridSight is open: every input, source and building class can be traced.</span></li>
       </ol>

@@ -11,13 +11,14 @@ export const CLS_LABEL: Record<Cls, string> = {
 export interface Place { name: string | null; cat: string | null; conf: number; lat: number; lon: number }
 export interface Plant { cls: string; name: string | null; d_km: number; source?: string | null; output?: string | null; lat: number; lon: number }
 // [lat, lon, area_m2, ob_conf, osm_class, poi_cat, poi_conf, d_road_m, d_main_road_m, n_within_50m, elongation, compactness, d_market_m]
-export type RawBuilding = [number, number, number, number, string | null, string | null, number | null, number | null, number | null, number, number | null, number | null, number | null];
+export type RawBuilding = [number, number, number, number | null, string | null, string | null, number | null, number | null, number | null, number, number | null, number | null, number | null, string?, (number | null)?];
 
 export interface SiteData {
   name: string; country: string; region: string; lat: number; lon: number; radius_m: number; note?: string; fetched: string;
   sources: { open_buildings: string; overture: string; overture_building_sources: Record<string, number> };
   grid: { dist_km: number | null; nearest: string | null; searched_km: number; note: string; plants?: Plant[] };
   viirs: number | null;
+  coverage?: { google_alone: number; merged: number };
   buildings: RawBuilding[];
   places: Place[];
   roads: { c: string; p: [number, number][] }[];

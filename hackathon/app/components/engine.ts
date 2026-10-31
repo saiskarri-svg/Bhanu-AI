@@ -16,6 +16,10 @@ export interface Engine {
   drivers1: EngineDriver[]; drivers5: EngineDriver[];
   designs: Design[]; risk: RiskRow[]; tariffs: TariffRow[];
   profile: Record<string, { p10: number[]; p50: number[]; p90: number[] }>;
+  age?: { data_year: number | null; years: number; growth: number; residential_seen: number; residential_now: number; sources: Record<string, number> };
+  nearby?: { radius_km: number; weight: number; factor: number; factor_lo: number; factor_hi: number;
+    sites: { site_id: string; name: string; country: string; d_km: number; metric: string; year: number; observed: number; predicted: number; ratio: number; weight: number; quality: string; precision: string; source: string; url: string; note: string }[] };
+  uncalibrated?: Record<string, Q[]>;
 }
 
 const files = import.meta.glob('../data/engine/*.json', { eager: true, import: 'default' }) as Record<string, Engine>;

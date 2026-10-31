@@ -388,6 +388,12 @@ def run_forecast(site: Site, A: dict, n_draws=4000, seed=42, tariff=None) -> For
     if T != T_ref:
         notes.append(f"Tariff ${T:.2f}/kWh vs reference ${T_ref:.2f}: usage scaled by "
                      f"{np.median(m_tar):.2f} (median).")
+    # Optional: calibration to metered sites near this village (set by
+    # pipeline/run_engine.py from measured_sites.csv). Absent = no change.
+    cal = (A.get("calibration") or {}).get("usage_multiplier")
+    if cal:
+        m_tar = m_tar * S.tri("nearby_calibration", cal, "Measured load at sites nearby")
+        notes.append(f"Usage scaled toward metered sites nearby (multiplier {cal[1]:.2f}, range {cal[0]:.2f} to {cal[2]:.2f}).")
 
     loads: list[Load] = []
     years_grid = np.ones((n_draws, NY))

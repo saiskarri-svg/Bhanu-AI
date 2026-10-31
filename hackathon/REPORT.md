@@ -52,3 +52,16 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 - OpenStreetMap shows a minor power line 0.38 km from Benichab. Worth checking before using it in the pitch.
 - Engine costs are 2021 Omorate prices (generation about $2,133/kWp). Replace with current quotes before the pitch?
 - Paper links on Sources are search links; I did not have the DOIs to hand.
+
+## Nearby measured load and old or missing pictures (2026-10-31)
+
+**Done**
+- Footprints from all three sources. Google alone sees 51% of roofs at Talek, 57% at Benichab, 69% at Bulongwa, 81% at Kychom, 90 to 91% at Kitobo and Gbamu Gbamu. Benichab's merged count (340) now matches Fereshteh's map (325).
+- Homes built since the data date are added at household growth, using Google's 2023 date where Google already sees 80% or more of roofs.
+- Measured load within 1,000 miles pulls each forecast: Talek x0.78, Bulongwa x0.74, Kitobo x0.81 (three East African sites use less than the published ranges suggest), Gbamu Gbamu x1.14 (one weak Nigeria study), Kychom and Benichab unchanged (no site in range).
+- The adjustment is inside the engine run (opt-in hook in `demand_forecast.py`, 11 tests pass), so sizing and tariffs use it too.
+
+**Decisions for Sai (and Fereshteh)**
+- Zenodo (Kenya and Nigeria smart-meter data, 24 mini-grids) and MDPI are blocked from this cloud box. Download the Zenodo dataset on a laptop, or allow zenodo.org in the environment's network settings, and I will add its sites to measured_sites.csv.
+- Fereshteh: the engine has one new opt-in hook (`calibration.usage_multiplier`), three lines after the tariff factor. Please review.
+- The North Central Nigeria figure (1 to 3 kWh a day per home) is ten times other sites; it has low weight. Keep or drop?

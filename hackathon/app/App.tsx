@@ -125,7 +125,7 @@ const App: React.FC = () => {
             <button onClick={() => goTab(0)} className="shrink-0 h-9 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
           </div>
         )}
-        {tab === 0 && <SitePage site={site} buildings={buildings} sum={sum} onNext={() => goTab(1)} />}
+        {tab === 0 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(1)} />}
         {tab >= 1 && tab <= 3 && !eng && <NoEngine />}
         {tab === 1 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(2)} />}
         {tab === 2 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(3)} />}

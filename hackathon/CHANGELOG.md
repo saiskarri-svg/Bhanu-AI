@@ -11,9 +11,12 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 - **Held-out test:** `pipeline/holdout_tags.py` writes `app/data/holdout/tags.json` (OSM-tagged buildings from other villages) for the Validation tab.
 - **Pitch kit:** `PITCH.md` (3-minute script), `IMPACT.md` (one-page impact estimate).
 - **Fereshteh's toolkit:** `forecast/` (village_landuse.py maps a village, demand_forecast.py gives a 5-year forecast with ranges, HOMER 8760 files, sizing and tariff risk, validate command; ranges in assumptions.yaml). Benichab, Mauritania example in `forecast/examples/`.
+- **Measured sites:** `pipeline/measured_sites.csv` (nearby calibration within 1,000 miles; add partner or Zenodo rows here).
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
 
 ## 2026-10-31
+
+- **Nearby measured load and old pictures:** buildings now come from Overture's merged Google, Microsoft and OpenStreetMap footprints (plus Google points the others miss, 6 m duplicate check), with source and record year per building and Google's own count kept as `coverage`. Homes built since the data date are added at household growth (3%, Mauritania 3.1%). New `pipeline/measured_sites.csv` (Sitolo MW, PowerGen TZ, Rwanda rural, North Central NG, each sourced and weighted); `run_engine.py` pulls each village toward metered sites within 1,000 miles through an opt-in `calibration.usage_multiplier` hook added to the engine (tests still pass). Site tab: Footprint sources and dates; Demand tab: Measured load within 1,000 miles. Pitch and impact numbers updated.
 
 - **Sources:** every modelled number on Site, Demand, Growth and money and Validation carries a "Source:" line (`components/refs.tsx`, `Cite`); each driver shows its source; Method lists every reference grouped by what it feeds, with "assumption" in amber where no published source exists. `sources.ts` replaced by `refs.tsx`.
 

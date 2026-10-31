@@ -4,6 +4,7 @@ import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend,
 import type { Estimate, SiteData } from './model';
 import type { Engine } from './engine';
 import { Cite, DRIVER_SRC } from './refs';
+import { NearbyBox } from './Nearby';
 import { n0, n1, pc } from './format';
 
 // A range bar: P10 to P90 band with the P50 mark, on a shared scale
@@ -156,6 +157,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
           )}
         </div>
       </Box>
+
+      <NearbyBox eng={eng} name={site.name} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <Box>

@@ -6,6 +6,8 @@ import { CLASSES, CLS_LABEL } from './model';
 import { n0, pc } from './format';
 import { FLAG, SITES } from './sites';
 import { Cite } from './refs';
+import { FootprintBox } from './Nearby';
+import type { Engine } from './engine';
 
 const COLOR = { res: 'var(--res)', com: 'var(--com)', health: 'var(--health)', school: 'var(--school)', other: 'var(--other)' };
 
@@ -65,7 +67,7 @@ export const SitePicker: React.FC<{ id: string; onPick: (id: string) => void; on
   );
 };
 
-export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: ClassSummary; onNext: () => void }> = ({ site, buildings, sum, onNext }) => {
+export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: ClassSummary; eng?: Engine; onNext: () => void }> = ({ site, buildings, sum, eng, onNext }) => {
   const [sel, setSel] = React.useState<number | null>(null);
   const [rows, setRows] = React.useState(10);
   const [sort, setSort] = React.useState<'area' | 'conf' | 'cls'>('area');
@@ -83,7 +85,7 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
   return (
     <>
       <StatStrip cols={4} stats={[
-        { label: 'Buildings in 1 km', value: n0(total), unit: 'roofs', note: <>{n0(sum.tagged)} tagged on the map, the rest estimated<Cite className="mt-1" k={['openbuildings']} /></> },
+        { label: 'Buildings in 1 km', value: n0(total), unit: 'roofs', note: <>{n0(sum.tagged)} tagged on the map, the rest estimated<Cite className="mt-1" k={['openbuildings', 'overture']} /></> },
         { label: 'Residential', value: n0(sum.expected.res), unit: 'buildings', tint: 'var(--res)', note: <>Commercial {n0(sum.expected.com)} · Other {n0(sum.expected.other)} (estimated)<Cite className="mt-1" k={['overture', 'assumption']} /></> },
         { label: 'Health and schools', value: n0(sum.expected.health + sum.expected.school), unit: 'buildings', tint: 'var(--health)', note: <>{n0(sum.expected.health)} health, {n0(sum.expected.school)} school (estimated)<Cite className="mt-1" k={['overture', 'assumption']} /></> },
         { label: 'Roof area', value: n0(roof), unit: 'm²', tint: 'var(--sun)', note: <>{site.grid.dist_km != null ? `Nearest mapped grid line ${site.grid.dist_km} km away${site.grid.dist_km < 5 ? '. Check whether the village is already connected or the grid will arrive soon.' : ''}` : 'No mapped grid line within 40 km'}<Cite className="mt-1" k={site.grid.dist_km != null && site.grid.dist_km < 5 ? ['openbuildings', 'overture', 'peters'] : ['openbuildings', 'overture']} /></> },
@@ -112,10 +114,16 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
               </p>
             </div>
           </Box>
+          {eng?.age && (
+            <Box>
+              <BoxHeader title="Footprint sources and dates" meta="Pictures can be old or missing" />
+              <div className="px-5 pb-5"><FootprintBox eng={eng} total={buildings.length} coverage={site.coverage} /></div>
+            </Box>
+          )}
           <Box>
             <BoxHeader title="Where the data comes from" />
             <ul className="px-5 pb-5 text-sm space-y-2 text-muted">
-              <li><span className="text-fg">Footprints:</span> Google Open Buildings v3, confidence 70% or more. Area is the footprint, not floor space.</li>
+              <li><span className="text-fg">Footprints:</span> Overture's merged set of Google Open Buildings, Microsoft ML Buildings and OpenStreetMap (duplicates removed), plus Google buildings with 70% or more confidence that the others miss. Area is the footprint, not floor space.</li>
               <li><span className="text-fg">Tags, places, roads, power lines:</span> Overture Maps (includes OpenStreetMap). Footprint sources here: {Object.entries(obs).map(([k, v]) => `${k} ${n0(Number(v))}`).join(', ')}.</li>
               <li><span className="text-fg">Night light:</span> {site.viirs != null ? `${site.viirs.toFixed(2)} nW/cm²/sr (VIIRS)` : 'not loaded in this prototype, so local spending power stays a wide range.'}</li>
               {plant && <li><span className="text-fg">Existing mini-grid:</span> OpenStreetMap shows a solar plant "{plant.name ?? 'unnamed'}" {plant.output ? `rated ${plant.output}` : ''} {Math.round(plant.d_km * 1000)} m from the centre. See Validation.</li>}
