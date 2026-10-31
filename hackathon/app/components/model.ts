@@ -19,6 +19,7 @@ export interface SiteData {
   grid: { dist_km: number | null; nearest: string | null; searched_km: number; note: string; plants?: Plant[] };
   viirs: number | null;
   coverage?: { google_alone: number; merged: number };
+  outlines?: (number[] | null)[];
   buildings: RawBuilding[];
   places: Place[];
   roads: { c: string; p: [number, number][] }[];

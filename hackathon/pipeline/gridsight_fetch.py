@@ -232,6 +232,15 @@ def main():
     allpts = STRtree([Point(p[4], p[5]) for p in pts]) if pts else None
     markets = [p for p in places if p['cat'] and any(k in p['cat'] for k in ('market', 'shopping'))]
     out_b = []
+    outlines = []
+    for la, lo, area, conf, x, y, pidx, src, year in pts:
+        if pidx is not None:
+            g = polys[pidx]
+            g = max(g.geoms, key=lambda q: q.area) if g.geom_type == 'MultiPolygon' else g
+            ring = g.simplify(0.5).exterior.coords[:-1]
+            outlines.append([v for cx_, cy_ in ring[:24] for v in (round((cx_ - x) * 10), round((cy_ - y) * 10))])
+        else:
+            outlines.append(None)
     for la, lo, area, conf, x, y, pidx, src, year in pts:
         pt = Point(x, y)
         osm, shape = None, None
@@ -281,6 +290,8 @@ def main():
         fields=['lat', 'lon', 'area_m2', 'ob_conf', 'osm_class', 'poi_cat', 'poi_conf', 'd_road_m', 'd_main_road_m', 'n_within_50m', 'elongation', 'compactness', 'd_market_m', 'source', 'source_year'],
         footprint_note='source: G Google Open Buildings, M Microsoft ML Buildings, O OpenStreetMap; source_year: date of that source record (Google dataset release, OSM last edit), not the photo date',
         buildings=out_b,
+        outlines=outlines,
+        outline_note='outline: x, y pairs in decimetres east and north of the building centre, simplified to 0.5 m; null where only a Google point exists',
         places=[{k: v for k, v in p.items() if k not in ('x', 'y')} for p in places if math.hypot(p['x'], p['y']) <= a.radius + 300],
         roads=roads,
         power_lines=gl,

@@ -6,6 +6,19 @@ import { ENGINE } from './engine';
 import { SITES, FLAG } from './sites';
 import { btn, StatusDot } from './ui';
 import { n0, n1, pc, usd } from './format';
+import { Map3D } from './Map3D';
+import type { Map3DHandle, Projected } from './Map3D';
+
+const useThemeKey = () => {
+  const get = () => `${document.documentElement.getAttribute('data-theme') ?? ''}${window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'd' : 'l'}`;
+  const [k, setK] = React.useState(get);
+  React.useEffect(() => {
+    const mo = new MutationObserver(() => setK(get())); mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)'); const on = () => setK(get()); mq?.addEventListener?.('change', on);
+    return () => { mo.disconnect(); mq?.removeEventListener?.('change', on); };
+  }, []);
+  return k;
+};
 
 // Full-screen map view: the village drawn from its coordinates, a summary
 // panel on the left, the village list on the right and callouts on the
@@ -26,6 +39,41 @@ const useSize = (ref: React.RefObject<HTMLElement>) => {
   return s;
 };
 
+// Donut of who uses the power, with the day's total in the middle
+const Donut: React.FC<{ segs: { k: string; v: number; c: string }[]; label: string; sub: string }> = ({ segs, label, sub }) => {
+  const tot = segs.reduce((a, s) => a + s.v, 0) || 1, r = 38, C = 2 * Math.PI * r;
+  let acc = 0;
+  return (
+    <svg viewBox="0 0 100 100" className="w-full max-w-[132px] mx-auto" role="img" aria-label={`${label} ${sub}: ${segs.map(s => `${s.k} ${Math.round((s.v / tot) * 100)}%`).join(', ')}`}>
+      <circle cx="50" cy="50" r={r} fill="none" stroke="var(--surface-2)" strokeWidth="10" />
+      {segs.map(s => { const len = (s.v / tot) * C; const el = <circle key={s.k} cx="50" cy="50" r={r} fill="none" stroke={s.c} strokeWidth="10" strokeDasharray={`${Math.max(0, len - 1.5)} ${C}`} strokeDashoffset={-acc} transform="rotate(-90 50 50)" />; acc += len; return el; })}
+      <text x="50" y="50" textAnchor="middle" fontSize="17" fontWeight="600" fill="var(--fg)" style={{ fontFamily: 'Saira, sans-serif' }}>{label}</text>
+      <text x="50" y="64" textAnchor="middle" fontSize="8" fill="var(--muted)">{sub}</text>
+    </svg>
+  );
+};
+
+// Half-circle gauge: demand as a share of what the system can make, with the P10 to P90 band
+const Gauge: React.FC<{ value: number; lo: number; hi: number }> = ({ value, lo, hi }) => {
+  const max = 1.5, a = (f: number) => Math.PI * (1 - Math.min(max, Math.max(0, f)) / max);
+  const pt = (f: number, r: number) => [50 + r * Math.cos(a(f)), 58 - r * Math.sin(a(f))];
+  const arc = (f0: number, f1: number, r: number) => { const [x0, y0] = pt(f0, r), [x1, y1] = pt(f1, r); return `M${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1}`; };
+  const tone = value > 1 ? 'var(--bad)' : value < 0.6 ? 'var(--warn)' : 'var(--ok)';
+  const [nx, ny] = pt(value, 30);
+  return (
+    <svg viewBox="0 0 100 72" className="w-full max-w-[150px] mx-auto" role="img" aria-label={`Demand is ${Math.round(value * 100)}% of what the system can make (range ${Math.round(lo * 100)} to ${Math.round(hi * 100)}%)`}>
+      <path d={arc(0, max, 38)} fill="none" stroke="var(--surface-2)" strokeWidth="9" />
+      <path d={arc(0.6, 1, 38)} fill="none" stroke="var(--ok)" strokeOpacity="0.25" strokeWidth="9" />
+      <path d={arc(lo, hi, 38)} fill="none" stroke={tone} strokeOpacity="0.55" strokeWidth="9" />
+      <line x1="50" y1="58" x2={nx} y2={ny} stroke="var(--fg)" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="50" cy="58" r="3" fill="var(--fg)" />
+      <text x="50" y="71" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--fg)" style={{ fontFamily: 'Saira, sans-serif' }}>{Math.round(value * 100)}%</text>
+      <text x="8" y="70" fontSize="6" fill="var(--muted)">0</text>
+      <text x="85" y="70" fontSize="6" fill="var(--muted)">150%</text>
+    </svg>
+  );
+};
+
 interface Callout { key: string; x: number; y: number; label: string; value: string; unit: string; note: string; color: string }
 
 export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: Engine; siteId: string; onPick: (id: string) => void; goTab: (t: number) => void }> =
@@ -33,6 +81,11 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     const box = React.useRef<HTMLDivElement>(null);
     const { w: W, h: H } = useSize(box);
     const wide = W >= 1024;
+    const [mode, setMode] = React.useState<'2d' | '3d'>(() => (window.innerWidth >= 1024 ? '3d' : '2d'));
+    const theme = useThemeKey();
+    const m3 = React.useRef<Map3DHandle>(null);
+    const [pj, setPj] = React.useState<Projected | null>(null);
+    React.useEffect(() => setPj(null), [mode, site.name]);
     const kx = 111320 * Math.cos((site.lat * Math.PI) / 180), ky = 110574;
     const proj = React.useCallback((la: number, lo: number): [number, number] => [(lo - site.lon) * kx, -(la - site.lat) * ky], [site, kx]);
 
@@ -77,12 +130,18 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
       return out;
     }, [eng, buildings, plant, proj]);
 
+    const [yr, setYr] = React.useState(5);
+    const [di, setDi] = React.useState(1);
     const S = eng?.summary;
     const e1 = S?.energy_kwh_per_day[0], e5 = S?.energy_kwh_per_day[4];
     const p50 = eng?.designs.find(d => d.design.startsWith('P50'));
     const r5 = p50 && eng?.risk.find(r => r.design === p50.design && r.year === 5);
     const t85 = eng?.tariffs.find(t => t.tariff_usd_per_kwh === 0.85);
-    const s5 = eng?.sectors[4];
+    const s5 = eng?.sectors[yr - 1];
+    const des = eng?.designs[di];
+    const solarDay = des ? des.capacity_kwh_day : 0;
+    const demDay = S ? S.energy_kwh_per_day[yr - 1] : undefined;
+    const rk = des && eng?.risk.find(r => r.design === des.design && r.year === yr);
     const segs = s5 ? [
       { k: 'Homes', v: s5.Households, c: 'var(--res)' }, { k: 'Shops', v: s5.Businesses, c: 'var(--com)' },
       { k: 'Institutions', v: s5.Institutions, c: 'var(--school)' }, { k: 'Machines', v: s5['Productive use'], c: 'var(--pue)' },
@@ -106,20 +165,46 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
                   <p className="text-[11px] text-muted tabular-nums">{n0(r.p10)} to {n0(r.p90)}</p>
                 </div>); })}
             </div>
-            <div className="space-y-2">
-              <p className="text-xs text-muted">Who uses the power, year 5</p>
-              <div className="flex h-2 rounded-full overflow-hidden bg-surface-2">{segs.map(s => <span key={s.k} style={{ width: `${(s.v / segTot) * 100}%`, background: s.c }} />)}</div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted">Year after connection</p>
+                <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Year">
+                  {[1, 2, 3, 4, 5].map(y => <button key={y} role="radio" aria-checked={yr === y} onClick={() => setYr(y)} className={`h-7 w-7 text-xs tabular-nums ${yr === y ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{y}</button>)}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <figure className="min-w-0 text-center">
+                  <Donut segs={segs} label={demDay ? n0(demDay.p50) : '-'} sub="kWh a day" />
+                  <figcaption className="text-[11px] text-muted mt-1">Who uses the power</figcaption>
+                </figure>
+                <figure className="min-w-0 text-center">
+                  <Gauge value={demDay ? demDay.p50 / Math.max(1, solarDay) : 0} lo={demDay ? demDay.p10 / Math.max(1, solarDay) : 0} hi={demDay ? demDay.p90 / Math.max(1, solarDay) : 0} />
+                  <figcaption className="text-[11px] text-muted mt-1">Demand against what the {des?.design.split(' ')[0]} system makes</figcaption>
+                </figure>
+              </div>
               <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">{segs.map(s => (
                 <li key={s.k} className="flex items-center justify-between gap-2 min-w-0"><span className="flex items-center gap-1.5 truncate"><span className="h-2 w-2 rounded-sm shrink-0" style={{ background: s.c }} />{s.k}</span><span className="tabular-nums text-muted">{pc(s.v / segTot)}</span></li>))}</ul>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted">System size</p>
+                <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="System size">
+                  {(eng?.designs ?? []).map((d, i) => <button key={d.design} role="radio" aria-checked={di === i} onClick={() => setDi(i)} className={`h-7 px-2 text-xs ${di === i ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{d.design.split(' ')[0]}</button>)}
+                </div>
+              </div>
+              {des && rk && (
+                <div className="text-sm space-y-1.5">
+                  <div className="flex justify-between"><span className="text-muted">Solar and battery</span><span className="tabular-nums">{n0(des.pv_kwp)} kWp · {n0(des.battery_kwh)} kWh</span></div>
+                  <div className="flex justify-between"><span className="text-muted">Build cost (rough)</span><span className="tabular-nums">{usd(des.capex_usd)}</span></div>
+                  <div className="flex justify-between gap-2"><span className="text-muted">Brownouts, year {yr}</span><StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot></div>
+                  <div className="flex justify-between gap-2"><span className="text-muted">Under 60% used, year {yr}</span><StatusDot tone={rk.p_underused > 0.5 ? 'warn' : 'ok'}>{pc(rk.p_underused)}</StatusDot></div>
+                  <div className="flex justify-between"><span className="text-muted">Cost per kWh, year {yr}</span><span className="tabular-nums">${rk.cost_per_kwh_p50.toFixed(2)}</span></div>
+                </div>
+              )}
             </div>
-            {p50 && r5 && (
-              <div className="text-sm space-y-1.5">
-                <div className="flex justify-between"><span className="text-muted">Peak, year 5</span><span className="tabular-nums">{n1(S!.peak_kw[4].p50)} kW</span></div>
-                <div className="flex justify-between"><span className="text-muted">Customers, year 5</span><span className="tabular-nums">{n0(S!.customers[4].p50)}</span></div>
-                <div className="flex justify-between"><span className="text-muted">Solar and battery (P50)</span><span className="tabular-nums">{n0(p50.pv_kwp)} kWp · {n0(p50.battery_kwh)} kWh</span></div>
-                <div className="flex justify-between"><span className="text-muted">Build cost (rough)</span><span className="tabular-nums">{usd(p50.capex_usd)}</span></div>
-                <div className="flex justify-between gap-2"><span className="text-muted">Brownout risk, year 5</span><StatusDot tone={r5.p_brownouts > 0.3 ? 'bad' : r5.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(r5.p_brownouts)}</StatusDot></div>
-                {t85 && <div className="flex justify-between gap-2"><span className="text-muted">Covers cost at $0.85/kWh</span><StatusDot tone={t85.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : 'warn'}>{pc(t85.p_revenue_covers_cost_year5)}</StatusDot></div>}
+            {S && (
+              <div className="text-sm space-y-1.5 border-t border-line pt-3">
+                <div className="flex justify-between"><span className="text-muted">Peak, year {yr}</span><span className="tabular-nums">{n1(S.peak_kw[yr - 1].p50)} kW</span></div>
+                <div className="flex justify-between"><span className="text-muted">Customers, year {yr}</span><span className="tabular-nums">{n0(S.customers[yr - 1].p50)}</span></div>
+                {t85 && <div className="flex justify-between gap-2"><span className="text-muted">Covers cost at $0.85/kWh (P50 size)</span><StatusDot tone={t85.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : 'warn'}>{pc(t85.p_revenue_covers_cost_year5)}</StatusDot></div>}
               </div>
             )}
             <p className="text-xs text-muted">Grid: {site.grid.dist_km != null ? `mapped line ${site.grid.dist_km} km away` : 'no mapped line within 40 km'}{eng?.nearby?.sites.length ? ` · ${eng.nearby.sites.length} metered ${eng.nearby.sites.length === 1 ? 'site' : 'sites'} within 1,000 miles` : ' · no metered site within 1,000 miles'}. Rough guide.</p>
@@ -148,7 +233,9 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     return (
       <div className="lg:relative">
         <div ref={box} className="relative h-[62vh] lg:h-[calc(100dvh-4rem)] overflow-hidden bg-[var(--map-bg)] select-none">
-          <svg className="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing" viewBox={`${v.x} ${v.y} ${W * px} ${H * px}`}
+          {mode === '3d' && <Map3D ref={m3} site={site} buildings={buildings} outlines={site.outlines} theme={theme} padLeft={wide ? 400 : 0} padRight={wide ? 236 : 0}
+            anchors={callouts.map(c => ({ key: c.key, x: c.x, y: c.y, h: c.key === 'plant' ? 2 : 5 }))} onProject={setPj} />}
+          {mode === '2d' && <svg className="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing" viewBox={`${v.x} ${v.y} ${W * px} ${H * px}`}
             role="img" aria-label={`Map of ${buildings.length} buildings in ${site.name}, coloured by estimated use`}
             onWheel={e => { const r = box.current!.getBoundingClientRect(); zoom(e.deltaY > 0 ? 1.2 : 1 / 1.2, e.clientX - r.left, e.clientY - r.top); }}
             onPointerDown={e => { (e.target as Element).setPointerCapture?.(e.pointerId); drag.current = { x: e.clientX, y: e.clientY, vx: v.x, vy: v.y }; }}
@@ -165,18 +252,19 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               <circle key={i} cx={x} cy={y} r={Math.max(Math.sqrt(b.area / Math.PI), px * 1.8)} fill={COLOR[b.cls]} fillOpacity={0.45 + 0.5 * b.conf} />); })}
             {plant && (() => { const [x, y] = proj(plant.lat, plant.lon); const s = px * 10; return <rect x={x - s} y={y - s} width={2 * s} height={2 * s} rx={px * 2} fill="var(--sun)" />; })()}
             <text x={site.radius_m * 0.72} y={-site.radius_m * 0.72} fontSize={px * 11} fill="var(--muted)">{site.radius_m / 1000} km</text>
-          </svg>
+          </svg>}
           {/* Callouts: boxes sit in fixed spots around the village, with a leader line to the building */}
           {(() => {
-            const [cx, cy] = toScreen(0, 0);
-            const rs = site.radius_m / v.mpp;
+            if (mode === '3d' && !pj) return null;
+            const [cx, cy] = mode === '3d' ? pj!.centre : toScreen(0, 0);
+            const rs = mode === '3d' ? pj!.r * 0.62 : site.radius_m / v.mpp;
             const SLOT: Record<string, [number, number]> = { homes: [0.95, -0.45], biz: [0.75, 0.72], inst: [-0.95, -0.55], plant: [-0.9, 0.55] };
             const half = wide ? 110 : 62;
             const minX = (wide ? 400 : 0) + half, maxX = W - (wide ? 252 : 56) - half;
             const items = callouts.map(c => {
-              const [sx, sy] = toScreen(c.x, c.y);
+              const [sx, sy] = mode === '3d' ? (pj!.anchors[c.key] ?? [-1, -1]) : toScreen(c.x, c.y);
               const [fx, fy] = SLOT[c.key] ?? [0.8, 0];
-              const bx = Math.min(maxX, Math.max(minX, cx + fx * rs)), by = Math.min(H - (wide ? 60 : 96), Math.max(wide ? 56 : 30, cy + fy * rs));
+              const bx = Math.min(maxX, Math.max(minX, cx + fx * rs)), by = Math.min(H - (wide ? 60 : 96), Math.max(wide ? 100 : 76, cy + fy * rs));
               return { c, sx, sy, bx, by };
             }).filter(i => i.sx > 0 && i.sy > 0 && i.sx < W && i.sy < H);
             return (
@@ -195,11 +283,14 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               </div>
             );
           })()}
+          <div className="absolute top-3 left-3 lg:top-4 lg:left-[400px] flex rounded-ctl border border-line overflow-hidden shadow-pop" role="radiogroup" aria-label="Map style">
+            {(['2d', '3d'] as const).map(m => <button key={m} role="radio" aria-checked={mode === m} onClick={() => setMode(m)} className={`h-9 px-3 text-xs ${mode === m ? 'bg-line text-fg font-medium' : 'bg-surface text-muted hover:text-fg'}`}>{m === '2d' ? 'Flat' : '3D'}</button>)}
+          </div>
           {/* Controls */}
-          <div className="absolute right-3 bottom-3 lg:right-[252px] flex flex-col gap-1">
-            <button aria-label="Zoom in" onClick={() => zoom(1 / 1.5)} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">+</button>
-            <button aria-label="Zoom out" onClick={() => zoom(1.5)} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">-</button>
-            <button aria-label="Fit village" onClick={() => setV(fit())} className="h-9 w-9 rounded-ctl bg-surface border border-line text-[11px] text-muted hover:bg-line">fit</button>
+          <div className="absolute right-3 bottom-3 lg:right-[252px] flex flex-col gap-1 w-9">
+            <button aria-label="Zoom in" onClick={() => (mode === '3d' ? m3.current?.zoom(0.75) : zoom(1 / 1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">+</button>
+            <button aria-label="Zoom out" onClick={() => (mode === '3d' ? m3.current?.zoom(1.33) : zoom(1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">-</button>
+            <button aria-label="Fit village" onClick={() => (mode === '3d' ? m3.current?.reset() : setV(fit()))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-[11px] text-muted hover:bg-line">fit</button>
           </div>
           <div className="absolute left-3 bottom-3 lg:left-[400px] flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted bg-surface border border-line rounded-ctl px-2.5 py-1.5 max-w-[calc(100%-5rem)]">
             {(['res', 'com', 'health', 'school', 'other'] as Cls[]).map(c => <span key={c} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR[c] }} />{CLS_LABEL[c]}</span>)}
