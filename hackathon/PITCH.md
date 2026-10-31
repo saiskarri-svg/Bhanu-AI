@@ -23,7 +23,7 @@ Demand is not fixed. The growth curve shows years 1 to 5 as people buy TVs, frid
 
 **2:20 to 2:45. Does it work?** (screen: Validation tab)
 
-We have no meter data yet, so we tested what we can. The building classifier is scored on tagged buildings from villages it has never seen. And for Gbamu Gbamu, where a real 85 kWp solar plant is mapped, GridSight's roof-only estimate of 72 to 140 kWp brackets what was actually built. Our validation plan scores P50 error and range coverage on held-out metered sites.
+We have no meter data yet, so we tested what we can. The building classifier is scored on tagged buildings from villages it has never seen. And for Gbamu Gbamu, where a real 85 kWp solar plant is mapped, GridSight's roof-only estimate of about 67 to 131 kWp brackets what was actually built. Our validation plan scores P50 error and range coverage on held-out metered sites.
 
 **2:45 to 3:00. Why it scales** (screen: Data sharing tab)
 

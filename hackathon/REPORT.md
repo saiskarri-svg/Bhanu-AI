@@ -22,11 +22,11 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 
 **Done**
 - Growth and money tab: years 1 to 5 with a widening band; appliance path; sizing for P50, P70 or P90 demand in year 1, 3 or 5; brownout and oversize risk; break-even tariff at each point; household bill against the $5 to $20 now spent.
-- Validation tab: how metered validation would work (held-out sites, P50 error, P10 to P90 coverage, baseline), a held-out check of building classes on OSM-tagged villages (building now), and a public sanity check: OpenStreetMap's 85 kWp Gbamu Gbamu plant sits inside GridSight's 72 to 140 kWp range from roofs alone.
+- Validation tab: how metered validation would work (held-out sites, P50 error, P10 to P90 coverage, baseline), a held-out check of building classes on OSM-tagged villages (building now), and a public sanity check: OpenStreetMap's 85 kWp Gbamu Gbamu plant sits inside GridSight's about 67 to 131 kWp range from roofs alone.
 - Data sharing tab: monthly site totals, small-group suppression, neutral data trust, federated learning option, give-to-get, data law.
 - PITCH.md (3 minutes) and IMPACT.md (one page).
 - Model calibration: homes-only load factor now about 20% (brief says about 22%); sample sites land at 17 to 22 kWh per customer per month, inside the 5 to 35 benchmark.
 
 **Decisions for Sai**
 - The P10 to P90 range is about 2x on every site. Without meter data we cannot show it covers 8 in 10 sites; IMPACT.md says so. OK to present it this way?
-- Cost benchmarks (solar $900/kWp, battery $400/kWh, $350 per connection, 10% cost of money) are rough guides. Break-even tariffs come out around $0.50 to $0.60 per kWh without subsidy. Want different numbers?
+- Cost benchmarks (solar $900/kWp, battery $400/kWh, $350 per connection, 10% cost of money) are rough guides. Break-even tariffs come out around $0.60 to $0.75 per kWh without subsidy (Gbamu Gbamu $0.70 at P50, year 3), driven mostly by $350 per connection and 10% cost of money. Want different numbers?

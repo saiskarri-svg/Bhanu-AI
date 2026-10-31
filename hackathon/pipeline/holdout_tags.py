@@ -38,15 +38,17 @@ def main():
     ap.add_argument('--villages', type=int, default=60)
     ap.add_argument('--radius', type=float, default=1500)
     ap.add_argument('--seed', type=int, default=3)
+    ap.add_argument('--countries', default=','.join(COUNTRIES))
     ap.add_argument('--max-homes', type=int, default=60, help='cap on house-like tags kept per village, so one heavily mapped village does not dominate')
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
     fs = s3()
     locs = localities(fs)
     random.seed(a.seed)
-    per = max(1, a.villages // len(COUNTRIES))
+    cs = a.countries.split(',')
+    per = max(1, a.villages // len(cs))
     pick = []
-    for c in COUNTRIES:
+    for c in cs:
         pool = [l for l in locs if l['country'] == c]
         pick += random.sample(pool, min(per, len(pool)))
     bld = ds.dataset(OVERTURE + 'theme=buildings/type=building/', filesystem=fs, format='parquet')

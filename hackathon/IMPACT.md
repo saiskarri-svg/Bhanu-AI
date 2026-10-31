@@ -23,14 +23,14 @@ All figures below are rough guides. Sources: [1] ESMAP / World Bank, *Mini Grids
 ## Impact estimate (illustrative, to be validated)
 
 - **Less over-building.** If a developer can size to P50 or P70 of a 2x range instead of adding a large safety margin to a 7x guess, generation and storage can be about 15 to 25% smaller on sites that would have been oversized (*assumption*). Generation and storage are roughly half of capex (*assumption*), so about 8 to 12% less capital on those sites.
-- **Per site.** For Gbamu Gbamu (1,229 buildings), GridSight suggests about 130 kWp and 300 kWh of battery at P50 for year 3, about $480k all in (rough guide). 10% less capital is about $48k, which lowers the break-even tariff by a similar share.
+- **Per site.** For Gbamu Gbamu (1,229 buildings), GridSight suggests about 120 kWp of solar and 330 kWh of battery at P50 for year 3, about $570k all in with poles, wires and meters for about 650 customers (rough guide). 10% less capital is about $57k, which lowers the break-even tariff by a similar share.
 - **Fewer brownouts.** The sizing panel shows the chance of running short before building. Developers can stage batteries for the upper part of the range instead of discovering it from customer complaints.
 - **At scale.** Applied across even 10% of the $127 billion pipeline [1], 8 to 12% less capital on oversized sites is on the order of $1 billion that could connect more villages (*assumption-driven; order of magnitude only*).
 - **Productive use.** The tool shows how daytime business load lifts the load factor; moving from about 22% to 40% cut the cost of power by about 25% in ESMAP's analysis [1]. That points developers and funders at appliance finance where it changes the tariff most.
 
 ## Against the judging criteria
 
-- **Impact (25%):** validation plan scores P50 error and P10 to P90 coverage on held-out metered sites. Public checks today: building classes on held-out tagged villages; a real 85 kWp plant at Gbamu Gbamu sits inside our 72 to 140 kWp roof-only range.
+- **Impact (25%):** validation plan scores P50 error and P10 to P90 coverage on held-out metered sites. Public checks today: building classes on held-out tagged villages; a real 85 kWp plant at Gbamu Gbamu sits inside our 67 to 131 kWp roof-only range.
 - **Innovation (25%):** demand from footprints with explicit class doubt, Monte Carlo ranges, growth curves with widening bands, and a lender-facing drivers panel.
 - **Sustainability (25%):** open data (Open Buildings CC BY 4.0, OpenStreetMap ODbL), open code, ranges retrainable from shared meter data; fewer oversized systems means less wasted hardware.
 - **Feasibility (15%):** public inputs only; a laptop script fetches any site in about a minute with no logins.
