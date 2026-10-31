@@ -26,6 +26,9 @@
   --other: #8a8a94;
   --pue: #0e8f86;
   --header: rgba(244, 244, 246, 0.8);
+  --map-bg: #e4e5ea;
+  --map-road: #c9cbd3;
+  --map-grid: rgba(0, 0, 0, 0.04);
   --gutter: clamp(16px, 2.6vw, 40px);
 }
 @media (prefers-color-scheme: dark) {
@@ -36,6 +39,7 @@
     --ok: #34d65c; --warn: #ffb547; --bad: #ff6f66; --info: #6ab8ff; --sun: #ffc23d;
     --res: #6ab8ff; --com: #ffb547; --health: #ff6f66; --school: #b49cff; --other: #7a7a84; --pue: #3fd0c6;
     --header: rgba(11, 11, 13, 0.72);
+    --map-bg: #0d0e11; --map-road: #2b2d34; --map-grid: rgba(255, 255, 255, 0.03);
   }
 }
 :root[data-theme="dark"] {
@@ -45,6 +49,7 @@
   --ok: #34d65c; --warn: #ffb547; --bad: #ff6f66; --info: #6ab8ff; --sun: #ffc23d;
   --res: #6ab8ff; --com: #ffb547; --health: #ff6f66; --school: #b49cff; --other: #7a7a84; --pue: #3fd0c6;
   --header: rgba(11, 11, 13, 0.72);
+  --map-bg: #0d0e11; --map-road: #2b2d34; --map-grid: rgba(255, 255, 255, 0.03);
 }
 
 html, body {

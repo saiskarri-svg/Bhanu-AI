@@ -10,10 +10,11 @@ import { DemandPage } from './components/DemandPage';
 import { GrowthPage } from './components/GrowthPage';
 import { ValidationPage } from './components/ValidationPage';
 import { SharingPage } from './components/SharingPage';
+import { MapView } from './components/MapView';
 import { MethodPage } from './components/MethodPage';
 
-const TABS = ['Site', 'Demand', 'Growth and money', 'Validation', 'Data sharing', 'Method'] as const;
-const HASH = ['site', 'demand', 'growth', 'validation', 'data-sharing', 'method'];
+const TABS = ['Map', 'Site', 'Demand', 'Growth and money', 'Validation', 'Data sharing', 'Method'] as const;
+const HASH = ['map', 'site', 'demand', 'growth', 'validation', 'data-sharing', 'method'];
 
 type Theme = 'system' | 'light' | 'dark';
 const store = {
@@ -37,11 +38,11 @@ const ThemeToggle: React.FC = () => {
 };
 
 const STEPS = [
-  { t: 'Count the roofs', tab: 0 },
-  { t: 'Forecast demand', tab: 1 },
-  { t: 'Size and tariff', tab: 2 },
-  { t: 'Check it', tab: 3 },
-  { t: 'Share meter data', tab: 4 },
+  { t: 'Count the roofs', tab: 1 },
+  { t: 'Forecast demand', tab: 2 },
+  { t: 'Size and tariff', tab: 3 },
+  { t: 'Check it', tab: 4 },
+  { t: 'Share meter data', tab: 5 },
 ];
 
 const NoEngine: React.FC = () => (
@@ -97,7 +98,8 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-page mx-auto px-[var(--gutter)] py-6 space-y-6">
+      {tab === 0 && <MapView site={site} buildings={buildings} eng={eng} siteId={siteId} onPick={pick} goTab={goTab} />}
+      {tab > 0 && <main className="max-w-page mx-auto px-[var(--gutter)] py-6 space-y-6">
         <section className="space-y-3">
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-balance">How much power will a village use, before anyone builds there?</h1>
           <ol className="flex gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible" aria-label="Steps">
@@ -110,10 +112,10 @@ const App: React.FC = () => {
               </li>
             ))}
           </ol>
-          {tab === 0 && <p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p>}
+          {tab === 1 && <p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p>}
         </section>
-        {tab === 0 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
-        {tab > 0 && tab < 4 && (
+        {tab === 1 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
+        {tab > 1 && tab < 5 && (
           <div className="flex items-center gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
             <span className="text-muted mr-1 shrink-0">Village</span>
             {SITES.map(s => (
@@ -122,20 +124,20 @@ const App: React.FC = () => {
                 {s.data.name} <span className="text-muted font-normal">· {FLAG[s.data.country] ?? s.data.country}</span>
               </button>
             ))}
-            <button onClick={() => goTab(0)} className="shrink-0 h-9 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
+            <button onClick={() => goTab(1)} className="shrink-0 h-9 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
           </div>
         )}
-        {tab === 0 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(1)} />}
-        {tab >= 1 && tab <= 3 && !eng && <NoEngine />}
-        {tab === 1 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(2)} />}
-        {tab === 2 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(3)} />}
-        {tab === 3 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(4)} />}
-        {tab === 4 && <SharingPage />}
-        {tab === 5 && <MethodPage />}
-      </main>
-      <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
+        {tab === 1 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(2)} />}
+        {tab >= 2 && tab <= 4 && !eng && <NoEngine />}
+        {tab === 2 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(3)} />}
+        {tab === 3 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(4)} />}
+        {tab === 4 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(5)} />}
+        {tab === 5 && <SharingPage />}
+        {tab === 6 && <MethodPage />}
+      </main>}
+      {tab > 0 && <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
         GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Demand engine by Fereshteh (forecast/demand_forecast.py); map, data pipeline and dashboard by GridSight. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
-      </footer>
+      </footer>}
       <BackToTop />
     </div>
   );

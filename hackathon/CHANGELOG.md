@@ -4,7 +4,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## Site at a glance
 
-- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Site, Demand, Growth and money, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
+- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Map (landing), Site, Demand, Growth and money, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
 - **Data:** `app/data/*.json`, one per sample village (Gbamu Gbamu NG, Kychom SL, Benichab MR, Talek KE, Kitobo UG, Bulongwa TZ), 1 km radius, made by `pipeline/gridsight_fetch.py` (`pipeline/fetch_samples.sh` rebuilds all).
 - **Demand engine (main model):** Fereshteh's `forecast/demand_forecast.py`, run on every village by `pipeline/run_engine.py` into `app/data/engine/*.json`; read by `app/components/engine.ts`.
 - **Building-level model (second opinion):** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
@@ -15,6 +15,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
 
 ## 2026-10-31
+
+- **Map view (UI batch 1):** new first tab, full screen map of the village (roads, power lines, buildings by class, mapped plant), left summary panel (year 1 and 5 demand, who uses the power, peak, customers, P50 system, cost, brownout and cost-recovery odds, grid and nearby meters), village rail on the right with year-5 demand, callouts on homes, shops, the likeliest clinic or school and the solar plant (`components/MapView.tsx`, `--map-*` tokens). Phone: map on top, compact callouts, rail and panel below.
 
 - **Nearby measured load and old pictures:** buildings now come from Overture's merged Google, Microsoft and OpenStreetMap footprints (plus Google points the others miss, 6 m duplicate check), with source and record year per building and Google's own count kept as `coverage`. Homes built since the data date are added at household growth (3%, Mauritania 3.1%). New `pipeline/measured_sites.csv` (Sitolo MW, PowerGen TZ, Rwanda rural, North Central NG, each sourced and weighted); `run_engine.py` pulls each village toward metered sites within 1,000 miles through an opt-in `calibration.usage_multiplier` hook added to the engine (tests still pass). Site tab: Footprint sources and dates; Demand tab: Measured load within 1,000 miles. Pitch and impact numbers updated.
 
