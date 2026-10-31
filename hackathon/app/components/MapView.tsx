@@ -213,6 +213,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
             )}
             {WEATHER[siteId] && (() => { const wa = WEATHER[siteId].annual; return (
               <p className="text-xs text-muted">Weather 2015 to 2024: {n1(wa.yield_kwh_kwp_day)} kWh per kWp a day; {wa.days.cloudy} cloudy, {wa.days.rainy} rainy, {wa.days.dusty} dusty days a year. <button onClick={() => goTab(4)} className="underline underline-offset-2 hover:text-fg">Sun and weather</button></p>); })()}
+            {eng?.by_population && <p className="text-xs text-muted">Households: {n0(eng.summary.households[0].p50)} from roofs, {n0(eng.by_population.households[0].p50)} from Meta's population map ({n0(eng.by_population.population)} people). <button onClick={() => goTab(2)} className="underline underline-offset-2 hover:text-fg">Compare</button></p>}
             <p className="text-xs text-muted">Grid: {site.grid.dist_km != null ? `mapped line ${site.grid.dist_km} km away` : 'no mapped line within 40 km'}{eng?.nearby?.sites.length ? ` · ${eng.nearby.sites.length} metered ${eng.nearby.sites.length === 1 ? 'site' : 'sites'} within 1,000 miles` : ' · no metered site within 1,000 miles'}. Rough guide.</p>
             <button onClick={() => goTab(2)} className={`${btn.primary} w-full h-10`}>See the forecast</button>
           </>

@@ -5,6 +5,7 @@ import type { Estimate, SiteData } from './model';
 import type { Engine } from './engine';
 import { Cite, DRIVER_SRC } from './refs';
 import { NearbyBox } from './Nearby';
+import { TwoCounts } from './TwoCounts';
 import { n0, n1, pc } from './format';
 
 // A range bar: P10 to P90 band with the P50 mark, on a shared scale
@@ -85,6 +86,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
           note={`Load factor ${pc(lf5.p50)}. Homes-only grids run near 22%; daytime business use toward 40% cut the cost of power by about 25% (ESMAP 2022).`} cite={['esmap', 'engine']} />
       </div>
       <p className="text-xs text-muted -mt-3">P10 means 1 in 10 simulated futures come in lower; P90 means 1 in 10 come in higher. 4,000 futures. Rough guide, not a site survey.</p>
+
+      <TwoCounts eng={eng} site={site} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Box>

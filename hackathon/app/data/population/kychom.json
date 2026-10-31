@@ -1,0 +1,8 @@
+{
+ "site": "kychom",
+ "population": 2579,
+ "radius_m": 1000,
+ "cells_with_people": 387,
+ "source": "Meta High Resolution Settlement Layer (HRSL), general population, 30 m, latest version on s3://dataforgood-fb-data (CC BY 4.0)",
+ "note": "Modelled from census counts and building detection; the census year differs by country, so fast-growing villages can be undercounted."
+}

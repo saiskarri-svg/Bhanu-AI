@@ -16,6 +16,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **Two household counts side by side:** `pipeline/meta_population.py` reads Meta's HRSL population (30 m, CC BY 4.0, AWS) within each village radius; `run_engine.py` runs the engine a second time from that population (`by_population`). Demand tab: "Two ways to count households" (households, customers, energy, peak and P50 system from roofs and from Meta); Map panel line with both counts. Roofs stay the main count.
+
 - **Fereshteh's clear-sky PV model:** `forecast/clearsky_pv.py` and `test_clearsky.py` added (her toolkit update; calibration hook kept in demand_forecast.py). New `pipeline/pv_hourly.py` runs it for every village with altitude from Copernicus 30 m elevation and NASA POWER temperatures, and scales each month by measured sunlight against clear sky and by dust on panels (agrees with weather.py within 2 to 10%). `run_engine.py` lays the year-5 hourly demand over the P50 system's typical day per month (battery need against usable size). Sun and weather tab: "A typical day in each month", 12 small charts.
 
 - **Sharper satellite pictures:** built from Sentinel-2 bands 4, 3, 2 (not the preview TCI), median of the 2 or 3 clearest recent pictures, one haze floor for all colours, natural saturation, 960 px; the picture fades as you zoom past its 10 m detail (Map flat and 3D, Site map) so the footprints take over. Checked Maxar Open Data (sub-metre, CC BY-NC, disaster events only): no event covers the six villages.

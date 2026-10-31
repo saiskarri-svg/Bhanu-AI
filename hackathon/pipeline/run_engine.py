@@ -249,6 +249,21 @@ def run(path):
                          gen_p50=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p50']],
                          gen_p90=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p90']],
                          gen_outlook=[round(p50['pv_kwp'] * v * (1 + ch.get('mid', 0)), 1) for v in w['monthly']['yield_p50']]))
+    # Second household count: Meta's population map, same settings otherwise
+    popf = DATA / 'population' / f'{path.stem}.json'
+    if popf.exists():
+        pop = json.loads(popf.read_text())
+        s2 = dfc.Site(label=s.label, lat=s.lat, lon=s.lon, population=float(pop['population']), counts=s.counts,
+                      evidence_pct=s.evidence_pct, source='Meta HRSL population')
+        fc2 = dfc.run_forecast(s2, A, n_draws=4000, seed=42)
+        sm2 = fc2.summary()
+        d2, _ = dfc.sizing_risk(fc2)
+        pick = lambda sm, m: [dict(year=int(r['year']), p10=round(r['p10'], 2), p50=round(r['p50'], 2), p90=round(r['p90'], 2)) for r in sm[sm.metric == m].to_dict('records')]
+        p50b = next(x for x in records(d2) if x['design'].startswith('P50'))
+        out['by_population'] = dict(population=pop['population'], source=pop['source'], note=pop['note'],
+                                    households=pick(sm2, 'households'), customers=pick(sm2, 'customers'),
+                                    energy_kwh_per_day=pick(sm2, 'energy_kwh_per_day'), peak_kw=pick(sm2, 'peak_kw'),
+                                    p50_design=dict(pv_kwp=p50b['pv_kwp'], battery_kwh=p50b['battery_kwh'], capex_usd=p50b['capex_usd']))
     pvp = DATA / 'pvday' / f'{path.stem}.json'
     if pvp.exists():
         import datetime as dt
