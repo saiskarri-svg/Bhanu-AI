@@ -5,10 +5,13 @@ import type { SiteData } from './components/model';
 import { classify, draws, drivers, estimate, summarise } from './components/model';
 import { SitePage, SitePicker } from './components/SitePage';
 import { DemandPage } from './components/DemandPage';
+import { GrowthPage } from './components/GrowthPage';
+import { ValidationPage } from './components/ValidationPage';
+import { SharingPage } from './components/SharingPage';
 import { MethodPage } from './components/MethodPage';
 
-const TABS = ['Site', 'Demand', 'Method'] as const;
-const HASH = ['site', 'demand', 'method'];
+const TABS = ['Site', 'Demand', 'Growth and money', 'Validation', 'Data sharing', 'Method'] as const;
+const HASH = ['site', 'demand', 'growth', 'validation', 'data-sharing', 'method'];
 
 type Theme = 'system' | 'light' | 'dark';
 const store = {
@@ -78,10 +81,13 @@ const App: React.FC = () => {
       </header>
 
       <main className="max-w-page mx-auto px-[var(--gutter)] py-6 space-y-6">
-        {tab < 2 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
+        {tab < 4 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
         {tab === 0 && <SitePage site={site} buildings={buildings} sum={sum} onNext={() => goTab(1)} />}
         {tab === 1 && <DemandPage site={site} est={est} drv={drv} />}
-        {tab === 2 && <MethodPage />}
+        {tab === 2 && <GrowthPage site={site} ds={ds} />}
+        {tab === 3 && <ValidationPage site={site} ds={ds} />}
+        {tab === 4 && <SharingPage />}
+        {tab === 5 && <MethodPage />}
       </main>
       <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
         GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.

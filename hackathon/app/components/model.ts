@@ -115,9 +115,9 @@ export const PARAMS: Param[] = [
     plain: 'Shops and bars connect early because power earns them money.', src: 'own estimate' },
   { key: 'kwhCom', label: 'Use per shop or small business', unit: 'kWh/month', lo: 10, mode: 28, hi: 90,
     plain: 'A kiosk with lights and phone charging uses little; a bar with a fridge and music uses much more.', src: 'ESMAP 2022; AMDA benchmarking' },
-  { key: 'pueShare', label: 'Businesses with a machine (mill, welder, freezer)', unit: '%', lo: 0.02, mode: 0.07, hi: 0.15,
+  { key: 'pueShare', label: 'Businesses with a machine (mill, welder, freezer)', unit: '%', lo: 0.01, mode: 0.05, hi: 0.12,
     plain: 'A few heavy daytime users decide the load factor and the cost of power.', src: 'ESMAP 2022 productive use; own estimate' },
-  { key: 'kwhPue', label: 'Use per machine business', unit: 'kWh/month', lo: 100, mode: 280, hi: 700,
+  { key: 'kwhPue', label: 'Use per machine business', unit: 'kWh/month', lo: 80, mode: 220, hi: 600,
     plain: 'A grain mill or welder running a few hours a day.', src: 'ESMAP 2022 productive use' },
   { key: 'kwhHealth', label: 'Use per health facility', unit: 'kWh/month', lo: 80, mode: 250, hi: 700,
     plain: 'A health post with lights, a vaccine fridge and a sterilizer; a health centre uses more.', src: 'WHO and World Bank, Energizing Health 2023' },
@@ -149,7 +149,7 @@ const gauss = (r: () => number) => Math.sqrt(-2 * Math.log(r() + 1e-12)) * Math.
 const norm = (a: number[]) => { const s = a.reduce((x, y) => x + y, 0); return a.map(x => x / s); };
 export const SHAPES: Record<'res' | 'com' | 'pue' | 'health' | 'school' | 'other', number[]> = {
   //        0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
-  res: norm([1.0, 0.8, 0.7, 0.7, 0.7, 0.9, 1.4, 1.3, 0.8, 0.6, 0.6, 0.6, 0.7, 0.7, 0.6, 0.6, 0.7, 1.2, 3.2, 4.4, 4.6, 3.8, 2.6, 1.6]),
+  res: norm([0.5, 0.4, 0.35, 0.35, 0.35, 0.5, 1.0, 0.9, 0.5, 0.35, 0.35, 0.35, 0.4, 0.4, 0.35, 0.35, 0.45, 0.9, 3.0, 4.4, 4.6, 3.6, 2.2, 1.0]),
   com: norm([0.4, 0.3, 0.3, 0.3, 0.3, 0.4, 0.8, 1.4, 1.9, 2.1, 2.2, 2.3, 2.3, 2.2, 2.2, 2.2, 2.2, 2.3, 2.8, 3.0, 2.7, 2.0, 1.2, 0.6]),
   pue: norm([0, 0, 0, 0, 0, 0, 0.3, 1.5, 3.5, 4.5, 4.8, 4.8, 3.5, 4.0, 4.6, 4.4, 3.5, 1.8, 0.4, 0, 0, 0, 0, 0]),
   health: norm([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.2, 1.6, 2.2, 2.4, 2.4, 2.4, 2.3, 2.3, 2.3, 2.2, 2.0, 1.6, 1.5, 1.5, 1.4, 1.2, 1.1, 1.0]),
@@ -161,13 +161,13 @@ export const SEG_LABEL: Record<Seg, string> = { res: 'Homes', com: 'Shops and se
 
 // ---------- One scenario ----------
 export interface Counts { res: number; com: number; health: number; school: number; other: number }
-export interface Scenario { monthly: number; segs: Record<Seg, number>; customers: number; peakKw: number; hourly: number[] }
+export interface Scenario { hh: number; monthly: number; segs: Record<Seg, number>; customers: number; peakKw: number; hourly: number[] }
 const PEAK_FACTOR = 1.25; // within-hour peaks above the hourly average
 
 export function scenario(c: Counts, p: P): Scenario {
   const hh = c.res * p.hhPerRes * p.conn;
   const com = c.com * p.comConn;
-  const pue = Math.max(c.com > 3 ? 1 : 0, c.com * p.pueShare);
+  const pue = Math.max(c.com > 10 ? 1 : 0, c.com * p.pueShare);
   const segs: Record<Seg, number> = {
     res: hh * p.kwhHH * p.econ,
     com: Math.max(0, com - pue) * p.kwhCom * p.econ,
@@ -179,7 +179,7 @@ export function scenario(c: Counts, p: P): Scenario {
   const hourly = new Array(24).fill(0);
   (Object.keys(segs) as Seg[]).forEach(s => { const d = segs[s] / 30; SHAPES[s].forEach((f, h) => { hourly[h] += d * f; }); });
   const monthly = Object.values(segs).reduce((a, x) => a + x, 0);
-  return { monthly, segs, customers: hh + com + c.health + c.school, peakKw: Math.max(...hourly) * PEAK_FACTOR, hourly };
+  return { hh, monthly, segs, customers: hh + com + c.health + c.school, peakKw: Math.max(...hourly) * PEAK_FACTOR, hourly };
 }
 
 export const pct = (xs: number[], q: number) => { const s = [...xs].sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.max(0, Math.round(q * (s.length - 1))))]; };

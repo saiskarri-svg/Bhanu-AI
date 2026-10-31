@@ -15,7 +15,7 @@ export const MethodPage: React.FC = () => (
         <li><span className="text-fg font-medium">3. Turn buildings into customers and kWh.</span> <span className="text-muted">Each class gets a range of households per roof, sign-up rate and monthly use, taken from the sources below.</span></li>
         <li><span className="text-fg font-medium">4. Simulate 1,500 futures.</span> <span className="text-muted">Draw every input from its range at once, and the building classes from their probabilities. Report P10, P50 and P90, not one number.</span></li>
         <li><span className="text-fg font-medium">5. Explain it.</span> <span className="text-muted">Swing each input alone from low to high to show which ones move the answer most.</span></li>
-        <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The ranges are set by hand today. With metered sites they become fitted distributions, checked on sites held back from fitting (see Validation, coming next).</span></li>
+        <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The ranges are set by hand today. With metered sites they become fitted distributions, checked on sites held back from fitting (see Validation).</span></li>
       </ol>
     </Box>
     <Box>

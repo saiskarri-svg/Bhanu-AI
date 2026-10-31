@@ -17,3 +17,16 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 - Map is drawn in SVG from coordinates (tiles cannot load inside the artifact). OK, or try a satellite image later on a laptop?
 - Night lights are not loaded (EOG needs a free login). The pipeline accepts a VIIRS GeoTIFF with `--viirs`. Worth adding before judging?
 - Building class rules are hand-set; with OSM tags for a few villages they could be fitted. Fine for the prototype?
+
+## Batch C, D and E, first pass (2026-10-31)
+
+**Done**
+- Growth and money tab: years 1 to 5 with a widening band; appliance path; sizing for P50, P70 or P90 demand in year 1, 3 or 5; brownout and oversize risk; break-even tariff at each point; household bill against the $5 to $20 now spent.
+- Validation tab: how metered validation would work (held-out sites, P50 error, P10 to P90 coverage, baseline), a held-out check of building classes on OSM-tagged villages (building now), and a public sanity check: OpenStreetMap's 85 kWp Gbamu Gbamu plant sits inside GridSight's 72 to 140 kWp range from roofs alone.
+- Data sharing tab: monthly site totals, small-group suppression, neutral data trust, federated learning option, give-to-get, data law.
+- PITCH.md (3 minutes) and IMPACT.md (one page).
+- Model calibration: homes-only load factor now about 20% (brief says about 22%); sample sites land at 17 to 22 kWh per customer per month, inside the 5 to 35 benchmark.
+
+**Decisions for Sai**
+- The P10 to P90 range is about 2x on every site. Without meter data we cannot show it covers 8 in 10 sites; IMPACT.md says so. OK to present it this way?
+- Cost benchmarks (solar $900/kWp, battery $400/kWh, $350 per connection, 10% cost of money) are rough guides. Break-even tariffs come out around $0.50 to $0.60 per kWh without subsidy. Want different numbers?
