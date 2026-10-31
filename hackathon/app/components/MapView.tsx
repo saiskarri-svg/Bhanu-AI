@@ -95,7 +95,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
 
     // Fit the village between the panels on wide screens
     const fit = React.useCallback(() => {
-      const left = wide ? 400 : 0, right = wide ? 236 : 0;
+      const left = wide ? 400 : 0, right = wide ? 268 : 0;
       const usable = Math.max(200, Math.min(W - left - right, H)) * 0.92;
       const mpp = (2 * site.radius_m) / usable; // metres per pixel
       const cx = left + (W - left - right) / 2;
@@ -134,18 +134,25 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
       return out;
     }, [eng, buildings, plant, proj]);
 
+    // Site settings (right panel)
     const [yr, setYr] = React.useState(5);
     const [di, setDi] = React.useState(1);
+    const [hh, setHh] = React.useState<'roofs' | 'meta'>('roofs');
+    const [tar, setTar] = React.useState(0.85);
+    const meta = hh === 'meta' && !!eng?.by_population;
+    const B = eng?.by_population;
     const S = eng?.summary;
-    const e1 = S?.energy_kwh_per_day[0], e5 = S?.energy_kwh_per_day[4];
-    const p50 = eng?.designs.find(d => d.design.startsWith('P50'));
-    const r5 = p50 && eng?.risk.find(r => r.design === p50.design && r.year === 5);
-    const t85 = eng?.tariffs.find(t => t.tariff_usd_per_kwh === 0.85);
+    const E = meta ? B!.energy_kwh_per_day : S?.energy_kwh_per_day;
+    const PK = meta ? B!.peak_kw : S?.peak_kw;
+    const CU = meta ? B!.customers : S?.customers;
+    const e1 = E?.[0], e5 = E?.[4];
+    const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === tar);
     const s5 = eng?.sectors[yr - 1];
-    const des = eng?.designs[di];
+    const dsel = meta ? 1 : di;
+    const des = meta && B ? { design: 'P50 of year-5 demand', pv_kwp: B.p50_design.pv_kwp, battery_kwh: B.p50_design.battery_kwh, capex_usd: B.p50_design.capex_usd, capacity_kwh_day: B.energy_kwh_per_day[4].p50 * 1.1 } : eng?.designs[di];
     const solarDay = des ? des.capacity_kwh_day : 0;
-    const demDay = S ? S.energy_kwh_per_day[yr - 1] : undefined;
-    const rk = des && eng?.risk.find(r => r.design === des.design && r.year === yr);
+    const demDay = E ? E[yr - 1] : undefined;
+    const rk = !meta && des ? eng?.risk.find(r => r.design === des.design && r.year === yr) : undefined;
     const segs = s5 ? [
       { k: 'Homes', v: s5.Households, c: 'var(--res)' }, { k: 'Shops', v: s5.Businesses, c: 'var(--com)' },
       { k: 'Institutions', v: s5.Institutions, c: 'var(--school)' }, { k: 'Machines', v: s5['Productive use'], c: 'var(--pue)' },
@@ -170,12 +177,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
                 </div>); })}
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted">Year after connection</p>
-                <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Year">
-                  {[1, 2, 3, 4, 5].map(y => <button key={y} role="radio" aria-checked={yr === y} onClick={() => setYr(y)} className={`h-7 w-7 text-xs tabular-nums ${yr === y ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{y}</button>)}
-                </div>
-              </div>
+              <p className="text-xs text-muted">Year {yr} after connection · {des?.design.split(' ')[0]} system · households from {meta ? "Meta's population map" : 'roofs'}</p>
               <div className="grid grid-cols-2 gap-3">
                 <figure className="min-w-0 text-center">
                   <Donut segs={segs} label={demDay ? n0(demDay.p50) : '-'} sub="kWh a day" />
@@ -188,32 +190,31 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               </div>
               <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">{segs.map(s => (
                 <li key={s.k} className="flex items-center justify-between gap-2 min-w-0"><span className="flex items-center gap-1.5 truncate"><span className="h-2 w-2 rounded-sm shrink-0" style={{ background: s.c }} />{s.k}</span><span className="tabular-nums text-muted">{pc(s.v / segTot)}</span></li>))}</ul>
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted">System size</p>
-                <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="System size">
-                  {(eng?.designs ?? []).map((d, i) => <button key={d.design} role="radio" aria-checked={di === i} onClick={() => setDi(i)} className={`h-7 px-2 text-xs ${di === i ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{d.design.split(' ')[0]}</button>)}
-                </div>
-              </div>
-              {des && rk && (
+              {des && (
                 <div className="text-sm space-y-1.5">
                   <div className="flex justify-between"><span className="text-muted">Solar and battery</span><span className="tabular-nums">{n0(des.pv_kwp)} kWp · {n0(des.battery_kwh)} kWh</span></div>
                   <div className="flex justify-between"><span className="text-muted">Build cost (rough)</span><span className="tabular-nums">{usd(des.capex_usd)}</span></div>
+                  {rk ? (<>
                   <div className="flex justify-between gap-2"><span className="text-muted">Brownouts, year {yr}</span><StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot></div>
                   <div className="flex justify-between gap-2"><span className="text-muted">Under 60% used, year {yr}</span><StatusDot tone={rk.p_underused > 0.5 ? 'warn' : 'ok'}>{pc(rk.p_underused)}</StatusDot></div>
                   <div className="flex justify-between"><span className="text-muted">Cost per kWh, year {yr}</span><span className="tabular-nums">${rk.cost_per_kwh_p50.toFixed(2)}</span></div>
+                  </>) : <p className="text-xs text-muted">Brownout and cost odds are run for the roof count; switch Households to Roofs to see them.</p>}
                 </div>
               )}
             </div>
             {S && (
               <div className="text-sm space-y-1.5 border-t border-line pt-3">
-                <div className="flex justify-between"><span className="text-muted">Peak, year {yr}</span><span className="tabular-nums">{n1(S.peak_kw[yr - 1].p50)} kW</span></div>
-                <div className="flex justify-between"><span className="text-muted">Customers, year {yr}</span><span className="tabular-nums">{n0(S.customers[yr - 1].p50)}</span></div>
-                {t85 && <div className="flex justify-between gap-2"><span className="text-muted">Covers cost at $0.85/kWh (P50 size)</span><StatusDot tone={t85.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : 'warn'}>{pc(t85.p_revenue_covers_cost_year5)}</StatusDot></div>}
+                <div className="flex justify-between"><span className="text-muted">Peak, year {yr}</span><span className="tabular-nums">{n1(PK![yr - 1].p50)} kW</span></div>
+                <div className="flex justify-between"><span className="text-muted">Customers, year {yr}</span><span className="tabular-nums">{n0(CU![yr - 1].p50)}</span></div>
+                {tsel && !meta && <>
+                  <div className="flex justify-between gap-2"><span className="text-muted">Covers cost at ${tar.toFixed(2)}/kWh (P50, year 5)</span><StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot></div>
+                  <div className="flex justify-between"><span className="text-muted">Home bill at that tariff, year 5</span><span className="tabular-nums">${tsel.year5_household_bill_usd_month_p50.toFixed(2)} a month</span></div>
+                </>}
               </div>
             )}
             {WEATHER[siteId] && (() => { const wa = WEATHER[siteId].annual; return (
               <p className="text-xs text-muted">Weather 2015 to 2024: {n1(wa.yield_kwh_kwp_day)} kWh per kWp a day; {wa.days.cloudy} cloudy, {wa.days.rainy} rainy, {wa.days.dusty} dusty days a year. <button onClick={() => goTab(4)} className="underline underline-offset-2 hover:text-fg">Sun and weather</button></p>); })()}
-            {eng?.by_population && <p className="text-xs text-muted">Households: {n0(eng.summary.households[0].p50)} from roofs, {n0(eng.by_population.households[0].p50)} from Meta's population map ({n0(eng.by_population.population)} people). <button onClick={() => goTab(2)} className="underline underline-offset-2 hover:text-fg">Compare</button></p>}
+            {eng?.by_population && <p className="text-xs text-muted">Households, year 1: {n0(eng.summary.households[0].p50)} from roofs, {n0(eng.by_population.households[0].p50)} from Meta's population map ({n0(eng.by_population.population)} people). <button onClick={() => goTab(2)} className="underline underline-offset-2 hover:text-fg">Compare</button></p>}
             <p className="text-xs text-muted">Grid: {site.grid.dist_km != null ? `mapped line ${site.grid.dist_km} km away` : 'no mapped line within 40 km'}{eng?.nearby?.sites.length ? ` · ${eng.nearby.sites.length} metered ${eng.nearby.sites.length === 1 ? 'site' : 'sites'} within 1,000 miles` : ' · no metered site within 1,000 miles'}. Rough guide.</p>
             <button onClick={() => goTab(2)} className={`${btn.primary} w-full h-10`}>See the forecast</button>
           </>
@@ -221,26 +222,43 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
       </div>
     );
 
+    const Seg: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+      <div className="space-y-1.5"><p className="text-xs text-muted">{label}</p><div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label={label}>{children}</div></div>
+    );
+    const opt = (on: boolean, onClick: () => void, text: React.ReactNode, key: React.Key, disabled = false) => (
+      <button key={key} role="radio" aria-checked={on} disabled={disabled} onClick={onClick}
+        className={`h-8 flex-1 px-1 text-xs tabular-nums disabled:opacity-35 disabled:cursor-not-allowed ${on ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{text}</button>
+    );
     const rail = (
-      <div className="bg-surface border border-line rounded-box shadow-pop p-2 min-w-0">
-        <p className="px-2 pt-1 pb-2 text-xs text-muted">Villages · year 5 kWh a day</p>
-        <ul className="space-y-0.5">
-          {SITES.map(s => { const e = ENGINE[s.id]?.summary.energy_kwh_per_day[4]; const on = s.id === siteId; return (
-            <li key={s.id}>
-              <button onClick={() => onPick(s.id)} aria-pressed={on} className={`w-full text-left rounded-ctl px-2 py-2 flex items-center justify-between gap-2 ${on ? 'bg-line text-fg' : 'text-muted hover:bg-surface-2 hover:text-fg'}`}>
-                <span className="min-w-0"><span className="block text-sm truncate">{s.data.name}</span><span className="block text-[11px] text-muted">{FLAG[s.data.country] ?? s.data.country}</span></span>
-                <span className={`tabular-nums text-sm ${on ? 'text-fg' : ''}`}>{e ? n0(e.p50) : '-'}</span>
-              </button>
-            </li>); })}
-        </ul>
-        <button onClick={() => goTab(1)} className="w-full mt-1 px-2 py-2 text-left text-xs text-muted hover:text-fg rounded-ctl hover:bg-surface-2">Any location: latitude and longitude</button>
+      <div className="bg-surface border border-line rounded-box shadow-pop p-3 min-w-0 space-y-4">
+        <p className="text-sm font-semibold">Site settings</p>
+        <div className="space-y-1.5">
+          <p className="text-xs text-muted">Village · year 5 kWh a day</p>
+          <ul className="space-y-0.5 -mx-1">
+            {SITES.map(s => { const e = ENGINE[s.id]?.summary.energy_kwh_per_day[4]; const on = s.id === siteId; return (
+              <li key={s.id}>
+                <button onClick={() => onPick(s.id)} aria-pressed={on} className={`w-full text-left rounded-ctl px-2 py-1.5 flex items-center justify-between gap-2 ${on ? 'bg-line text-fg' : 'text-muted hover:bg-surface-2 hover:text-fg'}`}>
+                  <span className="min-w-0 text-sm truncate">{s.data.name} <span className="text-[11px] text-muted">{FLAG[s.data.country] ?? s.data.country}</span></span>
+                  <span className={`tabular-nums text-sm ${on ? 'text-fg' : ''}`}>{e ? n0(e.p50) : '-'}</span>
+                </button>
+              </li>); })}
+          </ul>
+          <button onClick={() => goTab(1)} className="text-xs text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location: latitude and longitude</button>
+        </div>
+        {eng && <>
+          <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(yr === y, () => setYr(y), y, y))}</Seg>
+          <Seg label="System size (share of futures it covers)">{eng.designs.map((d, i) => opt(dsel === i, () => setDi(i), d.design.split(' ')[0], d.design, meta && i !== 1))}</Seg>
+          {eng.by_population && <Seg label="Households counted from">{opt(!meta, () => setHh('roofs'), 'Roofs', 'r')}{opt(meta, () => setHh('meta'), "Meta's map", 'm')}</Seg>}
+          <Seg label="Tariff, $ per kWh">{eng.tariffs.filter((t, i, a) => a.findIndex(u => u.tariff_usd_per_kwh === t.tariff_usd_per_kwh) === i).map(t => opt(tar === t.tariff_usd_per_kwh, () => setTar(t.tariff_usd_per_kwh), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
+        </>}
+        <Seg label="Map">{opt(mode === '2d', () => setMode('2d'), 'Flat', '2d')}{opt(mode === '3d', () => setMode('3d'), '3D', '3d')}{IMAGERY[siteId] && opt(sat, () => setSat(x => !x), 'Satellite', 'sat')}</Seg>
       </div>
     );
 
     return (
       <div className="lg:relative">
         <div ref={box} className="relative h-[62vh] lg:h-[calc(100dvh-4rem)] overflow-hidden bg-[var(--map-bg)] select-none">
-          {mode === '3d' && <Map3D ref={m3} site={site} buildings={buildings} outlines={site.outlines} theme={theme} padLeft={wide ? 400 : 0} padRight={wide ? 236 : 0}
+          {mode === '3d' && <Map3D ref={m3} site={site} buildings={buildings} outlines={site.outlines} theme={theme} padLeft={wide ? 400 : 0} padRight={wide ? 268 : 0}
             anchors={callouts.map(c => ({ key: c.key, x: c.x, y: c.y, h: c.key === 'plant' ? 2 : 5 }))} onProject={setPj} picture={pic} />}
           {mode === '2d' && <svg className="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing" viewBox={`${v.x} ${v.y} ${W * px} ${H * px}`}
             role="img" aria-label={`Map of ${buildings.length} buildings in ${site.name}, coloured by estimated use`}
@@ -268,7 +286,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
             const rs = mode === '3d' ? pj!.r * 0.62 : site.radius_m / v.mpp;
             const SLOT: Record<string, [number, number]> = { homes: [0.95, -0.45], biz: [0.75, 0.72], inst: [-0.95, -0.55], plant: [-0.9, 0.55] };
             const half = wide ? 110 : 62;
-            const minX = (wide ? 400 : 0) + half, maxX = W - (wide ? 252 : 56) - half;
+            const minX = (wide ? 400 : 0) + half, maxX = W - (wide ? 284 : 56) - half;
             const items = callouts.map(c => {
               const [sx, sy] = mode === '3d' ? (pj!.anchors[c.key] ?? [-1, -1]) : toScreen(c.x, c.y);
               const [fx, fy] = SLOT[c.key] ?? [0.8, 0];
@@ -291,24 +309,19 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               </div>
             );
           })()}
-          <div className="absolute top-3 left-3 lg:top-4 lg:left-[400px] flex rounded-ctl border border-line overflow-hidden shadow-pop" role="radiogroup" aria-label="Map style">
-            {(['2d', '3d'] as const).map(m => <button key={m} role="radio" aria-checked={mode === m} onClick={() => setMode(m)} className={`h-9 px-3 text-xs ${mode === m ? 'bg-line text-fg font-medium' : 'bg-surface text-muted hover:text-fg'}`}>{m === '2d' ? 'Flat' : '3D'}</button>)}
-            {IMAGERY[siteId] && <button role="switch" aria-checked={sat} onClick={() => setSat(x => !x)} className={`h-9 px-3 text-xs border-l border-line ${sat ? 'bg-line text-fg font-medium' : 'bg-surface text-muted hover:text-fg'}`}>Satellite</button>}
-          </div>
-
           {/* Controls */}
-          <div className="absolute right-3 bottom-3 lg:right-[252px] flex flex-col gap-1 w-9">
+          <div className="absolute right-3 bottom-3 lg:right-[284px] flex flex-col gap-1 w-9">
             <button aria-label="Zoom in" onClick={() => (mode === '3d' ? m3.current?.zoom(0.75) : zoom(1 / 1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">+</button>
             <button aria-label="Zoom out" onClick={() => (mode === '3d' ? m3.current?.zoom(1.33) : zoom(1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">-</button>
             <button aria-label="Fit village" onClick={() => (mode === '3d' ? m3.current?.reset() : setV(fit()))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-[11px] text-muted hover:bg-line">fit</button>
           </div>
-          <div className="absolute left-3 bottom-3 lg:left-[400px] flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted bg-surface border border-line rounded-ctl px-2.5 py-1.5 max-w-[calc(100%-5rem)] lg:max-w-[calc(100%-720px)]">
+          <div className="absolute left-3 bottom-3 lg:left-[400px] flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted bg-surface border border-line rounded-ctl px-2.5 py-1.5 max-w-[calc(100%-5rem)] lg:max-w-[calc(100%-760px)]">
             {(['res', 'com', 'health', 'school', 'other'] as Cls[]).map(c => <span key={c} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR[c] }} />{CLS_LABEL[c]}</span>)}
             <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-sun" />Solar plant</span>
             {pic && <span className="basis-full">Picture {fmtDate(pic.date)}, 10 m · {pic.credit}</span>}
           </div>
           {wide && <div className="absolute left-4 top-4 bottom-4 w-[368px] overflow-y-auto no-scrollbar">{panel}</div>}
-          {wide && <div className="absolute right-4 top-4 w-[220px]">{rail}</div>}
+          {wide && <div className="absolute right-4 top-4 bottom-4 w-[252px] overflow-y-auto no-scrollbar">{rail}</div>}
         </div>
         {!wide && <div className="px-[var(--gutter)] py-4 space-y-4">{rail}{panel}</div>}
       </div>

@@ -16,6 +16,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **Site settings panel:** the Map view's right panel is now "Site settings": village, year after connection, system size, households from roofs or Meta's map, tariff, and map style (Flat, 3D, Satellite). The left panel shows the results for those choices; the floating map toggle is gone.
 - **WorldCover, sizing basis, pitch refresh:** `pipeline/landcover.py` (ESA WorldCover 2021, 10 m) adds land cover within 1 and 5 km (Site tab, context only; Meta Relative Wealth Index is not reachable here). `run_engine.py` sizes the P50 system both on the dull-season month (used) and on the yearly average, each run through 10 weather years (Growth and money: "Size for the dull season or the yearly average?"). PITCH.md and IMPACT.md rewritten with current numbers (weather, nearby meters, two household counts, staging at Gbamu Gbamu matching the built 85 kWp at year 2).
 
 - **Two household counts side by side:** `pipeline/meta_population.py` reads Meta's HRSL population (30 m, CC BY 4.0, AWS) within each village radius; `run_engine.py` runs the engine a second time from that population (`by_population`). Demand tab: "Two ways to count households" (households, customers, energy, peak and P50 system from roofs and from Meta); Map panel line with both counts. Roofs stay the main count.
