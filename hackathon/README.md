@@ -18,6 +18,7 @@ Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 | `pipeline/fetch_samples.sh` | Rebuild the five sample villages |
 | `pipeline/holdout_tags.py` | Build the held-out test set |
 | `publish.sh` | Build and write `app/dist/page.html` for publishing |
+| `GridSight.html` | The whole dashboard in one file: open it in any browser, works offline, safe to email |
 | `PITCH.md`, `IMPACT.md` | 3-minute pitch and one-page impact estimate |
 | `REPORT.md`, `CHANGELOG.md` | Build notes and decisions |
 

@@ -15,6 +15,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **Sharing:** `GridSight.html`, the whole dashboard in one file that opens in any browser, offline.
+
 - **Engine and story (F1, F2, UI A):** Fereshteh's engine now drives Demand (answer sentence, year 1 and 5 ranges, use per household against Rwanda and Malawi, average day, who uses the energy, drivers for year 1 or 5, what the map gave the model, second opinion from the building model), Growth and money (growth band with design capacity, Faza appliance path, P25 to P90 design table with brownout, idle, cost and cost-recovery odds, tariff table, regional tariffs) and Validation (85 kWp plant inside the year-3 range). Benichab added. Headline, step strip, Amina intro, compact village bar, Next buttons, grid-nearby warning, Peters et al. and Antonanzas-Torres et al. in Sources, Method rewritten. PITCH.md and IMPACT.md rewritten as one team story.
 
 - **Toolkit:** added Fereshteh's mini-grid demand toolkit as `forecast/` (unchanged). All 11 forecast tests pass here and the Benichab run reproduces her numbers (year 5 peak 17.6 kW, load factor 28%).
