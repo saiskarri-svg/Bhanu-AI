@@ -7,6 +7,7 @@ import { SITES, FLAG } from './sites';
 import { btn, StatusDot } from './ui';
 import { n0, n1, pc, usd } from './format';
 import { Map3D } from './Map3D';
+import { IMAGERY, fmtDate } from './imagery';
 import type { Map3DHandle, Projected } from './Map3D';
 
 const useThemeKey = () => {
@@ -83,6 +84,8 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     const wide = W >= 1024;
     const [mode, setMode] = React.useState<'2d' | '3d'>(() => (window.innerWidth >= 1024 ? '3d' : '2d'));
     const theme = useThemeKey();
+    const [sat, setSat] = React.useState(true);
+    const pic = sat ? IMAGERY[siteId] ?? null : null;
     const m3 = React.useRef<Map3DHandle>(null);
     const [pj, setPj] = React.useState<Projected | null>(null);
     React.useEffect(() => setPj(null), [mode, site.name]);
@@ -234,7 +237,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
       <div className="lg:relative">
         <div ref={box} className="relative h-[62vh] lg:h-[calc(100dvh-4rem)] overflow-hidden bg-[var(--map-bg)] select-none">
           {mode === '3d' && <Map3D ref={m3} site={site} buildings={buildings} outlines={site.outlines} theme={theme} padLeft={wide ? 400 : 0} padRight={wide ? 236 : 0}
-            anchors={callouts.map(c => ({ key: c.key, x: c.x, y: c.y, h: c.key === 'plant' ? 2 : 5 }))} onProject={setPj} />}
+            anchors={callouts.map(c => ({ key: c.key, x: c.x, y: c.y, h: c.key === 'plant' ? 2 : 5 }))} onProject={setPj} picture={pic} />}
           {mode === '2d' && <svg className="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing" viewBox={`${v.x} ${v.y} ${W * px} ${H * px}`}
             role="img" aria-label={`Map of ${buildings.length} buildings in ${site.name}, coloured by estimated use`}
             onWheel={e => { const r = box.current!.getBoundingClientRect(); zoom(e.deltaY > 0 ? 1.2 : 1 / 1.2, e.clientX - r.left, e.clientY - r.top); }}
@@ -245,11 +248,12 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               <pattern id="mapgrid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--map-grid)" strokeWidth={px} /></pattern>
             </defs>
             <rect x={v.x - 5000} y={v.y - 5000} width={W * px + 10000} height={H * px + 10000} fill="url(#mapgrid)" />
+            {pic && (() => { const [x0, y0] = proj(pic.bounds.north, pic.bounds.west), [x1, y1] = proj(pic.bounds.south, pic.bounds.east); return <image href={pic.url} x={x0} y={y0} width={x1 - x0} height={y1 - y0} preserveAspectRatio="none" />; })()}
             <circle cx={0} cy={0} r={site.radius_m} fill="none" stroke="var(--map-road)" strokeWidth={px * 1.2} strokeDasharray={`${px * 6} ${px * 6}`} />
             {roads.map((r, i) => <path key={i} d={r.d} fill="none" stroke="var(--map-road)" strokeWidth={Math.max(px * 1.4, ROAD_W[r.c] ?? 3)} strokeLinecap="round" strokeLinejoin="round" />)}
             {lines.map((d, i) => <path key={'l' + i} d={d} fill="none" stroke="var(--sun)" strokeWidth={px * 2} strokeDasharray={`${px * 10} ${px * 6}`} />)}
             {buildings.map((b, i) => { const [x, y] = proj(b.lat, b.lon); return (
-              <circle key={i} cx={x} cy={y} r={Math.max(Math.sqrt(b.area / Math.PI), px * 1.8)} fill={COLOR[b.cls]} fillOpacity={0.45 + 0.5 * b.conf} />); })}
+              <circle key={i} cx={x} cy={y} r={Math.max(Math.sqrt(b.area / Math.PI), px * 1.8)} fill={COLOR[b.cls]} fillOpacity={pic ? 0.85 : 0.45 + 0.5 * b.conf} stroke={pic ? 'rgba(0,0,0,0.45)' : 'none'} strokeWidth={px * 0.6} />); })}
             {plant && (() => { const [x, y] = proj(plant.lat, plant.lon); const s = px * 10; return <rect x={x - s} y={y - s} width={2 * s} height={2 * s} rx={px * 2} fill="var(--sun)" />; })()}
             <text x={site.radius_m * 0.72} y={-site.radius_m * 0.72} fontSize={px * 11} fill="var(--muted)">{site.radius_m / 1000} km</text>
           </svg>}
@@ -264,7 +268,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
             const items = callouts.map(c => {
               const [sx, sy] = mode === '3d' ? (pj!.anchors[c.key] ?? [-1, -1]) : toScreen(c.x, c.y);
               const [fx, fy] = SLOT[c.key] ?? [0.8, 0];
-              const bx = Math.min(maxX, Math.max(minX, cx + fx * rs)), by = Math.min(H - (wide ? 60 : 96), Math.max(wide ? 100 : 76, cy + fy * rs));
+              const bx = Math.min(maxX, Math.max(minX, cx + fx * rs)), by = Math.min(H - (wide ? 120 : 110), Math.max(wide ? 100 : 76, cy + fy * rs));
               return { c, sx, sy, bx, by };
             }).filter(i => i.sx > 0 && i.sy > 0 && i.sx < W && i.sy < H);
             return (
@@ -285,16 +289,19 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
           })()}
           <div className="absolute top-3 left-3 lg:top-4 lg:left-[400px] flex rounded-ctl border border-line overflow-hidden shadow-pop" role="radiogroup" aria-label="Map style">
             {(['2d', '3d'] as const).map(m => <button key={m} role="radio" aria-checked={mode === m} onClick={() => setMode(m)} className={`h-9 px-3 text-xs ${mode === m ? 'bg-line text-fg font-medium' : 'bg-surface text-muted hover:text-fg'}`}>{m === '2d' ? 'Flat' : '3D'}</button>)}
+            {IMAGERY[siteId] && <button role="switch" aria-checked={sat} onClick={() => setSat(x => !x)} className={`h-9 px-3 text-xs border-l border-line ${sat ? 'bg-line text-fg font-medium' : 'bg-surface text-muted hover:text-fg'}`}>Satellite</button>}
           </div>
+
           {/* Controls */}
           <div className="absolute right-3 bottom-3 lg:right-[252px] flex flex-col gap-1 w-9">
             <button aria-label="Zoom in" onClick={() => (mode === '3d' ? m3.current?.zoom(0.75) : zoom(1 / 1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">+</button>
             <button aria-label="Zoom out" onClick={() => (mode === '3d' ? m3.current?.zoom(1.33) : zoom(1.5))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-lg leading-none hover:bg-line">-</button>
             <button aria-label="Fit village" onClick={() => (mode === '3d' ? m3.current?.reset() : setV(fit()))} className="h-9 w-9 rounded-ctl bg-surface border border-line text-[11px] text-muted hover:bg-line">fit</button>
           </div>
-          <div className="absolute left-3 bottom-3 lg:left-[400px] flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted bg-surface border border-line rounded-ctl px-2.5 py-1.5 max-w-[calc(100%-5rem)]">
+          <div className="absolute left-3 bottom-3 lg:left-[400px] flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted bg-surface border border-line rounded-ctl px-2.5 py-1.5 max-w-[calc(100%-5rem)] lg:max-w-[calc(100%-720px)]">
             {(['res', 'com', 'health', 'school', 'other'] as Cls[]).map(c => <span key={c} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR[c] }} />{CLS_LABEL[c]}</span>)}
             <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-sun" />Solar plant</span>
+            {pic && <span className="basis-full">Picture {fmtDate(pic.date)}, 10 m · {pic.credit}</span>}
           </div>
           {wide && <div className="absolute left-4 top-4 bottom-4 w-[368px] overflow-y-auto no-scrollbar">{panel}</div>}
           {wide && <div className="absolute right-4 top-4 w-[220px]">{rail}</div>}

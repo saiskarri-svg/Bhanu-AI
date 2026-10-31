@@ -40,6 +40,8 @@ export const REFS: Record<string, Ref> = {
   mtf: { short: 'MTF', full: 'ESMAP / World Bank, Multi-Tier Framework for energy access', url: 'https://mtfenergyaccess.esmap.org/', feeds: 'Building-level model: household tiers' },
   who: { short: 'WHO et al. 2023', full: 'WHO, World Bank, IRENA, SEforALL (2023), Energizing Health', url: 'https://www.who.int/publications/i/item/9789240066960', feeds: 'Building-level model: health facility use' },
   amda: { short: 'AMDA', full: 'Africa Minigrid Developers Association, Benchmarking Africa’s Minigrids', url: 'https://africamda.org/', feeds: 'Building-level model: use per business' },
+  sentinel2: { short: 'Copernicus Sentinel-2', full: 'Copernicus Sentinel-2 Level-2A true colour, 10 m (ESA), via the AWS open data bucket sentinel-cogs; contains modified Copernicus Sentinel data 2026', url: 'https://registry.opendata.aws/sentinel-2-l2a-cogs/',
+    feeds: 'The latest cloud-free satellite picture under each village map (Feb to Oct 2026), so footprints can be checked against what is on the ground now' },
   scottcoley: { short: 'Tanzania (Scott and Coley 2021)', full: 'Scott and Coley (2021), Understanding load profiles of mini-grid customers in Tanzania, Energies', url: 'https://strathprints.strath.ac.uk/77070/1/Scott_Coley_Energies_2021_Understanding_load_profiles_of_mini_grid_customers.pdf',
     feeds: 'Nearby measured load: 0.098 kWh a day per household across 8,541 load profiles at two PowerGen mini-grids' },
   ngrea: { short: 'North Central Nigeria (2023)', full: 'Assessment of off- and mini-grid beneficiaries and average electricity consumed per month, North Central Nigeria (2023)', url: 'https://www.researchgate.net/publication/368390606',

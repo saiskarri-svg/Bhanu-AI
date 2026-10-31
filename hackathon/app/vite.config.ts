@@ -9,6 +9,7 @@ export default defineConfig(() => {
         host: '0.0.0.0',
       },
       base: './',
+      build: { assetsInlineLimit: 100_000_000 },
       plugins: [react()],
       resolve: {
         alias: {

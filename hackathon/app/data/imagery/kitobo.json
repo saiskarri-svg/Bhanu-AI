@@ -1,0 +1,15 @@
+{
+ "site": "kitobo",
+ "date": "2026-10-05",
+ "scene": "S2C_36MVE_20261005_0_L2A",
+ "clear": 1.0,
+ "bounds": {
+  "west": 32.419369313149595,
+  "south": -0.2728002749290068,
+  "east": 32.4400306868504,
+  "north": -0.2519997250709932
+ },
+ "resolution_m": 10,
+ "source": "Copernicus Sentinel-2 L2A true colour (TCI), AWS open data s3://sentinel-cogs",
+ "credit": "Contains modified Copernicus Sentinel data 2026"
+}

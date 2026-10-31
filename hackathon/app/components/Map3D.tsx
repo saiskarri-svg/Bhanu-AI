@@ -20,7 +20,8 @@ const css = (name: string) => getComputedStyle(document.documentElement).getProp
 export const Map3D = React.forwardRef<Map3DHandle, {
   site: SiteData; buildings: Building[]; outlines?: (number[] | null)[]; anchors: { key: string; x: number; y: number; h?: number }[];
   theme: string; padLeft: number; padRight: number; onProject: (p: Projected) => void;
-}>(({ site, buildings, outlines, anchors, theme, padLeft, padRight, onProject }, ref) => {
+  picture?: { url: string; bounds: { west: number; south: number; east: number; north: number } } | null;
+}>(({ site, buildings, outlines, anchors, theme, padLeft, padRight, onProject, picture }, ref) => {
   const box = React.useRef<HTMLDivElement>(null);
   const api = React.useRef<Map3DHandle>({ zoom: () => {}, reset: () => {} });
   React.useImperativeHandle(ref, () => ({ zoom: f => api.current.zoom(f), reset: () => api.current.reset() }));
@@ -30,7 +31,7 @@ export const Map3D = React.forwardRef<Map3DHandle, {
   React.useEffect(() => {
     const el = box.current!;
     const W0 = el.clientWidth, H0 = el.clientHeight;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true, logarithmicDepthBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(W0, H0);
     el.appendChild(renderer.domElement);
@@ -42,14 +43,23 @@ export const Map3D = React.forwardRef<Map3DHandle, {
 
     // Ground and the radius ring
     const ground = new THREE.Mesh(new THREE.CircleGeometry(R * 3, 64), new THREE.MeshBasicMaterial({ color: css('--map-bg') }));
-    ground.rotation.x = -Math.PI / 2; ground.position.y = -0.05; scene.add(ground);
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -1.5; scene.add(ground);
+    if (picture) {
+      const b = picture.bounds;
+      const w = (b.east - b.west) * kx, h = (b.north - b.south) * ky;
+      const c = P((b.north + b.south) / 2, (b.east + b.west) / 2);
+      const tex = new THREE.TextureLoader().load(picture.url);
+      tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+      const img = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+      img.rotation.x = -Math.PI / 2; img.position.set(c.x, -0.4, c.z); scene.add(img);
+    }
     const ringPts = Array.from({ length: 129 }, (_, i) => new THREE.Vector3(Math.cos((i / 128) * Math.PI * 2) * R, 0.1, Math.sin((i / 128) * Math.PI * 2) * R));
     const ring = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineDashedMaterial({ color: css('--map-road'), dashSize: 14, gapSize: 10 }));
     ring.computeLineDistances(); scene.add(ring);
 
     // Roads and power lines
     const roadMat = new THREE.LineBasicMaterial({ color: css('--map-road') });
-    for (const r of site.roads) scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(r.p.map(([la, lo]) => P(la, lo).setY(0.08))), roadMat));
+    for (const r of site.roads) scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(r.p.map(([la, lo]) => P(la, lo).setY(picture ? 0.25 : 0.08))), roadMat));
     const lineMat = new THREE.LineDashedMaterial({ color: css('--sun'), dashSize: 12, gapSize: 7 });
     for (const r of site.power_lines) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(r.p.map(([la, lo]) => P(la, lo).setY(9))), lineMat); l.computeLineDistances(); scene.add(l); }
 
@@ -135,7 +145,7 @@ export const Map3D = React.forwardRef<Map3DHandle, {
       scene.traverse(o => { const m = o as THREE.Mesh; m.geometry?.dispose?.(); });
       mats.forEach(m => m.dispose()); renderer.dispose(); el.removeChild(renderer.domElement);
     };
-  }, [site, buildings, outlines, theme]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [site, buildings, outlines, theme, picture]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div ref={box} className="absolute inset-0" aria-label={`3D view of ${buildings.length} buildings in ${site.name}`} role="img" />;
 });

@@ -1,0 +1,15 @@
+{
+ "site": "gbamu-gbamu",
+ "date": "2026-02-03",
+ "scene": "S2C_31NFH_20260203_0_L2A",
+ "clear": 1.0,
+ "bounds": {
+  "west": 4.204495256471412,
+  "south": 6.834699725070994,
+  "east": 4.225304743528588,
+  "north": 6.855500274929007
+ },
+ "resolution_m": 10,
+ "source": "Copernicus Sentinel-2 L2A true colour (TCI), AWS open data s3://sentinel-cogs",
+ "credit": "Contains modified Copernicus Sentinel data 2026"
+}

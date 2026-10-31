@@ -4,7 +4,7 @@ import { PARAMS, GROWTH_PARAMS } from './model';
 import { REFS } from './refs';
 
 const GROUPS = [
-  { t: 'Map data', k: ['openbuildings', 'overture'] },
+  { t: 'Map data', k: ['openbuildings', 'overture', 'sentinel2'] },
   { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'scottcoley', 'ngrea', 'rockefeller', 'sltariff', 'clasp'] },
   { t: 'Benchmarks and context', k: ['esmap', 'peters', 'antonanzas'] },
   { t: 'Costs and sun', k: ['omorate', 'wbsplit', 'gsrough'] },

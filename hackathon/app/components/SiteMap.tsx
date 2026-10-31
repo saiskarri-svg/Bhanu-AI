@@ -1,6 +1,8 @@
 import React from 'react';
 import type { Building, Cls, SiteData } from './model';
 import { CLASSES, CLS_LABEL } from './model';
+import { IMAGERY, fmtDate } from './imagery';
+import { SITES } from './sites';
 
 // Map drawn from latitude and longitude in metres around the village point.
 // Buildings are drawn at true size (a circle with the footprint's area), so
@@ -22,6 +24,9 @@ export const SiteMap: React.FC<{ site: SiteData; buildings: Building[]; selected
   React.useEffect(() => setView({ x: -R, y: -R, w: 2 * R }), [site.name]); // eslint-disable-line react-hooks/exhaustive-deps
   const [hide, setHide] = React.useState<Set<Cls>>(new Set());
   const [hover, setHover] = React.useState<number | null>(null);
+  const sid = SITES.find(s => s.data === site)?.id;
+  const [sat, setSat] = React.useState(true);
+  const pic = sat && sid ? IMAGERY[sid] : null;
   const svgRef = React.useRef<SVGSVGElement>(null);
   const drag = React.useRef<{ x: number; y: number; vx: number; vy: number } | null>(null);
 
@@ -58,6 +63,7 @@ export const SiteMap: React.FC<{ site: SiteData; buildings: Building[]; selected
         }}
         onPointerUp={() => { drag.current = null; }}
       >
+        {pic && (() => { const [x0, y0] = proj(pic.bounds.north, pic.bounds.west), [x1, y1] = proj(pic.bounds.south, pic.bounds.east); return <image href={pic.url} x={x0} y={y0} width={x1 - x0} height={y1 - y0} preserveAspectRatio="none" />; })()}
         <circle cx={0} cy={0} r={site.radius_m} fill="none" stroke="var(--line)" strokeWidth={px * 1.5} strokeDasharray={`${px * 6} ${px * 5}`} />
         {roads.map((r, i) => <path key={i} d={r.d} fill="none" stroke="var(--line)" strokeWidth={Math.max(px * 1.2, ROAD_W[r.c] ?? 2.5)} strokeLinecap="round" strokeLinejoin="round" />)}
         {lines.map((d, i) => <path key={'l' + i} d={d} fill="none" stroke="var(--sun)" strokeWidth={px * 2} strokeDasharray={`${px * 8} ${px * 5}`} />)}
@@ -67,7 +73,7 @@ export const SiteMap: React.FC<{ site: SiteData; buildings: Building[]; selected
           const r = Math.max(Math.sqrt(b.area / Math.PI), px * 2.2);
           const on = i === shown;
           return (
-            <circle key={i} cx={x} cy={y} r={on ? r * 1.6 : r} fill={COLOR[b.cls]} fillOpacity={b.tagged ? 0.95 : 0.35 + 0.6 * b.conf}
+            <circle key={i} cx={x} cy={y} r={on ? r * 1.6 : r} fill={COLOR[b.cls]} fillOpacity={pic ? 0.85 : b.tagged ? 0.95 : 0.35 + 0.6 * b.conf}
               stroke={on ? 'var(--fg)' : b.tagged ? 'var(--fg)' : 'none'} strokeWidth={on ? px * 2 : b.tagged ? px * 1 : 0}
               onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(null)} onClick={() => onSelect?.(i === selected ? null : i)} />
           );
@@ -87,6 +93,7 @@ export const SiteMap: React.FC<{ site: SiteData; buildings: Building[]; selected
       <div className="absolute right-2 top-2 flex flex-col gap-1">
         <button aria-label="Zoom in" onClick={() => zoom(1 / 1.5)} className="h-8 w-8 rounded-ctl bg-surface border border-line text-fg text-lg leading-none hover:bg-line">+</button>
         <button aria-label="Zoom out" onClick={() => zoom(1.5)} className="h-8 w-8 rounded-ctl bg-surface border border-line text-fg text-lg leading-none hover:bg-line">-</button>
+        {sid && IMAGERY[sid] && <button aria-label="Satellite picture" aria-pressed={sat} onClick={() => setSat(x => !x)} className={`h-8 w-8 rounded-ctl border border-line text-[10px] ${sat ? 'bg-line text-fg' : 'bg-surface text-muted'} hover:bg-line`}>Sat</button>}
         <button aria-label="Reset view" onClick={() => setView({ x: -R, y: -R, w: 2 * R })} className="h-8 w-8 rounded-ctl bg-surface border border-line text-muted text-[11px] hover:bg-line">fit</button>
       </div>
       {hb && (
@@ -106,6 +113,7 @@ export const SiteMap: React.FC<{ site: SiteData; buildings: Building[]; selected
         <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-sun" />Mapped solar plant</span>
         <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 border-t-2 border-dashed border-sun" />Mapped power line</span>
         <span>Outlined: tagged on the map. Faint: low confidence.</span>
+        {pic && <span>Picture {fmtDate(pic.date)}, 10 m · {pic.credit}</span>}
       </div>
     </div>
   );

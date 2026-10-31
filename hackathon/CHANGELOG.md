@@ -16,6 +16,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **Satellite pictures:** `pipeline/satellite.py` picks the most recent cloud-free Copernicus Sentinel-2 picture (10 m, AWS open data, checked cloud-free over the village itself) and cuts it to each village (`app/data/imagery/`, Feb to Oct 2026). Shown under the Map view (Flat and 3D, Satellite switch) and the Site map, with date and Copernicus credit; inlined into the build. Google satellite imagery is not open, so not used.
+
 - **Map view (UI batches 2 and 3):** 3D buildings (three.js, footprints extruded to typical heights per class, orbit and tilt, callouts follow the camera; Flat/3D switch, 3D by default on wide screens); building outlines now stored in site files (`outlines`, decimetres). Left panel: year picker 1 to 5, donut of who uses the power, gauge of demand against what the chosen system makes (P10 to P90 band), size picker P25 to P90 with cost, brownout, idle and cost per kWh.
 
 - **Map view (UI batch 1):** new first tab, full screen map of the village (roads, power lines, buildings by class, mapped plant), left summary panel (year 1 and 5 demand, who uses the power, peak, customers, P50 system, cost, brownout and cost-recovery odds, grid and nearby meters), village rail on the right with year-5 demand, callouts on homes, shops, the likeliest clinic or school and the solar plant (`components/MapView.tsx`, `--map-*` tokens). Phone: map on top, compact callouts, rail and panel below.

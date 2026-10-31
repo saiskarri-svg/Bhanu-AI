@@ -17,6 +17,8 @@ Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 | `pipeline/gridsight_fetch.py` | Fetch any site: `--lat --lon --radius` to a site file the dashboard can load |
 | `pipeline/fetch_samples.sh` | Rebuild the five sample villages |
 | `pipeline/holdout_tags.py` | Build the held-out test set |
+| `pipeline/satellite.py` | Latest cloud-free Sentinel-2 picture for each village (open data, no login) |
+| `pipeline/measured_sites.csv` | Published metered sites used to calibrate villages within 1,000 miles |
 | `publish.sh` | Build and write `app/dist/page.html` for publishing |
 | `GridSight.html` | The whole dashboard in one file: open it in any browser, works offline, safe to email |
 | `PITCH.md`, `IMPACT.md` | 3-minute pitch and one-page impact estimate |
@@ -36,4 +38,5 @@ Then copy the file into `app/data/`, run `python run_engine.py`, and rebuild; or
 
 - Google Open Buildings v3, CC BY 4.0
 - Overture Maps release 2026-10-21.0, including OpenStreetMap data (ODbL)
+- Copernicus Sentinel-2 L2A (free and open; "Contains modified Copernicus Sentinel data 2026")
 - Ranges and benchmarks: ESMAP / World Bank (2022), MTF, WHO et al. (2023), AMDA. All energy and money figures are rough guides.
