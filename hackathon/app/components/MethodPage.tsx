@@ -1,7 +1,18 @@
 import React from 'react';
 import { Box, BoxHeader } from './ui';
 import { PARAMS, GROWTH_PARAMS } from './model';
-import { SOURCES } from './sources';
+import { REFS } from './refs';
+
+const GROUPS = [
+  { t: 'Map data', k: ['openbuildings', 'overture'] },
+  { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'rockefeller', 'sltariff', 'clasp'] },
+  { t: 'Benchmarks and context', k: ['esmap', 'peters', 'antonanzas'] },
+  { t: 'Costs and sun', k: ['omorate', 'wbsplit', 'gsrough'] },
+  { t: 'Population (Benichab)', k: ['dhs', 'census'] },
+  { t: 'Building-level model (second opinion)', k: ['mtf', 'who', 'amda'] },
+  { t: 'Model and assumptions', k: ['engine', 'assumption'] },
+  { t: 'Planned inputs', k: ['viirs', 'gridfinder'] },
+];
 
 const fmt = (x: number, unit: string) => (unit === '%' ? `${Math.round(x * 100)}%` : `${x}`);
 
@@ -20,7 +31,7 @@ export const MethodPage: React.FC = () => (
       </ol>
     </Box>
     <Box>
-      <BoxHeader title="Building-level model: inputs and ranges" meta="The second opinion on Demand. The engine\u2019s inputs are in forecast/assumptions.yaml" />
+      <BoxHeader title="Building-level model: inputs and ranges" meta="The second opinion on Demand. The engine's inputs are listed below" />
       <div className="px-5 pb-5 overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Input</th><th className="py-2 pr-4 font-normal">Low</th><th className="py-2 pr-4 font-normal">Likely</th><th className="py-2 pr-4 font-normal">High</th><th className="py-2 pr-4 font-normal">Unit</th><th className="py-2 font-normal">Source</th></tr></thead>
@@ -46,16 +57,22 @@ export const MethodPage: React.FC = () => (
       </div>
     </Box>
     <Box>
-      <BoxHeader title="Sources" />
-      <ol className="px-5 pb-5 space-y-3 text-sm">
-        {SOURCES.map(s => (
-          <li key={s.id} className="grid grid-cols-[1.5rem_minmax(0,1fr)]">
-            <span className="text-muted tabular-nums">{s.id}</span>
-            <span className="min-w-0"><a href={s.url} target="_blank" rel="noreferrer" className="text-fg underline decoration-line underline-offset-2 hover:decoration-fg">{s.title}</a> <span className="text-muted">· {s.who}</span>
-              <span className="block text-xs text-muted mt-0.5">{s.used}</span></span>
-          </li>
+      <BoxHeader title="Where each number comes from" meta="Links to the paper where we hold it; otherwise to a search for it" />
+      <div className="px-5 pb-5 space-y-5 [overflow-wrap:anywhere]">
+        {GROUPS.map(g => (
+          <div key={g.t}>
+            <p className="text-xs text-muted mb-2">{g.t}</p>
+            <ul className="space-y-2.5">
+              {g.k.map(key => { const r = REFS[key]; return (
+                <li key={key} id={`ref-${key}`} className="text-sm">
+                  {r.url ? <a href={r.url} target="_blank" rel="noreferrer" className="text-fg underline decoration-line underline-offset-2 hover:decoration-fg">{r.full}</a> : <span className={key === 'assumption' ? 'text-warn' : 'text-fg'}>{r.full}</span>}
+                  <span className="block text-xs text-muted mt-0.5">Feeds: {r.feeds}</span>
+                </li>); })}
+            </ul>
+          </div>
         ))}
-      </ol>
+        <p className="text-xs text-muted">Engine references are cited as forecast/assumptions.yaml names them (author and year); confirm full citations before submission. Every number on the Demand and Growth and money tabs carries a Source line pointing here.</p>
+      </div>
     </Box>
   </>
 );

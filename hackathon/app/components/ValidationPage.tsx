@@ -6,6 +6,7 @@ import type { Engine } from './engine';
 import { kwpFor } from './engine';
 import { btn } from './ui';
 import { SITES } from './sites';
+import { Cite } from './refs';
 import { n0, pc } from './format';
 
 // Held-out OSM-tagged buildings, made by pipeline/holdout_tags.py
@@ -62,6 +63,7 @@ const ClassCheck: React.FC = () => {
             ))}
           </ul>
           <p className="text-sm text-fg leading-relaxed">What we learned: shape rules find homes well but miss most shops, schools and clinics. Those need map tags, the place list, or a model trained on tagged villages like these (next step). Until then the demand range carries this doubt.</p>
+          <Cite k={['overture']} label="Tagged buildings" />
           <p className="text-xs text-muted leading-relaxed">Caveat: volunteers tag clinics and schools more often than ordinary houses, so this set has more of them than a real village. Footprints here are OSM polygons, not Open Buildings.</p>
         </div>
       </div>
@@ -124,6 +126,7 @@ export const ValidationPage: React.FC<{ site: SiteData; eng: Engine; onNext: () 
                         </li>); })}
                     </ul>
                     <p className="text-muted">The built {n0(kw)} kWp sits inside the range for {kwp.filter(k => kw >= k.p10 && kw <= k.p90).map(k => `year ${k.year}`).join(' and ') || 'none of the years'} (green outline). That fits a developer sizing for the first few years and expanding later. This is a sanity check, not validation: plant size reflects budget and staging, not measured use.</p>
+                    <Cite k={['overture', 'engine']} label="Plant rating" />
                   </div>
                 ) : <p className="text-muted mt-2">Pick {s.data.name} above to compare.</p>}
               </div>

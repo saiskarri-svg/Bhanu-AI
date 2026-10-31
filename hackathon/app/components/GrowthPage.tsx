@@ -4,6 +4,7 @@ import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend,
 import type { SiteData } from './model';
 import type { Engine } from './engine';
 import { kwpFor } from './engine';
+import { Cite } from './refs';
 import { n0, n1, pc, usd } from './format';
 
 const STORY = [
@@ -52,6 +53,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
         <div className="px-5 pb-4 flex flex-wrap items-center justify-between gap-2">
           <Legend items={[{ label: 'Most likely', color: 'var(--sun)' }, { label: 'P10 to P90', color: 'color-mix(in srgb, var(--sun) 30%, transparent)' }, { label: 'Capacity of chosen design', color: 'var(--bad)' }]} />
           <p className="text-xs text-muted">Customers {n0(S.customers[0].p50)} in year 1, {n0(S.customers[4].p50)} by year 5. Year 5 is {n1(data[4].p50 / data[0].p50)} times year 1.</p>
+          <Cite className="w-full" k={site.country === 'MR' ? ['faza', 'igc', 'frame', 'dhs', 'census', 'engine'] : ['faza', 'igc', 'frame', 'assumption', 'engine']} />
         </div>
       </Box>
 
@@ -65,6 +67,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
             </li>
           ))}
         </ol>
+        <Cite className="px-5 pb-5 -mt-2" k={['faza', 'clasp', 'esmap', 'peters']} />
       </Box>
 
       <Box>
@@ -92,14 +95,15 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
             </tbody>
           </table>
           <p className="text-sm mt-4 max-w-prose"><span className="text-fg font-medium">Build in stages.</span> <span className="text-muted">A system big enough for year 5 sits mostly idle in year 2, and one sized for today browns out later. Size for year 2 or 3 and add panels and batteries as metered demand shows up.</span></p>
+          <Cite className="mt-2" label="Costs, sun hours and thresholds" k={site.country === 'MR' ? ['omorate', 'wbsplit', 'assumption'] : ['omorate', 'wbsplit', 'gsrough', 'assumption']} />
         </div>
       </Box>
 
       <StatStrip cols={4} stats={[
-        { label: 'Solar', value: n0(d.pv_kwp), unit: 'kWp', tint: 'var(--sun)', note: `${eng.peak_sun_hours} sun hours a day (rough), 75% performance ratio` },
-        { label: 'Battery', value: n0(d.battery_kwh), unit: 'kWh', tint: 'var(--info)', note: `Inverter ${n0(d.inverter_kw)} kW` },
-        { label: 'Build cost, generation', value: usd(d.capex_usd), unit: 'rough guide', note: `${usd(d.capex_per_customer_usd)} per customer` },
-        { label: 'Risk of this size', value: pc(r5.p_brownouts), unit: 'brownouts, year 5', tint: 'var(--bad)', note: `${pc(r2.p_underused)} chance it is under 60% used in year 2` },
+        { label: 'Solar', value: n0(d.pv_kwp), unit: 'kWp', tint: 'var(--sun)', note: <>{eng.peak_sun_hours} sun hours a day (rough), 75% performance ratio<Cite className="mt-1" k={site.country === 'MR' ? ['omorate'] : ['gsrough']} /></> },
+        { label: 'Battery', value: n0(d.battery_kwh), unit: 'kWh', tint: 'var(--info)', note: <>Inverter {n0(d.inverter_kw)} kW<Cite className="mt-1" k={['omorate']} /></> },
+        { label: 'Build cost', value: usd(d.capex_usd), unit: 'rough guide', note: <>{usd(d.capex_per_customer_usd)} per customer<Cite className="mt-1" k={['omorate', 'wbsplit']} /></> },
+        { label: 'Risk of this size', value: pc(r5.p_brownouts), unit: 'brownouts, year 5', tint: 'var(--bad)', note: <>{pc(r2.p_underused)} chance it is under 60% used in year 2<Cite className="mt-1" k={['engine', 'assumption']} /></> },
       ]} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] [&>*]:min-w-0">
@@ -123,6 +127,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
               </tbody>
             </table>
             <p className="text-xs text-muted mt-3 leading-relaxed">A higher tariff lowers use (price elasticity -0.1 to -0.8; in Sierra Leone a 41% tariff cut raised use by about 50%) but raises revenue per kWh. Households spend $5 to $20 a month today on candles, kerosene, batteries and diesel (ESMAP 2022).</p>
+            <Cite className="mt-2" k={['sltariff', 'esmap', 'omorate']} />
           </div>
         </Box>
         <Box>
@@ -131,7 +136,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
             <li><span className="text-fg">Private mini-grids in West Africa:</span> <span className="text-muted">about $0.8 to $5 per kWh.</span></li>
             <li><span className="text-fg">Sierra Leone, 90-grid programme:</span> <span className="text-muted">about $0.85 per kWh.</span></li>
             <li><span className="text-fg">National grids in West Africa:</span> <span className="text-muted">about $0.35 per kWh on average, $0.14 (Ghana) to $0.66 (Liberia), often subsidised.</span></li>
-            <li className="text-xs text-muted">Antonanzas-Torres et al. (2021), Energies, data from 2020. Villagers compare with grid prices, so cost-covering tariffs are politically hard (Peters, Sievert and Toman 2019).</li>
+            <li className="text-xs text-muted">Antonanzas-Torres et al. (2021), Energies, data from 2020. Villagers compare with grid prices, so cost-covering tariffs are politically hard (Peters, Sievert and Toman 2019).<Cite className="mt-1" k={['antonanzas', 'peters']} /></li>
           </ul>
         </Box>
       </div>

@@ -5,6 +5,7 @@ import type { Building, ClassSummary, SiteData } from './model';
 import { CLASSES, CLS_LABEL } from './model';
 import { n0, pc } from './format';
 import { FLAG, SITES } from './sites';
+import { Cite } from './refs';
 
 const COLOR = { res: 'var(--res)', com: 'var(--com)', health: 'var(--health)', school: 'var(--school)', other: 'var(--other)' };
 
@@ -82,10 +83,10 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
   return (
     <>
       <StatStrip cols={4} stats={[
-        { label: 'Buildings in 1 km', value: n0(total), unit: 'roofs', note: `${n0(sum.tagged)} tagged on the map, the rest estimated` },
-        { label: 'Residential', value: n0(sum.expected.res), unit: 'buildings', tint: 'var(--res)', note: `Commercial ${n0(sum.expected.com)} · Other ${n0(sum.expected.other)} (estimated)` },
-        { label: 'Health and schools', value: n0(sum.expected.health + sum.expected.school), unit: 'buildings', tint: 'var(--health)', note: `${n0(sum.expected.health)} health (${n0(sum.count.health)} mapped or likely), ${n0(sum.expected.school)} school` },
-        { label: 'Roof area', value: n0(roof), unit: 'm²', tint: 'var(--sun)', note: site.grid.dist_km != null ? `Nearest mapped grid line ${site.grid.dist_km} km away${site.grid.dist_km < 5 ? '. Check whether the village is already connected or the grid will arrive soon.' : ''}` : 'No mapped grid line within 40 km' },
+        { label: 'Buildings in 1 km', value: n0(total), unit: 'roofs', note: <>{n0(sum.tagged)} tagged on the map, the rest estimated<Cite className="mt-1" k={['openbuildings']} /></> },
+        { label: 'Residential', value: n0(sum.expected.res), unit: 'buildings', tint: 'var(--res)', note: <>Commercial {n0(sum.expected.com)} · Other {n0(sum.expected.other)} (estimated)<Cite className="mt-1" k={['overture', 'assumption']} /></> },
+        { label: 'Health and schools', value: n0(sum.expected.health + sum.expected.school), unit: 'buildings', tint: 'var(--health)', note: <>{n0(sum.expected.health)} health, {n0(sum.expected.school)} school (estimated)<Cite className="mt-1" k={['overture', 'assumption']} /></> },
+        { label: 'Roof area', value: n0(roof), unit: 'm²', tint: 'var(--sun)', note: <>{site.grid.dist_km != null ? `Nearest mapped grid line ${site.grid.dist_km} km away${site.grid.dist_km < 5 ? '. Check whether the village is already connected or the grid will arrive soon.' : ''}` : 'No mapped grid line within 40 km'}<Cite className="mt-1" k={site.grid.dist_km != null && site.grid.dist_km < 5 ? ['openbuildings', 'overture', 'peters'] : ['openbuildings', 'overture']} /></> },
       ]} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Box>

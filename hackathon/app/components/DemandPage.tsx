@@ -3,7 +3,7 @@ import { Area, CartesianGrid, Line, ComposedChart, Tooltip, XAxis, YAxis, Bar, B
 import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, btn } from './ui';
 import type { Estimate, SiteData } from './model';
 import type { Engine } from './engine';
-import { MEASURED } from './engine';
+import { Cite, DRIVER_SRC } from './refs';
 import { n0, n1, pc } from './format';
 
 // A range bar: P10 to P90 band with the P50 mark, on a shared scale
@@ -20,8 +20,8 @@ export const RangeBar: React.FC<{ lo: number; mid: number; hi: number; max: numb
   </div>
 );
 
-const Figure: React.FC<{ label: string; p10: number; p50: number; p90: number; unit: string; fmt?: (x: number) => string; color?: string; note?: React.ReactNode; marks?: { at: number; label: string }[]; max?: number }> =
-  ({ label, p10, p50, p90, unit, fmt = n0, color, note, marks, max }) => (
+const Figure: React.FC<{ label: string; p10: number; p50: number; p90: number; unit: string; fmt?: (x: number) => string; color?: string; note?: React.ReactNode; marks?: { at: number; label: string }[]; max?: number; cite?: string[] }> =
+  ({ label, p10, p50, p90, unit, fmt = n0, color, note, marks, max, cite }) => (
     <div className="bg-surface px-5 py-4 min-w-0">
       <p className="text-xs text-muted">{label}</p>
       <p className="mt-1 flex items-baseline gap-1.5 flex-wrap">
@@ -31,6 +31,7 @@ const Figure: React.FC<{ label: string; p10: number; p50: number; p90: number; u
       <p className="mt-1 text-xs text-muted tabular-nums">Range {fmt(p10)} to {fmt(p90)} (P10 to P90)</p>
       <RangeBar lo={p10} mid={p50} hi={p90} max={max ?? p90 * 1.15} color={color} marks={marks} />
       {note && <p className={`${marks?.length ? 'mt-5' : 'mt-2'} text-xs text-muted leading-relaxed`}>{note}</p>}
+      {cite && <Cite k={cite} className="mt-2" />}
     </div>
   );
 
@@ -69,17 +70,18 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
             growing to <b className="font-semibold tabular-nums">{n0(e5.p50)} kWh a day</b> by year 5 ({n0(e5.p10)} to {n0(e5.p90)}) as homes connect and buy appliances.
             The evening peak reaches about <b className="font-semibold tabular-nums">{n0(pk5.p50)} kW</b>.
           </p>
+          <Cite className="mt-2" label="Built from" k={['openbuildings', 'overture', 'faza', 'igc', 'frame', 'esmap', 'engine']} />
         </div>
       </Box>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-px bg-line border border-line rounded-box overflow-hidden">
-        <Figure label="Energy, year 1" p10={e1.p10} p50={e1.p50} p90={e1.p90} unit="kWh a day" note={`${n0(cu1.p50)} customers in year 1 (early adopters).`} />
-        <Figure label="Energy, year 5" p10={e5.p10} p50={e5.p50} p90={e5.p90} unit="kWh a day" note={`${n0(cu5.p50)} customers by year 5.`} />
+        <Figure label="Energy, year 1" p10={e1.p10} p50={e1.p50} p90={e1.p90} unit="kWh a day" note={`${n0(cu1.p50)} customers in year 1 (early adopters).`} cite={['faza', 'igc', 'frame']} />
+        <Figure label="Energy, year 5" p10={e5.p10} p50={e5.p50} p90={e5.p90} unit="kWh a day" note={`${n0(cu5.p50)} customers by year 5.`} cite={['faza', 'igc', 'assumption']} />
         <Figure label="Use per household, year 5" p10={hh5.p10} p50={hh5.p50} p90={hh5.p90} unit="kWh a month" fmt={n1} color="var(--res)" max={36}
           marks={[{ at: 8.1, label: 'Rwanda 8.1' }, { at: 35, label: '35' }]}
-          note={`${n1(hh1.p50)} in year 1. Calibrated to measured sites (Rwanda 8.1, Malawi 7 to 8), inside ESMAP's 5 to 35 range.`} />
+          note={`${n1(hh1.p50)} in year 1. Calibrated to measured sites (Rwanda 8.1, Malawi 7 to 8), inside ESMAP's 5 to 35 range.`} cite={['igc', 'frame', 'esmap']} />
         <Figure label="Evening peak and load factor, year 5" p10={pk5.p10} p50={pk5.p50} p90={pk5.p90} unit="kW" fmt={n1} color="var(--bad)"
-          note={`Load factor ${pc(lf5.p50)}. Homes-only grids run near 22%; daytime business use toward 40% cut the cost of power by about 25% (ESMAP 2022).`} />
+          note={`Load factor ${pc(lf5.p50)}. Homes-only grids run near 22%; daytime business use toward 40% cut the cost of power by about 25% (ESMAP 2022).`} cite={['esmap', 'engine']} />
       </div>
       <p className="text-xs text-muted -mt-3">P10 means 1 in 10 simulated futures come in lower; P90 means 1 in 10 come in higher. 4,000 futures. Rough guide, not a site survey.</p>
 
@@ -105,7 +107,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
               </ComposedChart>
             </ResponsiveChart>
           </div>
-          <div className="px-5 pb-4"><Legend items={[{ label: 'Year 5, most likely', color: 'var(--sun)' }, { label: 'Year 5, P10 to P90', color: 'color-mix(in srgb, var(--sun) 30%, transparent)' }, { label: 'Year 1, most likely', color: 'var(--info)' }]} /></div>
+          <div className="px-5 pb-4"><Legend items={[{ label: 'Year 5, most likely', color: 'var(--sun)' }, { label: 'Year 5, P10 to P90', color: 'color-mix(in srgb, var(--sun) 30%, transparent)' }, { label: 'Year 1, most likely', color: 'var(--info)' }]} />
+            <Cite className="mt-2" k={['faza', 'esmap', 'assumption']} label="Appliance power and hours of use" /></div>
         </Box>
         <Box>
           <BoxHeader title="Who uses the energy" meta="kWh a day, most likely" />
@@ -121,7 +124,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
               </BarChart>
             </ResponsiveChart>
           </div>
-          <div className="px-5 pb-4"><Legend items={SECT.map(s => ({ label: s.k, color: s.c }))} /></div>
+          <div className="px-5 pb-4"><Legend items={SECT.map(s => ({ label: s.k, color: s.c }))} />
+            <Cite className="mt-2" k={['faza', 'rockefeller', 'esmap', 'peters', 'assumption']} /></div>
         </Box>
       </div>
 
@@ -138,7 +142,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
             {drv.map((d, i) => (
               <li key={d.input} className="grid gap-x-6 gap-y-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center">
                 <p className="text-sm text-fg min-w-0"><span className="text-muted tabular-nums mr-2">{i + 1}</span>{d.label}
-                  <span className="block text-xs text-muted ml-5">{d.effect.replace('->', 'means')}</span></p>
+                  <span className="block text-xs text-muted ml-5">{d.effect.replace('->', 'means')}</span>
+                  <Cite className="ml-5" k={DRIVER_SRC[d.input] ?? ['assumption']} /></p>
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex-1 h-3 rounded-sm bg-surface-2 overflow-hidden"><div className="h-full rounded-sm" style={{ width: `${(d.share_of_uncertainty / maxShare) * 100}%`, background: 'color-mix(in srgb, var(--sun) 65%, transparent)' }} /></div>
                   <span className="text-sm tabular-nums w-10 text-right">{pc(d.share_of_uncertainty)}</span>
@@ -166,6 +171,7 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
               </tbody>
             </table>
             <p className="text-xs text-muted mt-3 leading-relaxed">Where few buildings are tagged, shops, schools and clinics come from regional averages per household; mapped counts are used where higher. Check them on site.</p>
+            <Cite className="mt-2" k={['openbuildings', 'overture', 'omorate', 'assumption']} />
           </div>
         </Box>
         <Box>
@@ -173,7 +179,8 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
           <div className="px-5 pb-5 text-sm space-y-3">
             <p className="text-muted">GridSight's building-level model classes every roof and assumes most homes connect in year 1. It gives <span className="text-fg tabular-nums">{n0(ours.p10 / 30)} to {n0(ours.p90 / 30)} kWh a day</span> for year 1.</p>
             <p className="text-muted">The demand engine follows the connection pace measured at the Faza mini-grid in Kenya, so year 1 starts lower ({n0(e1.p10)} to {n0(e1.p90)}) and grows faster. By year 5 the building model says {n0(ours5.p10 / 30)} to {n0(ours5.p90 / 30)} kWh a day and the engine {n0(e5.p10)} to {n0(e5.p90)}.</p>
-            <p className="text-xs text-muted">Demand engine by Fereshteh (forecast/demand_forecast.py); every input and its source in forecast/assumptions.yaml.</p>
+            <Cite k={['esmap', 'mtf', 'who', 'amda', 'assumption']} label="Building-level model" />
+            <p className="text-xs text-muted">Demand engine by Fereshteh (forecast/demand_forecast.py); every input and its source in forecast/assumptions.yaml, and listed on the Method tab.</p>
           </div>
         </Box>
       </div>
