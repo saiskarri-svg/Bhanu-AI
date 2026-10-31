@@ -1,30 +1,31 @@
 # GridSight: 3-minute pitch
 
 Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
-Timings are a guide (about 130 words a minute). Show the screen named in each step.
+Team: Sai (map, data pipeline, dashboard) and Fereshteh (demand engine, Benichab field test).
+Timings are a guide (about 130 words a minute). The step strip at the top of the page follows the same order.
 
 ---
 
-**0:00 to 0:25. The problem** (screen: Site tab, Gbamu Gbamu map)
+**0:00 to 0:25. The problem** (screen: Site tab, the Amina line under the headline)
 
-Amina builds mini-grids. Her last site was too big: the tariff to repay it priced out half the village. The one before was too small and browned out every evening. Her lender wants a demand forecast. All she has is an old census and a survey where people guess at using electricity they have never had. Across Africa, measured use runs from 5 to 35 kWh per customer a month. That sevenfold gap is the difference between a project that pays and one that fails.
+Amina builds mini-grids. Her last site was too big: the tariff to repay it priced out half the village. The one before was too small and browned out every evening. Her lender wants a demand forecast, and all she has is an old census and a survey where people guess at using electricity they have never had. Measured use runs from 5 to 35 kWh per customer a month across Africa, a sevenfold spread. Researchers warn that forecasts are often overstated and should come from someone with no reason to inflate them.
 
-**0:25 to 1:05. What GridSight does** (screen: map, then class panel)
+**0:25 to 0:55. Step 1: count the roofs** (screen: Gbamu Gbamu map)
 
-GridSight starts from what you can see from space. Pick any village, or type a latitude and longitude. We pull every roof from Google Open Buildings, with its location and footprint area, and every tag, shop, clinic, school, road and power line from OpenStreetMap through Overture Maps. This is Gbamu Gbamu in Ogun State, Nigeria: 1,229 buildings. Where volunteers have tagged a building, we use the tag. Where they have not, which is almost everywhere, we score it from size, shape, road frontage and crowding, and we keep the doubt as a probability instead of pretending to know.
+GridSight starts from space. Pick a village, or any latitude and longitude. We pull every roof from Google Open Buildings and every tag, shop, clinic, road and power line from OpenStreetMap. Gbamu Gbamu in Nigeria: 1,219 homes and outbuildings. Almost nothing is tagged, so where the map is thin we fall back on regional averages for shops, schools and clinics, and say so.
 
-**1:05 to 1:45. A range, not a number** (screen: Demand tab)
+**0:55 to 1:35. Step 2: forecast demand** (screen: Demand tab, the answer sentence, then "Why this number")
 
-Then we simulate 1,500 futures, varying every assumption and every building class at once. Out comes a range: P10, P50, P90 for monthly energy, peak load, use per customer and load factor, with a daily load curve. And because a lender has to trust it, "Why this number" ranks the inputs that move it most. Here it is household use, then shop use. That tells Amina exactly where a one-day site visit pays off.
+The demand engine runs 4,000 futures. Households connect at the pace measured at a real Kenyan mini-grid, buy appliances along early and late adopter curves, and use what metered sites in Rwanda and Malawi actually use, not what surveys claim. Gbamu Gbamu: about 96 kWh a day in year 1, growing to about 450 by year 5, with the range shown. And for the lender, "Why this number": 41% of the doubt is how many roofs make one household. One day counting households on the ground narrows it most.
 
-**1:45 to 2:20. Growth and money** (screen: Growth and money tab)
+**1:35 to 2:15. Step 3: size and tariff** (screen: Growth and money, the "How wrong can we be?" table)
 
-Demand is not fixed. The growth curve shows years 1 to 5 as people buy TVs, fridges and mills, with the band widening honestly. Pick a design point and GridSight sizes the solar and battery, and shows the risk of brownouts against the risk of a tariff that is too high, using cost benchmarks labelled as rough guides.
+Now the money question. Build for the median year-5 forecast and there is a 31% chance of brownouts by year 5, yet a 96% chance it sits more than 40% idle in year 2. So we recommend building in stages. And the tariff: at 45 cents the system never covers its costs; at 85 cents it does in 85% of futures, for a household bill of about $7.60 a month, inside the $5 to $20 families already spend on kerosene and batteries.
 
-**2:20 to 2:45. Does it work?** (screen: Validation tab)
+**2:15 to 2:45. Step 4: check it** (screen: Validation)
 
-We have no meter data yet, so we tested what we can. The building classifier is scored on tagged buildings from villages it has never seen. And for Gbamu Gbamu, where a real 85 kWp solar plant is mapped, GridSight's roof-only estimate of about 67 to 131 kWp brackets what was actually built. Our validation plan scores P50 error and range coverage on held-out metered sites.
+No metered data yet, so we tested what we can. A real 85 kWp solar plant is mapped at Gbamu Gbamu; GridSight, from roofs alone, says year-3 demand needs about 87. We scored our building classifier on 2,225 volunteer-tagged buildings in 84 villages it had never seen, and we show where it falls short. The engine's validate command is ready for metered sites.
 
-**2:45 to 3:00. Why it scales** (screen: Data sharing tab)
+**2:45 to 3:00. Step 5: share meter data** (screen: Data sharing)
 
-Everything runs on open data, on a laptop, in five countries already. The missing piece is meter data, so we propose a data trust: operators share monthly site totals, never customer rows, and get a better model back. Fewer oversized grids, fewer brownouts, faster finance. That is GridSight.
+Six villages, six countries, open data, on a laptop. The missing piece is meter data, so we propose a data trust: operators share monthly site totals, never customer rows, and get a better model back. Fewer oversized grids, fewer brownouts, faster finance. That is GridSight.

@@ -4,15 +4,18 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## Site at a glance
 
-- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Site, Demand, Growth and money, Validation, Data sharing, Method. Light/Dark toggle (follows system, remembered).
-- **Data:** `app/data/*.json`, one per sample village (Gbamu Gbamu NG, Kychom SL, Talek KE, Kitobo UG, Bulongwa TZ), 1 km radius, made by `pipeline/gridsight_fetch.py` (`pipeline/fetch_samples.sh` rebuilds all).
-- **Model:** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
+- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Site, Demand, Growth and money, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
+- **Data:** `app/data/*.json`, one per sample village (Gbamu Gbamu NG, Kychom SL, Benichab MR, Talek KE, Kitobo UG, Bulongwa TZ), 1 km radius, made by `pipeline/gridsight_fetch.py` (`pipeline/fetch_samples.sh` rebuilds all).
+- **Demand engine (main model):** Fereshteh's `forecast/demand_forecast.py`, run on every village by `pipeline/run_engine.py` into `app/data/engine/*.json`; read by `app/components/engine.ts`.
+- **Building-level model (second opinion):** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
 - **Held-out test:** `pipeline/holdout_tags.py` writes `app/data/holdout/tags.json` (OSM-tagged buildings from other villages) for the Validation tab.
 - **Pitch kit:** `PITCH.md` (3-minute script), `IMPACT.md` (one-page impact estimate).
 - **Fereshteh's toolkit:** `forecast/` (village_landuse.py maps a village, demand_forecast.py gives a 5-year forecast with ranges, HOMER 8760 files, sizing and tariff risk, validate command; ranges in assumptions.yaml). Benichab, Mauritania example in `forecast/examples/`.
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
 
 ## 2026-10-31
+
+- **Engine and story (F1, F2, UI A):** Fereshteh's engine now drives Demand (answer sentence, year 1 and 5 ranges, use per household against Rwanda and Malawi, average day, who uses the energy, drivers for year 1 or 5, what the map gave the model, second opinion from the building model), Growth and money (growth band with design capacity, Faza appliance path, P25 to P90 design table with brownout, idle, cost and cost-recovery odds, tariff table, regional tariffs) and Validation (85 kWp plant inside the year-3 range). Benichab added. Headline, step strip, Amina intro, compact village bar, Next buttons, grid-nearby warning, Peters et al. and Antonanzas-Torres et al. in Sources, Method rewritten. PITCH.md and IMPACT.md rewritten as one team story.
 
 - **Toolkit:** added Fereshteh's mini-grid demand toolkit as `forecast/` (unchanged). All 11 forecast tests pass here and the Benichab run reproduces her numbers (year 5 peak 17.6 kW, load factor 28%).
 

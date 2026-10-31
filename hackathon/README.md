@@ -9,8 +9,10 @@ Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 | Path | What it is |
 |---|---|
 | `app/` | The dashboard (React, Vite, Tailwind). `npm install`, then `npx vite` |
-| `app/components/model.ts` | Building classes, demand range, load profile, drivers, growth, sizing |
-| `app/data/*.json` | Five sample villages, real buildings within 1 km |
+| `forecast/` | Demand engine by Fereshteh: `demand_forecast.py`, `assumptions.yaml`, tests, Benichab example (see its README) |
+| `pipeline/run_engine.py` | Runs the engine on every village into `app/data/engine/` |
+| `app/components/model.ts` | Building-level model (second opinion): classes, range, drivers |
+| `app/data/*.json` | Six sample villages, real buildings within 1 km |
 | `app/data/holdout/` | OSM-tagged buildings from other villages, for the Validation tab |
 | `pipeline/gridsight_fetch.py` | Fetch any site: `--lat --lon --radius` to a site file the dashboard can load |
 | `pipeline/fetch_samples.sh` | Rebuild the five sample villages |
@@ -27,7 +29,7 @@ cd pipeline
 python gridsight_fetch.py --name "My village" --country NG --lat 9.0765 --lon 7.3986 --radius 1000 --out my-village.json
 ```
 
-Then open the dashboard, Site tab, Load site file. No logins are needed: Google Open Buildings and Overture Maps are public buckets. Optional: pass `--viirs file.tif` with a VIIRS annual nighttime lights GeoTIFF (free login at eogdata.mines.edu).
+Then copy the file into `app/data/`, run `python run_engine.py`, and rebuild; or load it from the Site tab (map and building model only). No logins are needed: Google Open Buildings and Overture Maps are public buckets. Optional: pass `--viirs file.tif` with a VIIRS annual nighttime lights GeoTIFF (free login at eogdata.mines.edu).
 
 ## Data and licences
 

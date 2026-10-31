@@ -38,3 +38,17 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 - Not tuned on this set, so it stays a fair test. Next step: train a small model on a separate tagged set.
 
 **Decision for Sai:** show this weak result as it is on Validation (current choice), or train a model first?
+
+## Engine merge, team story and demo flow (2026-10-31)
+
+**Done**
+- Fereshteh's toolkit in `forecast/` (unchanged; 11 tests pass; Benichab reproduces her numbers). `pipeline/run_engine.py` turns each GridSight site file into her land-use format and runs her engine (4,000 futures) for all six villages in about 12 seconds.
+- Demand, Growth and money and Validation now show the engine's results. The building-level model stays as a "second opinion" box.
+- UI batch A: headline question, 5-step strip, Amina intro, compact village bar after Site, answer sentence on Demand, yellow Next buttons. Clashing numbers are gone (drivers now come from the same engine run).
+- PITCH.md and IMPACT.md rewritten with the six-village table and three findings: build in stages, tariff decides survival, count households first.
+
+**Decisions for Sai (and Fereshteh)**
+- Benichab: GridSight's 1 km Google map finds 193 homes; Fereshteh's settlement map (OSM, Microsoft and Google) finds 320. Use her map for Benichab, or switch GridSight's fetch to all Overture footprints for every village?
+- OpenStreetMap shows a minor power line 0.38 km from Benichab. Worth checking before using it in the pitch.
+- Engine costs are 2021 Omorate prices (generation about $2,133/kWp). Replace with current quotes before the pitch?
+- Paper links on Sources are search links; I did not have the DOIs to hand.
