@@ -251,7 +251,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
               <pattern id="mapgrid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--map-grid)" strokeWidth={px} /></pattern>
             </defs>
             <rect x={v.x - 5000} y={v.y - 5000} width={W * px + 10000} height={H * px + 10000} fill="url(#mapgrid)" />
-            {pic && (() => { const [x0, y0] = proj(pic.bounds.north, pic.bounds.west), [x1, y1] = proj(pic.bounds.south, pic.bounds.east); return <image href={pic.url} x={x0} y={y0} width={x1 - x0} height={y1 - y0} preserveAspectRatio="none" />; })()}
+            {pic && (() => { const [x0, y0] = proj(pic.bounds.north, pic.bounds.west), [x1, y1] = proj(pic.bounds.south, pic.bounds.east); return <image href={pic.url} x={x0} y={y0} width={x1 - x0} height={y1 - y0} preserveAspectRatio="none" opacity={Math.min(1, Math.max(0.3, (px - 0.5) / 1.5))} />; })()}
             <circle cx={0} cy={0} r={site.radius_m} fill="none" stroke="var(--map-road)" strokeWidth={px * 1.2} strokeDasharray={`${px * 6} ${px * 6}`} />
             {roads.map((r, i) => <path key={i} d={r.d} fill="none" stroke="var(--map-road)" strokeWidth={Math.max(px * 1.4, ROAD_W[r.c] ?? 3)} strokeLinecap="round" strokeLinejoin="round" />)}
             {lines.map((d, i) => <path key={'l' + i} d={d} fill="none" stroke="var(--sun)" strokeWidth={px * 2} strokeDasharray={`${px * 10} ${px * 6}`} />)}

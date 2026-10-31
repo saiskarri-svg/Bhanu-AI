@@ -44,13 +44,15 @@ export const Map3D = React.forwardRef<Map3DHandle, {
     // Ground and the radius ring
     const ground = new THREE.Mesh(new THREE.CircleGeometry(R * 3, 64), new THREE.MeshBasicMaterial({ color: css('--map-bg') }));
     ground.rotation.x = -Math.PI / 2; ground.position.y = -1.5; scene.add(ground);
+    let imgMat: THREE.MeshBasicMaterial | null = null;
     if (picture) {
       const b = picture.bounds;
       const w = (b.east - b.west) * kx, h = (b.north - b.south) * ky;
       const c = P((b.north + b.south) / 2, (b.east + b.west) / 2);
       const tex = new THREE.TextureLoader().load(picture.url);
       tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-      const img = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+      imgMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+      const img = new THREE.Mesh(new THREE.PlaneGeometry(w, h), imgMat);
       img.rotation.x = -Math.PI / 2; img.position.set(c.x, -0.4, c.z); scene.add(img);
     }
     const ringPts = Array.from({ length: 129 }, (_, i) => new THREE.Vector3(Math.cos((i / 128) * Math.PI * 2) * R, 0.1, Math.sin((i / 128) * Math.PI * 2) * R));
@@ -132,7 +134,13 @@ export const Map3D = React.forwardRef<Map3DHandle, {
     };
 
     let raf = 0, alive = true;
-    const loop = () => { if (!alive) return; controls.update(); renderer.render(scene, camera); project(); raf = requestAnimationFrame(loop); };
+    const loop = () => {
+      if (!alive) return;
+      controls.update();
+      // The picture is 10 m detail: fade it as the camera comes close, so the sharp footprints take over
+      if (imgMat) imgMat.opacity = Math.min(1, Math.max(0.35, (camera.position.distanceTo(controls.target) - 250) / 900));
+      renderer.render(scene, camera); project(); raf = requestAnimationFrame(loop);
+    };
     loop();
     const ro = new ResizeObserver(setOffset); ro.observe(el);
 

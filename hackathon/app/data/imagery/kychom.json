@@ -1,8 +1,14 @@
 {
  "site": "kychom",
  "date": "2026-05-20",
+ "dates": [
+  "2026-04-25",
+  "2026-05-07",
+  "2026-05-20"
+ ],
  "scene": "S2B_28PGQ_20260520_0_L2A",
  "clear": 1.0,
+ "pictures": 3,
  "bounds": {
   "west": -13.15215729747143,
   "south": 8.918299725070993,
@@ -10,6 +16,6 @@
   "north": 8.939100274929006
  },
  "resolution_m": 10,
- "source": "Copernicus Sentinel-2 L2A true colour (TCI), AWS open data s3://sentinel-cogs",
+ "source": "Copernicus Sentinel-2 L2A bands 4, 3, 2 at 10 m, median of the clearest recent pictures, haze-corrected and contrast-stretched; AWS open data s3://sentinel-cogs",
  "credit": "Contains modified Copernicus Sentinel data 2026"
 }

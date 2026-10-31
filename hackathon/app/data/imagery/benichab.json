@@ -1,8 +1,14 @@
 {
  "site": "benichab",
- "date": "2026-10-18",
+ "date": "2026-10-23",
+ "dates": [
+  "2026-10-13",
+  "2026-10-18",
+  "2026-10-23"
+ ],
  "scene": "S2C_28QDG_20261018_0_L2A",
  "clear": 1.0,
+ "pictures": 3,
  "bounds": {
   "west": -15.439474329350295,
   "south": 19.460763725070994,
@@ -10,6 +16,6 @@
   "north": 19.48156427492901
  },
  "resolution_m": 10,
- "source": "Copernicus Sentinel-2 L2A true colour (TCI), AWS open data s3://sentinel-cogs",
+ "source": "Copernicus Sentinel-2 L2A bands 4, 3, 2 at 10 m, median of the clearest recent pictures, haze-corrected and contrast-stretched; AWS open data s3://sentinel-cogs",
  "credit": "Contains modified Copernicus Sentinel data 2026"
 }

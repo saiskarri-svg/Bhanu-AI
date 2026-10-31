@@ -1,8 +1,14 @@
 {
  "site": "talek",
  "date": "2026-10-22",
+ "dates": [
+  "2026-10-02",
+  "2026-10-12",
+  "2026-10-22"
+ ],
  "scene": "S2C_36MYD_20261022_0_L2A",
  "clear": 1.0,
+ "pictures": 3,
  "bounds": {
   "west": 35.205666147967364,
   "south": -1.4526002749290068,
@@ -10,6 +16,6 @@
   "north": -1.431799725070993
  },
  "resolution_m": 10,
- "source": "Copernicus Sentinel-2 L2A true colour (TCI), AWS open data s3://sentinel-cogs",
+ "source": "Copernicus Sentinel-2 L2A bands 4, 3, 2 at 10 m, median of the clearest recent pictures, haze-corrected and contrast-stretched; AWS open data s3://sentinel-cogs",
  "credit": "Contains modified Copernicus Sentinel data 2026"
 }

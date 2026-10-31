@@ -16,6 +16,8 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-10-31
 
+- **Sharper satellite pictures:** built from Sentinel-2 bands 4, 3, 2 (not the preview TCI), median of the 2 or 3 clearest recent pictures, one haze floor for all colours, natural saturation, 960 px; the picture fades as you zoom past its 10 m detail (Map flat and 3D, Site map) so the footprints take over. Checked Maxar Open Data (sub-metre, CC BY-NC, disaster events only): no event covers the six villages.
+
 - **Sun and weather:** `pipeline/weather.py` pulls 10 years of daily NASA POWER data per village (sunlight, clear-sky sunlight, cloud, dust and haze AOD, rain, temperature; AWS open data) and five CMIP6 models (SSP2-4.5, 2027 to 2036 against 2015 to 2024; Google Cloud). Solar output per kWp includes system, heat and dust-on-panel losses (washed by rain or monthly cleaning). Fed into the engine: monthly temperature, design sun hours (third-worst month), performance ratio, day-to-day swing, battery days. `run_engine.py` runs each P25 to P90 system day by day through the 10 weather years (and the outlook) for unserved demand and short days. New tab Sun and weather; weather line on the Map panel; NASA POWER and CMIP6 in Sources.
 
 - **Satellite pictures:** `pipeline/satellite.py` picks the most recent cloud-free Copernicus Sentinel-2 picture (10 m, AWS open data, checked cloud-free over the village itself) and cuts it to each village (`app/data/imagery/`, Feb to Oct 2026). Shown under the Map view (Flat and 3D, Satellite switch) and the Site map, with date and Copernicus credit; inlined into the build. Google satellite imagery is not open, so not used.
