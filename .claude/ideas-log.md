@@ -55,3 +55,26 @@ New website ideas by market segment from the `segment-scout` agent. Full researc
 | 56 | 2026-10-21 | Services, abroad | NRI property care: inspections with photos, rent, repairs, yearly PDF | suggested |
 | 57 | 2026-10-21 | Education, abroad | Telugu lessons for diaspora kids with quizzes, progress and certificates | suggested |
 | 58 | 2026-10-21 | Climate | Heat-safe schools: daily heat level, action checklist, incident log, red-day alerts | suggested |
+
+## GridSight
+
+### 2026-10-31 (website and UI ideas for the hackathon dashboard, `hackathon/app`)
+
+Batches: A 59, 60, 61, 62 · B 63, 66, 69 · C 64, 65, 72 · D 67, 71 · E 68, 70. Feature batches already offered (weather, place search, transmission lines, similar villages, finance, current load proxy) are not repeated here.
+
+| No. | Date | Tab | Idea | Status |
+|---|---|---|---|---|
+| 59 | 2026-10-31 | Site (top) | One-line headline plus "Roofs > Demand > Size and tariff" step strip; introduce Amina, who is named on Growth and Validation but never introduced | suggested |
+| 60 | 2026-10-31 | Site, Demand, Growth, Validation | Shrink the repeated "Pick a site" box to one compact village bar after the Site tab; hide the lat/lon fetch tools behind "Any location" (takes the whole first screen now, about 1,170px on phone) | suggested |
+| 61 | 2026-10-31 | Demand, Growth, Validation | Yellow "Next" button at the end of each tab (Size the mini-grid, See how we test it) so the demo walks itself; Demand has no next step now | suggested |
+| 62 | 2026-10-31 | Demand | Answer sentence at the top (needs about 8,400 kWh a month, 38 kW peak after dark, about 121 kWp); fix "Most likely: 8,100" in Why this number, which clashes with the 8,400 headline | suggested |
+| 63 | 2026-10-31 | Validation | Scorecard strip at the top (3 checks with pass, partial, waiting chips); shade confusion matrix cells by count, show 0 in empty cells and a per-row hit rate; 2,225 on screen vs 2,256 in the changelog | suggested |
+| 64 | 2026-10-31 | Site map | Bigger, outlined dots for clinics, schools and shops (lost under 1,000 blue homes); "1 km" ring label; "only non-homes" toggle; drop the power line legend item or add an off-map arrow when the nearest line is 13.9 km away; click a table row to find it on the map | suggested |
+| 65 | 2026-10-31 | Growth | Round tariff chart x ticks (3,621, 7,121 now); mark the chosen sizing year and P level on the growth chart; move the "existing 85 kWp plant" label off the band | suggested |
+| 66 | 2026-10-31 | Growth, Site | Count-ups and draw-on-scroll show "0 kWp, $0k, $0.00", "0 buildings" and blank charts until scrolled into view: show final values in print, full-page shots and when opened by tab link | suggested |
+| 67 | 2026-10-31 | All tabs (phone) | Sticky header is about 100px with Data sharing and Method off screen: shorter tab names or two-row wrap, compact header on scroll; chips and segmented controls 36px tall, raise to 44px; "Size for" label sits alone | suggested |
+| 68 | 2026-10-31 | Method | Turn "How GridSight works" into a 6-step flow filled with this village's numbers (1,229 roofs > 486 customers > 8,400 kWh > 121 kWp > $0.70 a kWh); right half of the box is empty now | suggested |
+| 69 | 2026-10-31 | Header, footer | Trust line: data date, 5 villages in 5 countries, 1,500 futures, open pipeline link; "Rough guide" badge next to every money figure | suggested |
+| 70 | 2026-10-31 | All tabs | Demo mode: number keys and arrow keys move between tabs, small step dots, picker hidden, for the 3-minute pitch | suggested |
+| 71 | 2026-10-31 | Data sharing | Example row is cut off on the right: show it as a field list with plain meanings (or wrap), and give "Who gets what" small meaning-colour markers | suggested |
+| 72 | 2026-10-31 | Site | Buildings table: fold behind "Show all buildings" for judges; keep the "Why" column on phone as a second line; larger sort controls | suggested |
