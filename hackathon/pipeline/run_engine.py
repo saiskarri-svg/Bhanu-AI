@@ -249,6 +249,34 @@ def run(path):
                          gen_p50=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p50']],
                          gen_p90=[round(p50['pv_kwp'] * v, 1) for v in w['monthly']['yield_p90']],
                          gen_outlook=[round(p50['pv_kwp'] * v * (1 + ch.get('mid', 0)), 1) for v in w['monthly']['yield_p50']]))
+    pvp = DATA / 'pvday' / f'{path.stem}.json'
+    if pvp.exists():
+        import datetime as dt
+        pv = json.loads(pvp.read_text())
+        p50 = next(x for x in out['designs'] if x['design'].startswith('P50'))
+        Z = A['sizing']
+        usable = p50['battery_kwh'] * Z['battery_depth_of_discharge']
+        months_of_day = np.array([(dt.date(2027, 1, 1) + dt.timedelta(days=i)).month for i in range(365)])
+        def avg_day(year):
+            h = dfc.hourly_8760(fc, year, fc.representative_draw(year, 0.5)).reshape(365, 24)
+            return [h[months_of_day == m].mean(axis=0) for m in range(1, 13)]
+        d5, d1 = avg_day(5), avg_day(1)
+        rows = []
+        for m in range(12):
+            sol = np.array(pv['typical'][m]) * p50['pv_kwp']
+            clr = np.array(pv['clear'][m]) * p50['pv_kwp']
+            dem = d5[m]
+            direct = np.minimum(sol, dem).sum()
+            short = np.clip(dem - sol, 0, None).sum()      # from the battery (or unmet)
+            spare = np.clip(sol - dem, 0, None).sum()       # to charge the battery
+            rows.append(dict(month=m + 1, solar=[round(float(v), 2) for v in sol], clear=[round(float(v), 2) for v in clr],
+                             demand=[round(float(v), 2) for v in dem], demand_y1=[round(float(v), 2) for v in d1[m]],
+                             solar_kwh=round(float(sol.sum()), 1), demand_kwh=round(float(dem.sum()), 1), direct_kwh=round(float(direct), 1),
+                             battery_need_kwh=round(float(short), 1), spare_kwh=round(float(spare), 1),
+                             battery_ok=bool(short <= usable * 1.0001 and spare * Z['battery_roundtrip_efficiency'] >= short)))
+        out['pvday'] = dict(design=p50['design'], pv_kwp=round(p50['pv_kwp'], 1), battery_kwh=round(p50['battery_kwh'], 1), battery_usable_kwh=round(usable, 1),
+                            altitude_m=pv['altitude_m'], tz=pv['tz'], tilt=pv['tilt'], model=pv['model'], weather=pv['weather'],
+                            clear_kwh_kwp_day=pv['clear_kwh_kwp_day'], typical_kwh_kwp_day=pv['typical_kwh_kwp_day'], months=rows)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f'{path.stem}.json').write_text(json.dumps(out, separators=(',', ':'), default=float))
     y = out['summary']['energy_kwh_per_day']

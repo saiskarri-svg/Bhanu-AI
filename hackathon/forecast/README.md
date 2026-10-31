@@ -1,9 +1,11 @@
 # Mini-grid demand before building (GEH Brief 03)
 
-Two tools that run on a laptop with open data:
+Three tools that run on a laptop with open data:
 
 1. **`village_landuse.py`** maps a village. It reads building footprints (Google Open Buildings, Microsoft and OpenStreetMap, via Overture Maps) and works out what each building is used for: homes, shops, schools, clinics, markets, restaurants, workshops.
 2. **`demand_forecast.py`** turns that map into a **five-year electricity demand forecast with ranges**. It also gives the hourly load profile, the peak, what drives the uncertainty, and how likely different system sizes are to brown out, sit idle, or fail to cover their costs.
+
+3. **`clearsky_pv.py`** computes clear-sky irradiance (Ineichen-Perez) and PV output for a full year at any site, from nominal power, tilt, orientation, latitude, longitude and altitude, and draws the daily curves for each month.
 
 ## Quick start
 
@@ -107,9 +109,51 @@ Operators don't need to share customer-level data. The template above asks only 
 - **The tariff affects how much people use, not which appliances they buy.**
 - **The land-use step has been tested on a synthetic village and on one live run (Benichab, Mauritania).** Compare its HTML map with satellite imagery for new sites.
 
+## Clear-sky PV (`clearsky_pv.py`)
+
+```bash
+python clearsky_pv.py --lat 19.47116 --lon -15.42852 --altitude 50 --kwp 31 --tilt 20 --azimuth 180 \
+    --albedo 0.3 --name "Benichab, Mauritania" \
+    --tmax 28.3,31.1,34.4,37.8,40.6,42.8,41.1,40,40,37.8,33.3,29.4 \
+    --tmin 13.3,15,17.2,20,23.3,26.7,26.1,26.7,26.7,23.9,18.9,15
+```
+
+**The chain.** Each step is a function in the script:
+1. Solar position (NREL SPA).
+2. Kasten-Young air mass at site pressure.
+3. Linke turbidity: the monthly climatology shipped with pvlib, or your own values (`--linke`, 1 or 12 values).
+4. **Ineichen-Perez clear-sky GHI, DNI and DHI**, with the equations written out in `ineichen_perez()` and tested against pvlib.
+5. Perez transposition onto the tilted plane, plus ground reflection.
+6. Reflection (IAM) losses.
+7. Faiman cell temperature, from a daily temperature cycle built on monthly Tmin/Tmax.
+8. PVWatts DC output with temperature coefficient and system losses.
+9. Inverter output with DC/AC clipping.
+
+**Conventions and defaults.**
+- **Azimuth** is measured clockwise from north (180 = south).
+- **Tilt and azimuth** default to |latitude| (at least 10°), facing the equator.
+- **Time zone** comes from the coordinates (`--tz` to override).
+
+**Outputs** (folder `clearsky/`):
+
+| File | Contents |
+|---|---|
+| `*_pv_power_by_month.png` | AC power vs local time for every day of each month (12 panels; the 15th highlighted) |
+| `*_irradiance_by_month.png` | POA, GHI, DNI and DHI on the 15th of each month |
+| `*_clearsky_year.png` | clear-sky energy per average day of each month, and Linke turbidity |
+| `*_clearsky_monthly.csv` | per month: turbidity, GHI/DNI/DHI/POA kWh/m²/day, PV kWh/day and kWh/kWp/day, peak kW, max cell temperature, clipping, performance ratio |
+| `*_clearsky_15min.csv` | the full year at 15-minute steps (`--freq` to change) |
+
+**Reading the results.** Clear sky is the upper bound. In dry, dusty regions the climatological turbidity already includes typical haze, so real yields are usually not far below it, except on dust-storm and cloudy days.
+
+The near-noon kinks in some months come from the Perez model's discrete sky-clearness bins. Use `--diffuse-model isotropic` for smooth curves.
+
+For the demand forecast, the clear-sky kWh/kWp per day (about 4.6-5.3 at Benichab) bounds `peak_sun_hours x performance_ratio` in `assumptions.yaml` (6.0 x 0.75 = 4.5).
+
 ## Tests
 
 ```bash
 python test_synthetic.py   # land-use model
 python test_forecast.py    # demand forecast (11 tests: calibration, tariff, priors, 8760, sizing, validation, CLI)
+python test_clearsky.py    # clear-sky PV (7 tests: Ineichen equations = pvlib, flat panel = GHI, symmetry, seasons, clipping)
 ```

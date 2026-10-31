@@ -7,7 +7,7 @@ const GROUPS = [
   { t: 'Map data', k: ['openbuildings', 'overture', 'sentinel2'] },
   { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'scottcoley', 'ngrea', 'rockefeller', 'sltariff', 'clasp'] },
   { t: 'Benchmarks and context', k: ['esmap', 'peters', 'antonanzas'] },
-  { t: 'Weather, sun and climate', k: ['nasapower', 'cmip6'] },
+  { t: 'Weather, sun and climate', k: ['nasapower', 'clearsky', 'copdem', 'cmip6'] },
   { t: 'Costs and sun', k: ['omorate', 'wbsplit', 'gsrough'] },
   { t: 'Population (Benichab)', k: ['dhs', 'census'] },
   { t: 'Building-level model (second opinion)', k: ['mtf', 'who', 'amda'] },

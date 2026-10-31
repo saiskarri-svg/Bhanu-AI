@@ -20,6 +20,9 @@ export interface Engine {
   nearby?: { radius_km: number; weight: number; factor: number; factor_lo: number; factor_hi: number;
     sites: { site_id: string; name: string; country: string; d_km: number; metric: string; year: number; observed: number; predicted: number; ratio: number; weight: number; quality: string; precision: string; source: string; url: string; note: string }[] };
   uncalibrated?: Record<string, Q[]>;
+  pvday?: { design: string; pv_kwp: number; battery_kwh: number; battery_usable_kwh: number; altitude_m: number; tz: string; tilt: number; model: string; weather: string;
+    clear_kwh_kwp_day: number[]; typical_kwh_kwp_day: number[];
+    months: { month: number; solar: number[]; clear: number[]; demand: number[]; demand_y1: number[]; solar_kwh: number; demand_kwh: number; direct_kwh: number; battery_need_kwh: number; spare_kwh: number; battery_ok: boolean }[] };
   weather_inputs?: { monthly_mean_temp_c: number[]; peak_sun_hours: number; performance_ratio: number; daily_pv_variability: number; autonomy_days: number } | null;
   weather_sim?: { year: number; outlook_factor: number;
     designs: { design: string; unmet_share: number; worst_year_unmet_share: number; shortfall_days_per_year: number; worst_year_shortfall_days: number; monthly_unmet_share: number[] }[];

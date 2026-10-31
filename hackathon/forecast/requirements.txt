@@ -10,3 +10,5 @@ osmnx>=2.0
 overturemaps>=1.0
 matplotlib
 folium
+pvlib>=0.11
+timezonefinder
