@@ -2,6 +2,7 @@ import type { Engine } from './engine';
 import type { SiteData } from './model';
 import { derive, type Settings } from './settings';
 import { cashFlow, TERMS } from './CashFlow';
+import { lvNetwork, gridVsMini, LV_PER_KM, VERDICT } from './wires';
 
 const n0 = (x: number) => Math.round(x).toLocaleString('en-US');
 const usd = (x: number) => (x >= 1e6 ? `$${(x / 1e6).toFixed(2)}M` : x >= 1e4 ? `$${n0(x / 1000)}k` : `$${n0(x)}`);
@@ -40,6 +41,8 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
 
   h2('3. Proposed system');
   p(`${des.design.split(' ')[0]} size (covers that share of 4,000 simulated futures in year 5): ${n0(des.pv_kwp)} kWp of solar, ${n0(des.battery_kwh)} kWh of battery. Build cost about ${usd(des.capex_usd)} (${s.cost === 'amda' ? "AMDA 2024 benchmark per connection for the region" : '2021 Omorate prices including distribution'}; rough guide, replace with quotes).${d.rk ? ` Chance of brownouts by year ${s.yr}: ${pc(d.rk.p_brownouts)}; chance it is under 60% used: ${pc(d.rk.p_underused)}.` : ''} Build in stages: the first stage can be sized for year-2 to year-3 demand.`);
+  { const lv = lvNetwork(site), g = gridVsMini(site, eng, s);
+    p(`Village network: about ${lv.km.toFixed(1)} km of low-voltage line reaches ${n0(lv.reached)} of ${n0(lv.total)} roofs, roughly ${usd(lv.km * LV_PER_KM.mid)} (${usd(lv.km * LV_PER_KM.lo)} to ${usd(lv.km * LV_PER_KM.hi)}). Grid alternative: the nearest mapped line is ${g.known ? `${g.km.toFixed(1)} km` : `over ${g.km} km`} away; a medium-voltage line costs about ${usd(g.grid.mid)} (${usd(g.grid.lo)} to ${usd(g.grid.hi)}) against ${usd(g.gen)} for solar and battery. ${VERDICT[g.verdict]} (break-even about ${g.breakEven.toFixed(1)} km; line cost only, rough guide).`); }
   if (eng.weather_sim) p(`Checked against 10 real weather years (NASA POWER, 2015 to 2024): clouds, heat and dust on panels included.`);
 
   h2('4. Affordability and cost recovery');
@@ -59,7 +62,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   p('1) A household count and short business walk-through in the village (the biggest driver of the range). 2) Partner introductions for installation and maintenance. 3) Grant or concessional finance for the first stage. 4) Monthly site totals once running, shared through a data trust, to sharpen future forecasts.');
 
   h2('Method and sources');
-  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine: Fereshteh (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023 (2021 prices); AMDA Benchmarking Africa\'s Minigrids 2024 (2022 to 2024 data); IRENA Renewable Power Generation Costs in 2024. Built by the GridSight team for the Global Energy Hackathon 2026.', 8.5, 90);
+  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine: Fereshteh (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023 (2021 prices); AMDA Benchmarking Africa\'s Minigrids 2024 (2022 to 2024 data); IRENA Renewable Power Generation Costs in 2024. Line costs per km: ESMAP tables, OnSSET West Africa 2026, World Bank 2019, RMI 2018. Built by the GridSight team for the Global Energy Hackathon 2026.', 8.5, 90);
 
   const name = `GridSight-concept-note-${site.name.replace(/\s+/g, '-')}.pdf`;
   // Inside claude.ai the page asks the runtime to save; elsewhere a normal download

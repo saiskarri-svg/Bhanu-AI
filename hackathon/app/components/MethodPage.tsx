@@ -8,7 +8,7 @@ const GROUPS = [
   { t: 'Measured use and connections', k: ['faza', 'igc', 'frame', 'scottcoley', 'ngrea', 'rockefeller', 'sltariff', 'clasp'] },
   { t: 'Benchmarks and context', k: ['esmap', 'peters', 'antonanzas'] },
   { t: 'Weather, sun and climate', k: ['nasapower', 'clearsky', 'copdem', 'cmip6'] },
-  { t: 'Costs and sun', k: ['amda2024', 'irena2024', 'omorate', 'wbsplit', 'gsrough'] },
+  { t: 'Costs and sun', k: ['amda2024', 'irena2024', 'esmapgrid', 'onsset2026', 'wbgrid', 'rmi2018', 'omorate', 'wbsplit', 'gsrough'] },
   { t: 'Population (Benichab)', k: ['dhs', 'census'] },
   { t: 'Building-level model (second opinion)', k: ['mtf', 'who', 'amda'] },
   { t: 'Model and assumptions', k: ['engine', 'assumption'] },

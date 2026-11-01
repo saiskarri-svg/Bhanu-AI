@@ -5,10 +5,11 @@ import { ENGINE } from './engine';
 import { WEATHER } from './WeatherPage';
 import { derive, type Settings } from './settings';
 import { cashFlow } from './CashFlow';
+import { lvNetwork, gridVsMini } from './wires';
 import { n0, n1, usd, pc } from './format';
 
 type Col = { k: string; t: string; get: (r: Row) => number | undefined; fmt: (v: number) => React.ReactNode; best: 'hi' | 'lo' };
-interface Row { id: string; name: string; cc: string; roofs: number; hh: number; dem: number; kwp: number; kwh: number; capex: number; perCust: number; sun?: number; covers?: number; bill?: number; cash24?: number }
+interface Row { id: string; name: string; cc: string; roofs: number; hh: number; dem: number; kwp: number; kwh: number; capex: number; perCust: number; sun?: number; covers?: number; bill?: number; cash24?: number; lvKm: number; gridKm: number; gridKnown: boolean; verdict: string }
 
 // All sample villages side by side with the same settings, for picking sites and building a portfolio
 export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: string) => void; rate?: number }> = ({ s, siteId, onPick, rate = 433 }) => {
@@ -21,6 +22,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
       id: x.id, name: x.data.name, cc: x.data.country, roofs: x.data.buildings.length, hh: (d.meta ? eng.by_population!.households : eng.summary.households)[0].p50,
       dem: d.E[s.yr - 1].p50, kwp: d.des.pv_kwp, kwh: d.des.battery_kwh, capex: d.des.capex_usd, perCust: d.des.capex_usd / Math.max(1, cust),
       sun: WEATHER[x.id]?.annual.yield_kwh_kwp_day, covers: d.meta ? undefined : d.tsel?.p_revenue_covers_cost_year5, bill: d.meta ? undefined : d.tsel?.year5_household_bill_usd_month_p50, cash24: cf?.total,
+      lvKm: lvNetwork(x.data).km, ...(() => { const g = gridVsMini(x.data, eng, s); return { gridKm: g.km, gridKnown: g.known, verdict: g.verdict }; })(),
     }];
   });
   const [sort, setSort] = React.useState('perCust');
@@ -33,6 +35,8 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
     { k: 'sun', t: 'Sun, kWh/kWp', get: r => r.sun, fmt: n1, best: 'hi' },
     { k: 'covers', t: `Covers cost at $${s.tar.toFixed(2)}`, get: r => r.covers, fmt: v => <StatusDot tone={v >= 0.8 ? 'ok' : v >= 0.5 ? 'warn' : 'bad'}>{pc(v)}</StatusDot>, best: 'hi' },
     { k: 'bill', t: 'Bill a month', get: r => r.bill, fmt: v => `$${n1(v)}`, best: 'lo' },
+    { k: 'lvKm', t: 'Village line', get: r => r.lvKm, fmt: v => `${n1(v)} km`, best: 'lo' },
+    { k: 'gridKm', t: 'To the grid', get: r => r.gridKm, fmt: v => `${n1(v)} km`, best: 'hi' },
     { k: 'cash24', t: 'Cash at 24 months', get: r => r.cash24, fmt: v => <span className={v >= 0 ? 'text-ok' : 'text-bad'}>{v < 0 ? '-' : ''}{usd(Math.abs(v))}</span>, best: 'hi' },
   ];
   const c = cols.find(x => x.k === sort)!;
@@ -44,7 +48,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
       <div className="px-5 pb-5 space-y-3">
         <p className="text-sm text-muted max-w-prose">All {rows.length} villages as one portfolio: <span className="text-fg tabular-nums">{n0(tot.hh)}</span> households, <span className="text-fg tabular-nums">{n0(tot.kwp)} kWp</span>, about <span className="text-fg tabular-nums">{usd(tot.capex)}</span> to build (rough). Tap a column to sort; tap a village to open it.</p>
         <div className="overflow-x-auto -mx-5 px-5">
-          <table className="w-full text-sm tabular-nums min-w-[860px]">
+          <table className="w-full text-sm tabular-nums min-w-[1080px]">
             <thead><tr className="text-xs text-muted border-b border-line">
               <th className="py-2 pr-3 font-normal text-left">Village</th>
               {cols.map(x => (
@@ -57,7 +61,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
               {sorted.map((r, i) => (
                 <tr key={r.id} onClick={() => onPick(r.id)} className={`border-b border-line/60 cursor-pointer ${r.id === siteId ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
                   <td className="py-2 pr-3 whitespace-nowrap"><span className="text-muted mr-2">{i + 1}</span>{r.name} <span className="text-xs text-muted">{FLAG[r.cc] ?? r.cc}</span></td>
-                  {cols.map(x => { const v = x.get(r); return <td key={x.k} className={`py-2 pr-3 text-right whitespace-nowrap ${sort === x.k ? 'text-fg' : ''}`}>{v === undefined ? <span className="text-muted">-</span> : x.fmt(v)}</td>; })}
+                  {cols.map(x => { const v = x.get(r); return <td key={x.k} className={`py-2 pr-3 text-right whitespace-nowrap ${sort === x.k ? 'text-fg' : ''}`}>{v === undefined ? <span className="text-muted">-</span> : x.k === 'gridKm' ? <>{r.gridKnown ? '' : 'over '}{x.fmt(v)} <span className={`text-[11px] ${r.verdict.includes('grid') ? 'text-info' : 'text-ok'}`}>{r.verdict.includes('grid') ? 'grid' : 'mini-grid'}</span></> : x.fmt(v)}</td>; })}
                 </tr>
               ))}
             </tbody>

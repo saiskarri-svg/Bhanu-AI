@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Settings } from './settings';
+import { WiresBox } from './wires';
 import { Area, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, More } from './ui';
 import type { SiteData } from './model';
@@ -171,6 +172,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
         Costs: Omorate mini-grid, Ethiopia, 2021 contract prices (Wassie and Ahlgren 2023), generation only plus a share for distribution and soft costs. Newer data: AMDA's 2024 benchmark (member sites 2022 to 2024) puts the full build cost at about $1,046 a connection in West and Central Africa and $1,948 in East and Southern Africa; switch "Build cost" in the settings bar to use it. Panels and batteries are far cheaper now (IRENA 2024: $691 a kW, $192 a kWh), so most of the gap is installation, wiring and soft costs. Replace with real quotes before quoting dollars. Grants and subsidies are not included.
         {plantKw ? ` Solar for the most likely demand: year 1 about ${n0(kwpFor(S.energy_kwh_per_day[0].p50, eng.peak_sun_hours))} kWp, year 3 about ${n0(kwpFor(S.energy_kwh_per_day[2].p50, eng.peak_sun_hours))} kWp.` : ''}
       </p></More>
+      <WiresBox site={site} eng={eng} s={s} />
       <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: funding</button></div>
     </>
   );
