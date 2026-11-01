@@ -143,7 +143,7 @@ export const RoofPlanner: React.FC<{ needed: number; lat: number }> = ({ needed,
         ))}
       </div>
       <p className="px-5 pb-5 -mt-1 text-sm">
-        <StatusDot tone={ok ? 'ok' : 'bad'} className="text-fg">
+        <StatusDot hang tone={ok ? 'ok' : 'bad'} className="text-fg">
           {ok
             ? `Fits. ${needed} filled panels are your plan, the dashed ones show spare room for ${fits - needed} more.`
             : `Only ${fits} of ${needed} panels fit. Use a bigger roof area, a walkway canopy, or cover less of the school's use.`}

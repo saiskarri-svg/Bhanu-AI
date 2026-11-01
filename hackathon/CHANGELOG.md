@@ -16,6 +16,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-11-01
 
+- **Text alignment:** `StatusDot` has a `hang` option: when a coloured dot starts a line it sits in the margin (beside the first line) so the text lines up with the text above. Used for line-start dots on the Site, Validation and Funding tabs and in the Site Studio starter.
 - **Funding tab:** new `app/components/FundingPage.tsx` (tab 8, step 7 "Find funding"). Lists funding routes for the chosen village's country (Nigeria from Sai's partner shortlist: REA DARES, Africa Minigrids Program, All On, AECF, GFIF; plus Sierra Leone, Mauritania, Kenya, Uganda, Tanzania programmes) and Africa-wide ones (Mission 300, Universal Energy Facility, AMP, SEFA, GET.invest, AECF). Shows a rough grant-per-connection check against the P50 build cost and a list of what funders ask for against what GridSight already gives.
 
 ## 2026-10-31

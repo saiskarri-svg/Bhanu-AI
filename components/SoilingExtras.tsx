@@ -173,7 +173,7 @@ export const CleaningPlanner: React.FC<{ config: SystemConfig; annualGen: number
       <div className="p-5 space-y-1.5 text-sm">
         <p className="text-muted">Next three cleanings: <span className="text-fg">{upcoming.map(fmtDate).join(' · ')}</span></p>
         {upcoming.some(isMonsoon) && (
-          <p><StatusDot tone="info" className="text-fg">Monsoon rain cleans the panels for free<Cite id="rain-cleans" />. Skip a cleaning if it rained hard in the last few days.</StatusDot></p>
+          <p><StatusDot hang tone="info" className="text-fg">Monsoon rain cleans the panels for free<Cite id="rain-cleans" />. Skip a cleaning if it rained hard in the last few days.</StatusDot></p>
         )}
         <p className="text-xs text-muted">Each cleaning stops about {inr(plan.perDay)} a day of combined loss. Mark cleanings in the maintenance log below to keep this up to date.</p>
       </div>
@@ -213,7 +213,7 @@ export const BeforeAfter: React.FC<{ config: SystemConfig; annualGen: number }> 
       <div className="px-5 pt-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm">
           {after > 0
-            ? <StatusDot tone={gain > 3 ? 'ok' : 'warn'} className="text-fg">Output went up {gain.toFixed(0)}% after cleaning</StatusDot>
+            ? <StatusDot hang tone={gain > 3 ? 'ok' : 'warn'} className="text-fg">Output went up {gain.toFixed(0)}% after cleaning</StatusDot>
             : <span className="text-muted">Check back tomorrow for the first day after cleaning.</span>}
         </p>
         <Legend items={[{ label: 'Before', color: CHART.faint }, { label: 'After', color: CHART.positive }]} />
@@ -289,7 +289,7 @@ export const DustOutlook: React.FC<{ config: SystemConfig }> = ({ config }) => {
       </div>
       <div className="px-5 pb-5 space-y-1.5 text-sm">
         <p>
-          <StatusDot tone={high >= 7 ? 'bad' : high >= 3 ? 'warn' : 'ok'} className="text-fg">
+          <StatusDot hang tone={high >= 7 ? 'bad' : high >= 3 ? 'warn' : 'ok'} className="text-fg">
             {high} of the next 14 days have high dust risk.
           </StatusDot>
         </p>

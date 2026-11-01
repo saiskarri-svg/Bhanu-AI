@@ -102,7 +102,7 @@ export const FundingOptions: React.FC<{ config: SystemConfig; annualGen: number 
         </table>
       </div>
       <div className="px-5 pb-5 -mt-1 space-y-1.5 text-sm">
-        <p><StatusDot tone="ok" className="text-fg">Biggest 20 year gain: {best.name.replace(/csr/i,'CSR')} ({lakh(best.total)}).</StatusDot></p>
+        <p><StatusDot hang tone="ok" className="text-fg">Biggest 20 year gain: {best.name.replace(/csr/i,'CSR')} ({lakh(best.total)}).</StatusDot></p>
         <p className="text-muted">If the school has no money to spare, {noCash.name.replace(/^./, c => c.toLowerCase())} gives the most without a large upfront payment.</p>
         <p className="text-xs text-muted">Rough guide. Loan terms, CSR rules<Cite id="csr" /> and pay-per-unit contracts<Cite id="psg-gov" /> vary; get written quotes before deciding.</p>
       </div>
@@ -263,7 +263,7 @@ export const SavingsTracker: React.FC<{ config: SystemConfig; annualGen: number 
           <button type="submit" className={`${btn.secondary} col-span-2 lg:col-span-1`}>Add month</button>
         </form>
       )}
-      {error && <p className="px-5 pt-2 text-sm"><StatusDot tone="bad" className="text-bad">{error}</StatusDot></p>}
+      {error && <p className="px-5 pt-2 text-sm"><StatusDot hang tone="bad" className="text-bad">{error}</StatusDot></p>}
 
       <ul className="mt-4 border-t border-line divide-y divide-line">
         {rows.length ? rows.map(r => (

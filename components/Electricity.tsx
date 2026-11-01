@@ -379,7 +379,7 @@ export const Wiring: React.FC<{ defaultPanels: number }> = ({ defaultPanels }) =
         <p className="text-xs text-muted mb-2">Check against a typical 5 kW inverter</p>
         <ul className="space-y-1.5 text-sm">
           {r.checks.map(c => (
-            <li key={c.text}><StatusDot tone={c.tone} className="text-fg">{c.text}</StatusDot></li>
+            <li key={c.text}><StatusDot hang tone={c.tone} className="text-fg">{c.text}</StatusDot></li>
           ))}
         </ul>
       </div>

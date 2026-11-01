@@ -63,7 +63,7 @@ const SchemeList: React.FC<{ items: Scheme[] }> = ({ items }) => (
         <div className="min-w-0">
           <a href={s.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-fg underline underline-offset-2 decoration-line hover:decoration-fg">{s.name}</a>
           <p className="text-xs text-muted mt-0.5">{s.who}</p>
-          <div className="mt-1.5"><StatusDot tone={KIND_TONE[s.kind]}>{s.kind}</StatusDot></div>
+          <div className="mt-1.5 text-xs text-muted"><StatusDot hang tone={KIND_TONE[s.kind]}>{s.kind}</StatusDot></div>
         </div>
         <div className="min-w-0 text-sm space-y-1">
           <p>{s.what}</p>
@@ -144,14 +144,14 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: nu
 
       <Box>
         <BoxHeader title={`In ${NAME[cc] ?? cc}`} meta={COMPACT[cc] ? `Mission 300 energy compact presented ${COMPACT[cc]}` : 'No Mission 300 compact confirmed'} />
-        <div className="px-5 pb-5">
+        <div className="px-5 pb-5 pt-2">
           {local.length ? <SchemeList items={local} /> : <p className="text-sm text-muted">No country programmes listed yet for this location; see the Africa-wide routes below.</p>}
         </div>
       </Box>
 
       <Box>
         <BoxHeader title="Across Africa" meta="Open to several countries" />
-        <div className="px-5 pb-5"><SchemeList items={AFRICA} /></div>
+        <div className="px-5 pb-5 pt-2"><SchemeList items={AFRICA} /></div>
       </Box>
 
       <Box>

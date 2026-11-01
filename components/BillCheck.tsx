@@ -73,7 +73,7 @@ const BillCheck: React.FC<{ config: SystemConfig; annualGen: number }> = ({ conf
           </ul>
         </div>
         <div className="text-sm text-muted leading-relaxed space-y-2">
-          <p><StatusDot tone="info" className="text-fg">How net metering works</StatusDot></p>
+          <p><StatusDot hang tone="info" className="text-fg">How net metering works</StatusDot></p>
           <p>The meter counts units in both directions. In sunny months the school can send more than it uses. Units sent out first cancel units the school buys. Any surplus left at the year end is usually paid at about ₹{EXPORT_RATE} a unit, less than the tariff<Cite id={['export-rate', 'net-metering']} />.</p>
           <p className="text-xs">PM Surya Ghar's subsidy is for homes. Government schools can get rooftop solar through its government buildings programme, usually run by a RESCO or the DISCOM with little or no upfront cost<Cite id="psg-gov" />, or through state schemes and CSR. Check with your DISCOM.</p>
         </div>

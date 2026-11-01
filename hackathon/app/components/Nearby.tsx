@@ -74,7 +74,7 @@ export const FootprintBox: React.FC<{ eng?: Engine; total: number; coverage?: { 
   return (
     <div className="space-y-2">
       {coverage && share != null && (
-        <p className="text-sm"><StatusDot tone={share < 0.8 ? 'warn' : 'ok'}>Google alone finds {n0(coverage.google_alone)} of {n0(coverage.merged)} roofs ({pc(share)}).</StatusDot>
+        <p className="text-sm"><StatusDot hang tone={share < 0.8 ? 'warn' : 'ok'}>Google alone finds {n0(coverage.google_alone)} of {n0(coverage.merged)} roofs ({pc(share)}).</StatusDot>
           <span className="block text-xs text-muted mt-0.5">{share < 0.8 ? 'Its pictures miss many buildings here; Microsoft and OpenStreetMap fill the gap.' : 'Microsoft and OpenStreetMap add the rest.'}</span></p>
       )}
       <p className="text-xs text-muted">Who supplied each footprint, after duplicates are removed (OpenStreetMap is preferred where sources overlap):</p>

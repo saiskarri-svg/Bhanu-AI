@@ -130,7 +130,7 @@ const MaintenanceLog: React.FC = () => {
         Tick off each check when it is done. {overdueCount ? `${overdueCount} of ${TASKS.length} checks are due or never done.` : 'Everything is up to date.'}
         {!canWrite && ' You can view this log. Ask the owner for Contributor access to add entries.'}
       </p>
-      {error && <p className="px-5 pt-2 text-sm"><StatusDot tone="bad" className="text-bad">{error}</StatusDot></p>}
+      {error && <p className="px-5 pt-2 text-sm"><StatusDot hang tone="bad" className="text-bad">{error}</StatusDot></p>}
 
       <ul className="mt-3 border-t border-line divide-y divide-line">
         {TASKS.map(t => {

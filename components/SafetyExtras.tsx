@@ -141,7 +141,7 @@ export const ShutdownDrill: React.FC = () => {
           </ul>
           {wrong && !complete && (
             <p className="mt-2 text-xs text-muted" role="status">
-              <StatusDot tone="bad" className="text-bad">Not yet</StatusDot> · "{STEPS[wrong.i].t}" comes later. What has to happen first?
+              <StatusDot hang tone="bad" className="text-bad">Not yet</StatusDot> · "{STEPS[wrong.i].t}" comes later. What has to happen first?
             </p>
           )}
         </div>
@@ -162,7 +162,7 @@ export const ShutdownDrill: React.FC = () => {
           </ol>
           {complete && (
             <div className="mt-3 space-y-1.5">
-              <p className="text-sm"><StatusDot tone="ok" className="text-ok">{mistakes === 0 ? 'Perfect, no mistakes' : `Done with ${mistakes} mistake${mistakes > 1 ? 's' : ''}`}</StatusDot></p>
+              <p className="text-sm"><StatusDot hang tone="ok" className="text-ok">{mistakes === 0 ? 'Perfect, no mistakes' : `Done with ${mistakes} mistake${mistakes > 1 ? 's' : ''}`}</StatusDot></p>
               <p className="text-xs text-muted">To start up again, go in reverse: remove locks, close the DC isolator, switch on the inverter, then the AC breaker.</p>
             </div>
           )}

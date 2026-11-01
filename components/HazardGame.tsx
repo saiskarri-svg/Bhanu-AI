@@ -251,7 +251,7 @@ const HazardGame: React.FC = () => {
 
           {done && (
             <div className="border border-line rounded-box p-4">
-              <StatusDot tone="ok" className="text-sm text-ok">All {HAZARDS.length} hazards found</StatusDot>
+              <StatusDot hang tone="ok" className="text-sm text-ok">All {HAZARDS.length} hazards found</StatusDot>
               <p className="mt-1 text-sm text-muted">Great spotting. Remember: you find it, you report it, a trained technician fixes it.</p>
             </div>
           )}

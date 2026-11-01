@@ -257,7 +257,7 @@ const Sizing: React.FC<{ config: SystemConfig; setConfig: React.Dispatch<React.S
 
         <div className="px-5 pb-5 space-y-1.5 text-sm">
           <p>
-            <StatusDot tone={currentCover >= 90 ? 'ok' : currentCover >= 60 ? 'warn' : 'bad'} className="text-fg">
+            <StatusDot hang tone={currentCover >= 90 ? 'ok' : currentCover >= 60 ? 'warn' : 'bad'} className="text-fg">
               The current {config.systemSize} kWp system covers about {currentCover}% of this school's use.
             </StatusDot>
           </p>

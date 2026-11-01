@@ -118,7 +118,7 @@ const Certificate: React.FC<{ config: SystemConfig; goTo: (lesson: string) => vo
         <ul className="mt-4 border-t border-line divide-y divide-line">
           {reqs.map(r => (
             <li key={r.key} className="px-5 py-2.5 flex items-center justify-between gap-3">
-              <StatusDot tone={r.done ? 'ok' : 'muted'} className={`text-sm ${r.done ? 'text-fg' : 'text-muted'}`}>{r.label}</StatusDot>
+              <StatusDot hang tone={r.done ? 'ok' : 'muted'} className={`text-sm ${r.done ? 'text-fg' : 'text-muted'}`}>{r.label}</StatusDot>
               {!r.done && <button onClick={() => goTo(r.lesson)} className={`${btn.quiet} shrink-0`}>Go to {r.lesson}</button>}
             </li>
           ))}

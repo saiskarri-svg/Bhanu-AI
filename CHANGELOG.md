@@ -10,6 +10,10 @@ Read this first at the start of a session instead of exploring the code. Newest 
 - **Key files:** `components/fundingData.ts` (funding by state), `App.tsx` (tabs), `components/ui.tsx` (shared pieces, CHART/TINT colours), `index.css` (tokens), `components/risk.ts` (risk + WhatsApp rules), `components/sourceList.ts` (citations), `components/solarModel.ts` (simulator model), `components/runtime.ts` (artifact runtime), `components/useSharedSettings.ts`.
 - **On hold:** language switcher (14), live data hookup (18, needs inverter brand), multi-school view (19, needs school list).
 
+## 2026-11-01
+
+- **Text alignment:** a coloured status dot that starts a line now hangs in the margin (beside the first line), so the text lines up with the text above it: funding notes, net metering, dust and cleaning notes, sizing checks, error messages, quiz and certificate lists (`StatusDot` `hang` option in `components/ui.tsx`).
+
 ## 2026-10-21
 
 - **Translations:** en, te and hi brought up to date with today's text (Maintenance tab name, Today strip, Where the power goes now, funding by state, payback marker, WhatsApp number hints and practice message, AI Advisor notice, Impact wording and next steps, Saved a year, chart summaries for screen readers). Files stay line-aligned (879 lines).

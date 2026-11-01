@@ -91,10 +91,10 @@ export const ValidationPage: React.FC<{ site: SiteData; eng: Engine; onNext: () 
           <div className="min-w-0 bg-surface-2 border border-line rounded-box p-4 text-sm">
             <p className="text-fg font-medium">Status</p>
             <ul className="mt-2 space-y-2 text-muted">
-              <li><StatusDot tone="warn">Metered site data: not yet available.</StatusDot> <span className="block text-xs mt-0.5">Needs a partner operator or a data trust (see Data sharing).</span></li>
-              <li><StatusDot tone="warn">Building classifier: tested below; misses most shops, schools and clinics.</StatusDot></li>
-              <li><StatusDot tone="ok">Plant size sanity check: below, from a plant mapped on OpenStreetMap.</StatusDot></li>
-              <li><StatusDot tone="info">Retraining: when meters arrive, the hand-set ranges on the Method tab are replaced by ranges fitted to them; the scoring above runs again.</StatusDot></li>
+              <li><StatusDot hang tone="warn">Metered site data: not yet available.</StatusDot> <span className="block text-xs mt-0.5">Needs a partner operator or a data trust (see Data sharing).</span></li>
+              <li><StatusDot hang tone="warn">Building classifier: tested below; misses most shops, schools and clinics.</StatusDot></li>
+              <li><StatusDot hang tone="ok">Plant size sanity check: below, from a plant mapped on OpenStreetMap.</StatusDot></li>
+              <li><StatusDot hang tone="info">Retraining: when meters arrive, the hand-set ranges on the Method tab are replaced by ranges fitted to them; the scoring above runs again.</StatusDot></li>
             </ul>
           </div>
         </div>

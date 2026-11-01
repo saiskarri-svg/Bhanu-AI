@@ -279,9 +279,10 @@ const toneClass: Record<Tone, string> = {
 
 // Colour as a small dot plus plain text, no box
 // pulse: a soft ring that keeps drawing the eye; use only for high risk items
-export const StatusDot: React.FC<{ tone: Tone; children: React.ReactNode; className?: string; pulse?: boolean }> = ({ tone, children, className = '', pulse }) => (
-  <span className={`inline-flex items-center gap-1.5 ${className}`}>
-    <span className={`h-1.5 w-1.5 rounded-full ${toneClass[tone]} ${pulse ? 'risk-pulse' : ''}`} aria-hidden="true" />
+// hang: when the dot starts a line, it sits in the margin so the text lines up with the text above
+export const StatusDot: React.FC<{ tone: Tone; children: React.ReactNode; className?: string; pulse?: boolean; hang?: boolean }> = ({ tone, children, className = '', pulse, hang }) => (
+  <span className={`inline-flex gap-1.5 ${hang ? '-ml-3 items-start' : 'items-center'} ${className}`}>
+    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${toneClass[tone]} ${pulse ? 'risk-pulse' : ''}`} style={hang ? { marginTop: 'calc(0.5lh - 3px)' } : undefined} aria-hidden="true" />
     {children}
   </span>
 );

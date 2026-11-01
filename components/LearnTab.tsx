@@ -389,7 +389,7 @@ const Safety: React.FC = () => (
               ['Fault code on the inverter display', 'info'],
             ].map(([t, tone]) => (
               <li key={t} className="px-5 py-2.5">
-                <StatusDot tone={tone as 'bad' | 'warn' | 'info'} className="text-fg">{t}</StatusDot>
+                <StatusDot hang tone={tone as 'bad' | 'warn' | 'info'} className="text-fg">{t}</StatusDot>
               </li>
             ))}
           </ul>

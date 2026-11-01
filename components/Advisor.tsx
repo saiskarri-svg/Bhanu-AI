@@ -225,7 +225,7 @@ export const AskAdvisor: React.FC<{ context: string }> = ({ context }) => {
             <div ref={endRef} />
           </div>
 
-          {error && <p className="px-5 pt-2 text-sm"><StatusDot tone="bad" className="text-bad">{error}</StatusDot></p>}
+          {error && <p className="px-5 pt-2 text-sm"><StatusDot hang tone="bad" className="text-bad">{error}</StatusDot></p>}
 
           <form className="p-5 flex flex-col sm:flex-row gap-2" onSubmit={e => { e.preventDefault(); ask(draft); }}>
             <label htmlFor="advisor-q" className="sr-only">Your question</label>
@@ -287,7 +287,7 @@ export const WeeklyReport: React.FC<{ context: string; school: string }> = ({ co
             )}
             {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
           </div>
-          {g.error && <p className="text-sm"><StatusDot tone="bad" className="text-bad">{g.error}</StatusDot></p>}
+          {g.error && <p className="text-sm"><StatusDot hang tone="bad" className="text-bad">{g.error}</StatusDot></p>}
           {(g.busy || g.text) && (
             <div className="border border-line rounded-box p-4 bg-bg/40" aria-live="polite">
               {g.text ? <Answer text={g.text} /> : <p className="text-sm text-muted inline-flex items-center gap-2"><Spinner /> Writing the report…</p>}
@@ -373,7 +373,7 @@ export const Diagnose: React.FC<{ context: string }> = ({ context }) => {
               : <button onClick={run} disabled={!symptom.trim() || !sample} className={btn.secondary}>Diagnose</button>}
             <LangPicker id="diag-lang" value={lang} onChange={setLang} />
           </div>
-          {g.error && <p className="text-sm"><StatusDot tone="bad" className="text-bad">{g.error}</StatusDot></p>}
+          {g.error && <p className="text-sm"><StatusDot hang tone="bad" className="text-bad">{g.error}</StatusDot></p>}
           {(g.busy || g.text) && (
             <div className="border border-line rounded-box p-4 bg-bg/40" aria-live="polite">
               {g.text ? <Answer text={g.text} /> : <p className="text-sm text-muted inline-flex items-center gap-2"><Spinner /> Looking into it…</p>}
@@ -437,7 +437,7 @@ export const LessonBuilder: React.FC<{ context: string }> = ({ context }) => {
             )}
             {msg && <span className="text-xs text-muted" role="status">{msg}</span>}
           </div>
-          {g.error && <p className="text-sm"><StatusDot tone="bad" className="text-bad">{g.error}</StatusDot></p>}
+          {g.error && <p className="text-sm"><StatusDot hang tone="bad" className="text-bad">{g.error}</StatusDot></p>}
           {(g.busy || g.text) && (
             <div className="border border-line rounded-box p-4 bg-bg/40" aria-live="polite">
               {g.text ? <Answer text={g.text} /> : <p className="text-sm text-muted inline-flex items-center gap-2"><Spinner /> Writing the lesson…</p>}
