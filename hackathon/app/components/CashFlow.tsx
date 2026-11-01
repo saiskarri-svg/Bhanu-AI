@@ -59,15 +59,15 @@ export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
 };
 
 // Smallest grant per connection that makes year 2 cover running costs and 1.2x the loan payment
-export const minGrant = (eng: Engine, s: Settings): number | null => {
+export const minGrant = (eng: Engine, s: Settings, extra?: (grantTotal: number) => boolean): number | null => {
   const d = derive(eng, s); const cust = d.CU?.[4].p50 ?? 0;
   if (!d.des || cust <= 0) return null;
-  const at = (g: number) => cashFlow(eng, s, g * cust);
-  if (at(0)?.ok) return 0;
+  const at = (g: number) => { const c = cashFlow(eng, s, g * cust); return c && c.ok && (!extra || extra(g * cust)) ? c : null; };
+  if (at(0)) return 0;
   const max = d.des.capex_usd / cust;
-  if (!at(max)?.ok) return null; // even a full grant leaves bills below running costs
+  if (!at(max)) return null; // even a full grant leaves bills below running costs
   let lo = 0, hi = max;
-  for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (at(mid)?.ok) hi = mid; else lo = mid; }
+  for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (at(mid)) hi = mid; else lo = mid; }
   return Math.ceil(hi / 10) * 10;
 };
 

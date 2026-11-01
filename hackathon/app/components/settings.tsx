@@ -3,6 +3,7 @@ import type { Engine } from './engine';
 import { SITES, FLAG } from './sites';
 import { StatusDot } from './ui';
 import { n0, n1 } from './format';
+import { lifetime } from './lifetime';
 
 // Site settings shared by the Map panel and every tab: change once, everything follows.
 export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; grant: number; loan: 'commercial' | 'concessional' }
@@ -87,16 +88,17 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
 
 // The answer for the chosen settings, in five numbers
 export const Answer: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => {
-  const { meta, des, tsel, rk, dem } = derive(eng, s);
+  const { meta, des, tsel, rk, dem, CU } = derive(eng, s);
   const cells: { k: string; v: React.ReactNode; sub?: React.ReactNode }[] = [
     { k: `Demand, year ${s.yr}`, v: dem ? <>{n0(dem.p50)} <span className="text-xs text-muted font-sans">kWh a day</span></> : '-', sub: dem ? `${n0(dem.p10)} to ${n0(dem.p90)}` : undefined },
     { k: s.stage ? 'Stage 1 system' : `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${COST_LABEL[s.cost]}, rough)` : undefined },
     { k: `Brownouts, year ${s.yr}`, v: rk ? <StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot> : '-', sub: rk ? `under 60% used: ${pc(rk.p_underused)}` : meta ? 'run for the roof count' : undefined },
     { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: s.cost !== 'engine' || s.stage ? 'of futures, P50, 2021 engine costs' : 'of futures, P50 system, year 5' },
     { k: 'Home bill, year 5', v: tsel && !meta ? <>${n1(tsel.year5_household_bill_usd_month_p50)} <span className="text-xs text-muted font-sans">a month</span></> : '-', sub: `at $${s.tar.toFixed(2)} a kWh` },
+    { k: "Owner's money back", v: (() => { const L = lifetime(eng, s, s.grant * (CU?.[4].p50 ?? 0)); return L?.ownerPayback == null ? <span className="text-bad">20+ yrs</span> : <span className={L.ownerPayback <= 7 ? 'text-ok' : L.ownerPayback <= 12 ? 'text-warn' : 'text-bad'}>{n1(L.ownerPayback)} <span className="text-xs text-muted font-sans">yrs</span></span>; })(), sub: `$${s.grant} grant, ${s.loan} loan` },
   ];
   return (
-    <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-line border border-line rounded-ctl overflow-hidden">
+    <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-line border border-line rounded-ctl overflow-hidden">
       {cells.map(c => (
         <div key={c.k} className="bg-surface-2 px-3 py-2 min-w-0">
           <dt className="text-[11px] text-muted truncate">{c.k}</dt>

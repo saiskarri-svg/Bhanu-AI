@@ -2,6 +2,7 @@ import React from 'react';
 import { derive, type Settings } from './settings';
 import { CashFlow, LOANS } from './CashFlow';
 import { Pencil } from './Pencil';
+import { Payback } from './Payback';
 import { conceptNote } from './conceptNote';
 import { Box, BoxHeader, More, StatusDot, StatStrip, type Tone } from './ui';
 import type { Engine } from './engine';
@@ -98,6 +99,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
     { t: 'Customer affordability', tone: 'ok', state: 'Household bill and chance of covering cost at four tariffs', tab: 3 },
     { t: 'Weather risk to output', tone: 'ok', state: 'Ten real weather years and climate-model outlook', tab: 4 },
     { t: '12 to 24 month cash flow', tone: 'ok', state: 'First 24 months above, for the chosen system, tariff and grant' },
+    { t: 'Payback period', tone: 'ok', state: '20-year payback for the owner and the whole project, above' },
     { t: '2-page concept note', tone: 'ok', state: 'Download below, built from these numbers' },
     { t: 'Installation and maintenance partners', tone: 'muted', state: 'From the developer; not something GridSight can supply' },
     { t: 'Track record and audited accounts', tone: 'muted', state: 'From the developer' },
@@ -155,6 +157,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
       )}
 
       {eng && p50 && <Box><CashFlow eng={eng} s={st} grant={grant} /></Box>}
+      {eng && p50 && <Payback eng={eng} s={st} />}
       {eng && p50 && <Pencil eng={eng} s={st} set={set} />}
 
       <Box>

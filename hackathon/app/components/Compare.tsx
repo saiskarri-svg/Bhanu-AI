@@ -5,11 +5,12 @@ import { ENGINE } from './engine';
 import { WEATHER } from './WeatherPage';
 import { derive, type Settings } from './settings';
 import { cashFlow } from './CashFlow';
+import { lifetime } from './lifetime';
 import { lvNetwork, gridVsMini } from './wires';
 import { n0, n1, usd, pc } from './format';
 
 type Col = { k: string; t: string; get: (r: Row) => number | undefined; fmt: (v: number) => React.ReactNode; best: 'hi' | 'lo' };
-interface Row { id: string; name: string; cc: string; roofs: number; hh: number; dem: number; kwp: number; kwh: number; capex: number; perCust: number; sun?: number; covers?: number; bill?: number; cash24?: number; lvKm: number; gridKm: number; gridKnown: boolean; verdict: string }
+interface Row { id: string; name: string; cc: string; roofs: number; hh: number; dem: number; kwp: number; kwh: number; capex: number; perCust: number; sun?: number; covers?: number; bill?: number; cash24?: number; payback?: number; lvKm: number; gridKm: number; gridKnown: boolean; verdict: string }
 
 // All sample villages side by side with the same settings, for picking sites and building a portfolio
 export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: string) => void; rate?: number }> = ({ s, siteId, onPick, rate = 433 }) => {
@@ -21,7 +22,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
     return [{
       id: x.id, name: x.data.name, cc: x.data.country, roofs: x.data.buildings.length, hh: (d.meta ? eng.by_population!.households : eng.summary.households)[0].p50,
       dem: d.E[s.yr - 1].p50, kwp: d.des.pv_kwp, kwh: d.des.battery_kwh, capex: d.des.capex_usd, perCust: d.des.capex_usd / Math.max(1, cust),
-      sun: WEATHER[x.id]?.annual.yield_kwh_kwp_day, covers: d.meta ? undefined : d.tsel?.p_revenue_covers_cost_year5, bill: d.meta ? undefined : d.tsel?.year5_household_bill_usd_month_p50, cash24: cf?.total,
+      sun: WEATHER[x.id]?.annual.yield_kwh_kwp_day, covers: d.meta ? undefined : d.tsel?.p_revenue_covers_cost_year5, bill: d.meta ? undefined : d.tsel?.year5_household_bill_usd_month_p50, cash24: cf?.total, payback: lifetime(eng, s, cust * rate)?.ownerPayback ?? 99,
       lvKm: lvNetwork(x.data).km, ...(() => { const g = gridVsMini(x.data, eng, s); return { gridKm: g.km, gridKnown: g.known, verdict: g.verdict }; })(),
     }];
   });
@@ -37,6 +38,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
     { k: 'bill', t: 'Bill a month', get: r => r.bill, fmt: v => `$${n1(v)}`, best: 'lo' },
     { k: 'lvKm', t: 'Village line', get: r => r.lvKm, fmt: v => `${n1(v)} km`, best: 'lo' },
     { k: 'gridKm', t: 'To the grid', get: r => r.gridKm, fmt: v => `${n1(v)} km`, best: 'hi' },
+    { k: 'payback', t: 'Owner payback', get: r => r.payback, fmt: v => <span className={v <= 7 ? 'text-ok' : v <= 12 ? 'text-warn' : 'text-bad'}>{v >= 99 ? '20+' : n1(v)} yrs</span>, best: 'lo' },
     { k: 'cash24', t: 'Cash at 24 months', get: r => r.cash24, fmt: v => <span className={v >= 0 ? 'text-ok' : 'text-bad'}>{v < 0 ? '-' : ''}{usd(Math.abs(v))}</span>, best: 'hi' },
   ];
   const c = cols.find(x => x.k === sort)!;
@@ -48,7 +50,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
       <div className="px-5 pb-5 space-y-3">
         <p className="text-sm text-muted max-w-prose">All {rows.length} villages as one portfolio: <span className="text-fg tabular-nums">{n0(tot.hh)}</span> households, <span className="text-fg tabular-nums">{n0(tot.kwp)} kWp</span>, about <span className="text-fg tabular-nums">{usd(tot.capex)}</span> to build (rough). Tap a column to sort; tap a village to open it.</p>
         <div className="overflow-x-auto -mx-5 px-5">
-          <table className="w-full text-sm tabular-nums min-w-[1080px]">
+          <table className="w-full text-sm tabular-nums min-w-[1180px]">
             <thead><tr className="text-xs text-muted border-b border-line">
               <th className="py-2 pr-3 font-normal text-left">Village</th>
               {cols.map(x => (

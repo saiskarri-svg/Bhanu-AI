@@ -2,6 +2,7 @@ import type { Engine } from './engine';
 import type { SiteData } from './model';
 import { derive, type Settings } from './settings';
 import { cashFlow } from './CashFlow';
+import { lifetime } from './lifetime';
 import { lvNetwork, gridVsMini, LV_PER_KM, VERDICT } from './wires';
 
 const n0 = (x: number) => Math.round(x).toLocaleString('en-US');
@@ -53,6 +54,9 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
     p(`A results-based grant of $${rate} per connection for ${n0(d.CU![4].p50)} connections gives about ${usd(grant)} (${pc(grant / des.capex_usd)} of the build cost). The rest: a loan of ${usd(cf.loan)} (${Math.round(cf.T.debtShare * 100)}%, ${cf.T.years} years at ${Math.round(cf.T.rate * 100)}%${cf.T.grace ? `, ${cf.T.grace}-month grace` : ''}, ${usd(cf.debt)} a month) and ${usd(cf.equity)} from the developer.`);
     p(`Cash after running costs and loan payments: ${cf.firstPositive ? `first positive month ${cf.firstPositive}` : 'not positive within 24 months'}; ${cf.total >= 0 ? 'ahead' : 'short'} by ${usd(Math.abs(cf.total))} after 24 months${cf.dscr !== undefined ? `; debt cover in year 2 about ${cf.dscr.toFixed(2)}x` : ''}. Assumes ${Math.round(cf.T.collection * 100)}% of bills collected.${cf.total < 0 ? ' The early gap comes from demand ramping up as homes connect; a smaller first stage, a larger grant, lower build costs or a loan grace period close it.' : ''}`);
   }
+
+  { const L = lifetime(eng, s, grant);
+    if (L) p(`Over 20 years: the owner's money (${usd(L.equity)}) is back in ${L.ownerPayback === null ? 'more than 20 years' : `about ${L.ownerPayback.toFixed(1)} years`}, and the whole project after the grant in ${L.projectPayback === null ? 'more than 20 years' : `about ${L.projectPayback.toFixed(1)} years`}, counting battery and inverter renewal around year 11${L.capex3 ? ' and the year-3 expansion' : ''}. Owner's cash after 20 years: ${L.ownerTotal < 0 ? '-' : ''}${usd(Math.abs(L.ownerTotal))}. Demand grows 2% a year after year 5 (assumption).`); }
 
   h2('6. Funding routes to approach');
   routes.forEach(r => p(`• ${r}`, 9));

@@ -3,6 +3,7 @@ import { Box, BoxHeader, More, StatusDot } from './ui';
 import type { Engine } from './engine';
 import { derive, type Settings } from './settings';
 import { cashFlow, minGrant, LOANS, DSCR_MIN } from './CashFlow';
+import { lifetime } from './lifetime';
 import { Cite } from './refs';
 import { n0, usd } from './format';
 
@@ -19,14 +20,20 @@ export const Pencil: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Setti
   const d = derive(eng, s);
   const cust = d.CU?.[4].p50 ?? 0;
   const now = cashFlow(eng, s, s.grant * cust);
-  const grid = LADDER.map(l => TARIFFS.map(t => { const ss = { ...s, ...l.p, tar: t }; return { ss, g: minGrant(eng, ss) }; }));
+  const [target, setTarget] = React.useState(10);
+  const grid = LADDER.map(l => TARIFFS.map(t => {
+    const ss = { ...s, ...l.p, tar: t };
+    const g = minGrant(eng, ss, total => { const L = lifetime(eng, ss, total); return !!L && L.ownerPayback !== null && L.ownerPayback <= target; });
+    const pb = g === null ? null : lifetime(eng, ss, g * cust)?.ownerPayback ?? null;
+    return { ss, g, pb };
+  }));
   // Cheapest working option at the current tariff, and the best overall
   const atTar = grid.map(row => row.find(c => c.ss.tar === s.tar) ?? row[row.length - 1]);
   const pick = grid.flat().filter(c => c.g !== null).sort((a, b) => a.g! - b.g!)[0];
   const ref = 433;
   return (
     <Box>
-      <BoxHeader title="Make it pencil out" meta={`Works = year 2 bills cover running costs and ${DSCR_MIN}x the loan payment`} />
+      <BoxHeader title="Make it pencil out" meta={`Works = year-2 bills cover running costs and ${DSCR_MIN}x the loan payment, and the owner's money is back within ${target} years`} />
       <div className="px-5 pb-5 space-y-4">
         <p className="text-sm max-w-prose">
           {now?.ok
@@ -34,6 +41,15 @@ export const Pencil: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Setti
             : <StatusDot hang tone="bad">Not yet: as set, year-2 bills {now?.dscr !== undefined ? `cover the loan payment only ${now.dscr.toFixed(2)}x` : 'do not cover running costs'}.</StatusDot>}
           {' '}<span className="text-muted">Each row adds one lever; each cell is the smallest grant per connection that makes it work at that tariff. Tap a cell to use it.</span>
         </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted">Owner's money back within</span>
+          <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Payback target">
+            {[5, 7, 10, 15].map(t => (
+              <button key={t} role="radio" aria-checked={target === t} onClick={() => setTarget(t)}
+                className={`h-8 px-3 text-xs tabular-nums ${target === t ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{t} years</button>
+            ))}
+          </div>
+        </div>
         <div className="overflow-x-auto -mx-5 px-5">
           <table className="w-full text-sm tabular-nums min-w-[560px]">
             <thead><tr className="text-xs text-muted border-b border-line">
@@ -48,10 +64,10 @@ export const Pencil: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Setti
                     const on = c === pick;
                     return (
                       <td key={c.ss.tar} className="py-1.5 pr-1 text-right">
-                        {c.g === null ? <span className="text-muted text-xs">bills below running costs</span> : (
+                        {c.g === null ? <span className="text-muted text-xs">not within {target} yrs</span> : (
                           <button onClick={() => set({ ...l.p, stage: !!l.p.stage, cost: l.p.cost ?? s.cost, loan: l.p.loan ?? s.loan, tar: c.ss.tar, grant: c.g! })}
                             className={`h-8 px-2 rounded-ctl tabular-nums hover:bg-surface-2 ${on ? 'ring-1 ring-ok text-ok font-medium' : c.g === 0 ? 'text-ok' : c.g <= ref ? 'text-fg' : 'text-warn'}`}>
-                            {c.g === 0 ? 'no grant' : `$${n0(c.g)}`}<span className="block text-[10px] text-muted font-normal">{c.g ? usd(c.g * cust) : 'works alone'}</span>
+                            {c.g === 0 ? 'no grant' : `$${n0(c.g)}`}<span className="block text-[10px] text-muted font-normal">{c.g ? usd(c.g * cust) : 'works alone'}{c.pb !== null ? ` · back in ${c.pb.toFixed(1)} yrs` : ''}</span>
                           </button>)}
                       </td>);
                   })}
@@ -70,7 +86,7 @@ export const Pencil: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Setti
             <li>Import duty and VAT exemptions on solar equipment where the country offers them.</li>
           </ul>
         </More>
-        <p className="text-[11px] text-muted">At this tariff the {LADDER.length} steps need {atTar.map(c => c.g === null ? 'n/a' : c.g === 0 ? '$0' : `$${n0(c.g)}`).join(', ')} a connection. Loan terms are rough guides: commercial {Math.round(LOANS.commercial.rate * 100)}% over {LOANS.commercial.years} years; concessional {Math.round(LOANS.concessional.rate * 100)}% over {LOANS.concessional.years} years with {LOANS.concessional.grace} months' grace (assumptions). Year 3 expansion and battery replacement are not in this 2-year test.</p>
+        <p className="text-[11px] text-muted">At this tariff the {LADDER.length} steps need {atTar.map(c => c.g === null ? 'n/a' : c.g === 0 ? '$0' : `$${n0(c.g)}`).join(', ')} a connection. Loan terms are rough guides: commercial {Math.round(LOANS.commercial.rate * 100)}% over {LOANS.commercial.years} years; concessional {Math.round(LOANS.concessional.rate * 100)}% over {LOANS.concessional.years} years with {LOANS.concessional.grace} months' grace (assumptions). Payback counts the year-3 expansion, battery and inverter renewal around year 11, and slow growth after year 5 (see Payback over 20 years).</p>
         <Cite k={['irena2024', 'amda2024', 'omorate', 'assumption']} />
       </div>
     </Box>
