@@ -34,7 +34,7 @@ export const TwoCounts: React.FC<{ eng: Engine; site: SiteData }> = ({ eng, site
           <table className="w-full text-sm tabular-nums min-w-[560px]">
             <thead><tr className="text-left text-xs text-muted border-b border-line">
               <th className="py-2 pr-3 font-normal w-[30%]"></th>
-              <th className="py-2 pr-3 font-normal">From roofs <span className="text-muted">(used across GridSight)</span></th>
+              <th className="py-2 pr-3 font-normal">From roofs <span className="text-muted">(used across Kesho)</span></th>
               <th className="py-2 font-normal">From Meta's population map</th>
             </tr></thead>
             <tbody>

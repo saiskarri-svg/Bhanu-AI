@@ -1,4 +1,4 @@
-# GridSight: 3-minute pitch
+# Kesho: 3-minute pitch
 
 Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 Team: Sai (map, data pipeline, dashboard) and Fereshteh (demand engine, clear-sky solar model, Benichab field test).
@@ -12,7 +12,7 @@ Amina builds mini-grids. Her last site was too big: the tariff to repay it price
 
 **0:25 to 0:55. Step 1: count the roofs** (screen: Site tab, footprint sources and the satellite picture)
 
-GridSight starts from space. We merge three footprint sources, because pictures can be old or missing: at Talek in Kenya, Google alone sees only half the roofs. A satellite picture from this month shows what is there now. Gbamu Gbamu in Nigeria: about 1,350 roofs. And we check the count against a second open source, Meta's population map. They disagree up to four-fold, and we show both.
+Kesho starts from space. We merge three footprint sources, because pictures can be old or missing: at Talek in Kenya, Google alone sees only half the roofs. A satellite picture from this month shows what is there now. Gbamu Gbamu in Nigeria: about 1,350 roofs. And we check the count against a second open source, Meta's population map. They disagree up to four-fold, and we show both.
 
 **0:55 to 1:30. Step 2: forecast demand** (screen: Demand tab, the answer, then "Why this number")
 
@@ -28,4 +28,4 @@ Build for the median year-5 forecast and there is about a 30% chance of brownout
 
 **2:35 to 3:00. Step 5: check it and share data** (screen: Trust tab: Checks, then Data sharing)
 
-We scored our building classes on 2,225 volunteer-tagged buildings in 84 villages it had never seen, and we show where it falls short. Six villages, six countries, open data only, on a laptop. The missing piece is meter data, so we propose a data trust: operators share monthly site totals, never customer rows, and get a better model back. Fewer oversized grids, fewer brownouts, faster finance. That is GridSight.
+We scored our building classes on 2,225 volunteer-tagged buildings in 84 villages it had never seen, and we show where it falls short. Six villages, six countries, open data only, on a laptop. The missing piece is meter data, so we propose a data trust: operators share monthly site totals, never customer rows, and get a better model back. Fewer oversized grids, fewer brownouts, faster finance. That is Kesho.

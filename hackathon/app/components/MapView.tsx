@@ -158,7 +158,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     ] : [];
     const segTot = segs.reduce((a, s) => a + s.v, 0) || 1;
 
-    // What GridSight is for, in one line
+    // What Kesho is for, in one line
     const goalText = <>Plan a solar mini-grid for a village before anyone builds there: count the roofs, forecast how much power people will use, size it so it is neither too big nor too small, and find a way to pay for it.</>;
     const goal = (
       <section aria-label="Goal" className="bg-surface border border-line rounded-box p-4 space-y-1">

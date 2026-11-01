@@ -54,7 +54,7 @@ export const SitePicker: React.FC<{ id: string; onPick: (id: string) => void; on
               <input type="file" accept=".json,application/json" className="sr-only" onChange={async e => {
                 const f = e.target.files?.[0]; if (!f) return;
                 try { const d = JSON.parse(await f.text()); if (!Array.isArray(d.buildings)) throw new Error(); setErr(''); onUpload(d); }
-                catch { setErr('That file is not a GridSight site file. Make it with gridsight_fetch.py.'); }
+                catch { setErr('That file is not a Kesho site file. Make it with gridsight_fetch.py.'); }
               }} />
             </label>
           </div>

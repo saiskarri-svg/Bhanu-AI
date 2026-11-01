@@ -66,7 +66,7 @@ def run(sid):
         clear.append([round(float(v), 4) for v in prof])
         typical.append([round(float(v * k[m - 1] * (1 - dust)), 4) for v in prof])
     out = dict(site=sid, altitude_m=round(alt), tz=site.tz, tilt=a.tilt, azimuth=a.azimuth, kwp=1,
-               model='clearsky_pv.py (GridSight): Ineichen-Perez clear sky, Perez transposition, Faiman cell temperature, PVWatts, 14% system losses, DC/AC 1.2',
+               model='clearsky_pv.py (Kesho): Ineichen-Perez clear sky, Perez transposition, Faiman cell temperature, PVWatts, 14% system losses, DC/AC 1.2',
                weather='typical = clear sky x (NASA POWER measured sunlight / Ineichen clear-sky sunlight, by month) x (1 - dust on panels)',
                clear_kwh_kwp_day=[round(float(v), 3) for v in summ['pv_ac_kwh_per_kwp_day'].values],
                typical_kwh_kwp_day=[round(float(sum(t)), 3) for t in typical],

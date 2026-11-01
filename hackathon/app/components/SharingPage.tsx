@@ -29,7 +29,7 @@ export const SharingPage: React.FC = () => (
       <BoxHeader title="Sharing meter data safely" meta="A proposal for operators, lenders and regulators" />
       <div className="px-5 pb-5">
         <p className="text-sm text-muted max-w-prose">
-          A few hundred sites sharing monthly totals would let GridSight learn real ranges. Six rules keep customers and business data safe.
+          A few hundred sites sharing monthly totals would let Kesho learn real ranges. Six rules keep customers and business data safe.
         </p>
         <ol className="mt-5 grid gap-x-8 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
           {STEPS.map((s, i) => (

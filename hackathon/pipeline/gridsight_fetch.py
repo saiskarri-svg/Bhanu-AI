@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""GridSight site fetcher.
+"""Kesho site fetcher.
 
 Pulls public data for one site (a point plus a radius) and writes a compact
-JSON file the GridSight dashboard reads:
+JSON file the Kesho dashboard reads:
 
   * Google Open Buildings v3 (points: centroid lat/lon, area_in_meters,
     confidence), from the public bucket gs://open-buildings-data (no login).

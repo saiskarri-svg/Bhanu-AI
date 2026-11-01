@@ -6,6 +6,8 @@ export interface EngineDriver { year: number; input: string; label: string; rank
 export interface Design { design: string; design_quantile: number; design_kwh_day: number; capacity_kwh_day: number; pv_kwp: number; battery_kwh: number; inverter_kw: number; capex_usd: number; capex_per_customer_usd: number; annual_cost_usd: number; breakeven_utilisation_at_tariff: number }
 export interface RiskRow { design: string; year: number; p_brownouts: number; p_underused: number; median_utilisation: number; cost_per_kwh_p50: number; p_revenue_below_cost: number }
 export interface TariffRow { tariff_usd_per_kwh: number; year5_kwh_per_day_p50: number; year5_kwh_per_household_month_p50: number; year5_household_bill_usd_month_p50: number; p50_design_capex_usd: number; breakeven_utilisation: number; p_revenue_covers_cost_year5: number }
+export interface BatteryMonth { direct: number; battery: number; share: number; surplus: number; recharge_ok: boolean; need: number; need_p10: number; need_p90: number }
+export interface BatteryMode { months: BatteryMonth[]; unmet_pct: number; spilled_mwh: number; cycles: number; min_soc: number; week: { month: number; pv: number[]; demand: number[]; soc: number[] } }
 export interface Engine {
   site: string; engine: string; tariff: number; peak_sun_hours: number;
   landuse: { residential_buildings: number; mapped: Record<string, number>; evidence_pct: number };
@@ -24,6 +26,8 @@ export interface Engine {
   landcover?: { source: string; within_1km: Record<string, number>; within_5km: Record<string, number> };
   by_population?: { population: number; source: string; note: string; households: Q[]; customers: Q[]; energy_kwh_per_day: Q[]; peak_kw: Q[];
     p50_design: { pv_kwp: number; battery_kwh: number; capex_usd: number } };
+  battery?: { design: string; pv_kwp: number; battery_kwh: number; usable_kwh: number; inverter_kw: number; roundtrip: number; dod: number; model: string;
+    clear: BatteryMode; typical: BatteryMode };
   pvday?: { design: string; pv_kwp: number; battery_kwh: number; battery_usable_kwh: number; altitude_m: number; tz: string; tilt: number; model: string; weather: string;
     clear_kwh_kwp_day: number[]; typical_kwh_kwp_day: number[];
     months: { month: number; solar: number[]; clear: number[]; demand: number[]; demand_y1: number[]; solar_kwh: number; demand_kwh: number; direct_kwh: number; battery_need_kwh: number; spare_kwh: number; battery_ok: boolean }[] };

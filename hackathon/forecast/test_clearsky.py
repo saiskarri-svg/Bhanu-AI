@@ -107,9 +107,12 @@ def test_cli_writes_outputs():
     assert cs.main(["--lat", "12.65", "--lon", "-8.0", "--altitude", "350", "--kwp", "20", "--name", "Test site",
                     "--tmin", "22", "--tmax", "35", "--freq", "30min", "--out", str(out)]) == 0
     names = sorted(p.name for p in out.iterdir())
-    assert names == ["test_site_clearsky_30min.csv", "test_site_clearsky_monthly.csv",
-                     "test_site_clearsky_year.png", "test_site_irradiance_by_month.png",
-                     "test_site_pv_power_by_month.png"]
+    assert names == ["test_site_clearsky_30min.csv", "test_site_clearsky_meta.json",
+                     "test_site_clearsky_monthly.csv", "test_site_clearsky_year.png",
+                     "test_site_irradiance_by_month.png", "test_site_pv_power_by_month.png"]
+    import json
+    meta = json.loads((out / "test_site_clearsky_meta.json").read_text())
+    assert meta["array"]["kwp"] == 20 and meta["site"]["altitude"] == 350
     m = pd.read_csv(out / "test_site_clearsky_monthly.csv")
     assert len(m) == 12 and (m["pv_ac_kwh_day"] > 0).all()
     ts = pd.read_csv(out / "test_site_clearsky_30min.csv")

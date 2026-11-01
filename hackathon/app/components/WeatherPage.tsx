@@ -5,6 +5,7 @@ import type { SiteData } from './model';
 import type { Engine } from './engine';
 import { Cite } from './refs';
 import { DayCurves } from './DayCurves';
+import { BatteryJob } from './BatteryJob';
 import { n0, n1, pc } from './format';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -160,6 +161,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
       </div>
 
       {eng?.pvday && <DayCurves eng={eng} />}
+      {eng?.battery && <BatteryJob eng={eng} site={site.name} />}
 
       {sim && (
         <Box>

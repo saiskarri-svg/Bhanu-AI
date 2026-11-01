@@ -1,4 +1,4 @@
-# GridSight build report
+# Kesho build report
 
 Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 
@@ -13,7 +13,7 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 - Found by accident: OpenStreetMap maps the Gbamu Gbamu solar plant at 0.085 MW, 330 m from the village point. A public sanity check for the Validation page.
 
 **Decisions for Sai**
-- Name "GridSight": keep or change?
+- Name "Kesho": keep or change?
 - Map is drawn in SVG from coordinates (tiles cannot load inside the artifact). OK, or try a satellite image later on a laptop?
 - Night lights are not loaded (EOG needs a free login). The pipeline accepts a VIIRS GeoTIFF with `--viirs`. Worth adding before judging?
 - Building class rules are hand-set; with OSM tags for a few villages they could be fitted. Fine for the prototype?
@@ -22,7 +22,7 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 
 **Done**
 - Growth and money tab: years 1 to 5 with a widening band; appliance path; sizing for P50, P70 or P90 demand in year 1, 3 or 5; brownout and oversize risk; break-even tariff at each point; household bill against the $5 to $20 now spent.
-- Validation tab: how metered validation would work (held-out sites, P50 error, P10 to P90 coverage, baseline), a held-out check of building classes on OSM-tagged villages (building now), and a public sanity check: OpenStreetMap's 85 kWp Gbamu Gbamu plant sits inside GridSight's about 67 to 131 kWp range from roofs alone.
+- Validation tab: how metered validation would work (held-out sites, P50 error, P10 to P90 coverage, baseline), a held-out check of building classes on OSM-tagged villages (building now), and a public sanity check: OpenStreetMap's 85 kWp Gbamu Gbamu plant sits inside Kesho's about 67 to 131 kWp range from roofs alone.
 - Data sharing tab: monthly site totals, small-group suppression, neutral data trust, federated learning option, give-to-get, data law.
 - PITCH.md (3 minutes) and IMPACT.md (one page).
 - Model calibration: homes-only load factor now about 20% (brief says about 22%); sample sites land at 17 to 22 kWh per customer per month, inside the 5 to 35 benchmark.
@@ -42,13 +42,13 @@ Link: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 ## Engine merge, team story and demo flow (2026-10-31)
 
 **Done**
-- Fereshteh's toolkit in `forecast/` (unchanged; 11 tests pass; Benichab reproduces her numbers). `pipeline/run_engine.py` turns each GridSight site file into her land-use format and runs her engine (4,000 futures) for all six villages in about 12 seconds.
+- Fereshteh's toolkit in `forecast/` (unchanged; 11 tests pass; Benichab reproduces her numbers). `pipeline/run_engine.py` turns each Kesho site file into her land-use format and runs her engine (4,000 futures) for all six villages in about 12 seconds.
 - Demand, Growth and money and Validation now show the engine's results. The building-level model stays as a "second opinion" box.
 - UI batch A: headline question, 5-step strip, Amina intro, compact village bar after Site, answer sentence on Demand, yellow Next buttons. Clashing numbers are gone (drivers now come from the same engine run).
 - PITCH.md and IMPACT.md rewritten with the six-village table and three findings: build in stages, tariff decides survival, count households first.
 
 **Decisions for Sai (and Fereshteh)**
-- Benichab: GridSight's 1 km Google map finds 193 homes; Fereshteh's settlement map (OSM, Microsoft and Google) finds 320. Use her map for Benichab, or switch GridSight's fetch to all Overture footprints for every village?
+- Benichab: Kesho's 1 km Google map finds 193 homes; Fereshteh's settlement map (OSM, Microsoft and Google) finds 320. Use her map for Benichab, or switch Kesho's fetch to all Overture footprints for every village?
 - OpenStreetMap shows a minor power line 0.38 km from Benichab. Worth checking before using it in the pitch.
 - Engine costs are 2021 Omorate prices (generation about $2,133/kWp). Replace with current quotes before the pitch?
 - Paper links on Sources are search links; I did not have the DOIs to hand.

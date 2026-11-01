@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Run the demand engine (forecast/demand_forecast.py, by GridSight team) on every
-GridSight site file and write one compact JSON per site for the dashboard.
+"""Run the demand engine (forecast/demand_forecast.py, by Kesho team) on every
+Kesho site file and write one compact JSON per site for the dashboard.
 
-GridSight site file (buildings with map tags and nearby places)
+Kesho site file (buildings with map tags and nearby places)
   -> land-use counts in the engine's format (residential, shops, schools ...)
   -> engine: 4,000 simulated futures, years 1 to 5
   -> app/data/engine/<site>.json
@@ -19,6 +19,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT / 'forecast'))
 import demand_forecast as dfc  # noqa: E402
+sys.path.insert(0, str(ROOT / 'forecast'))
 
 DATA = ROOT / 'app' / 'data'
 OUT = DATA / 'engine'
@@ -186,7 +187,7 @@ def landuse(site):
     res = grown
     return dfc.Site(label=f"{site['name']}, {site['region']}", lat=site['lat'], lon=site['lon'],
                     residential_buildings=float(res), counts={k: float(v) for k, v in counts.items()},
-                    evidence_pct=round(100 * evidence / n, 1), source='GridSight site file'), counts, res
+                    evidence_pct=round(100 * evidence / n, 1), source='Kesho site file'), counts, res
 
 
 def records(df, digits=3):
@@ -215,7 +216,7 @@ def run(path):
                        for q in dfc.QUANTILES} for j, yr in enumerate(dfc.YEARS)}
     sect = fc.sector_table()
     out = dict(
-        site=path.stem, engine='demand_forecast.py (GridSight), 4,000 draws, seed 42',
+        site=path.stem, engine='demand_forecast.py (Kesho), 4,000 draws, seed 42',
         tariff=fc.tariff, peak_sun_hours=A['sizing']['peak_sun_hours'],
         landuse=dict(residential_buildings=res, mapped=counts, evidence_pct=s.evidence_pct),
         notes=fc.notes, business=fc.business_estimate,
@@ -310,6 +311,44 @@ def run(path):
         out['pvday'] = dict(design=p50['design'], pv_kwp=round(p50['pv_kwp'], 1), battery_kwh=round(p50['battery_kwh'], 1), battery_usable_kwh=round(usable, 1),
                             altitude_m=pv['altitude_m'], tz=pv['tz'], tilt=pv['tilt'], model=pv['model'], weather=pv['weather'],
                             clear_kwh_kwp_day=pv['clear_kwh_kwp_day'], typical_kwh_kwp_day=pv['typical_kwh_kwp_day'], months=rows)
+        # What the battery has to carry (pv_vs_demand.py): average day of each month for P10/P50/P90
+        # demand, and an hour-by-hour year with the P50 design battery, at clear sky and in typical weather
+        import pv_vs_demand as pvd
+        def avg_q(q):
+            h = dfc.hourly_8760(fc, 5, fc.representative_draw(5, q)).reshape(365, 24)
+            return h, [h[months_of_day == m].mean(axis=0) for m in range(1, 13)]
+        h50, D50 = avg_q(0.5)
+        _, D10 = avg_q(0.1)
+        _, D90 = avg_q(0.9)
+        rt, dod = Z['battery_roundtrip_efficiency'], Z['battery_depth_of_discharge']
+        bat = pvd.Battery(p50['battery_kwh'], dod, rt, p50['inverter_kw'])
+        battery = dict(design=p50['design'], pv_kwp=round(p50['pv_kwp'], 1), battery_kwh=round(p50['battery_kwh'], 1),
+                       usable_kwh=round(bat.usable_kwh, 1), inverter_kw=round(p50['inverter_kw'], 1), roundtrip=rt, dod=dod,
+                       model='pv_vs_demand.py (Kesho team): average-day energy balance by month and hour-by-hour battery dispatch')
+        for mode in ('clear', 'typical'):
+            P = [np.array(pv[mode][m]) * p50['pv_kwp'] for m in range(12)]
+            months = []
+            for m in range(12):
+                b = pvd.daily_balance(D50[m], P[m], rt)
+                months.append(dict(direct=round(b['direct_pv_kwh'], 1), battery=round(b['from_battery_kwh'], 1),
+                                   share=round(b['battery_share'], 3), surplus=round(b['pv_surplus_kwh'], 1), recharge_ok=b['recharge_ok'],
+                                   need=round(b['usable_capacity_needed_kwh'], 1),
+                                   need_p10=round(pvd.daily_balance(D10[m], P[m], rt)['usable_capacity_needed_kwh'], 1),
+                                   need_p90=round(pvd.daily_balance(D90[m], P[m], rt)['usable_capacity_needed_kwh'], 1)))
+            pv8760 = np.concatenate([P[months_of_day[d] - 1] for d in range(365)])
+            sim = pvd.simulate_year(h50.reshape(-1), pv8760, bat)
+            mo = np.repeat(months_of_day, 24)
+            worst = int(np.argmax([x['need'] for x in months])) + 1
+            i0 = int(np.argmax(mo == worst)) + 7 * 24
+            w = sim.iloc[i0:i0 + 7 * 24]
+            battery[mode] = dict(months=months,
+                                 unmet_pct=round(100 * sim['unmet'].sum() / sim['demand'].sum(), 2),
+                                 spilled_mwh=round(sim['spilled'].sum() / 1000, 2),
+                                 cycles=round(sim['discharge'].sum() / (bat.usable_kwh * np.sqrt(rt)), 0),
+                                 min_soc=round(float(sim['soc_pct'].min()), 0),
+                                 week=dict(month=worst, pv=[round(float(v), 2) for v in w['pv']], demand=[round(float(v), 2) for v in w['demand']],
+                                           soc=[round(float(v), 1) for v in w['soc_pct']]))
+        out['battery'] = battery
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f'{path.stem}.json').write_text(json.dumps(out, separators=(',', ':'), default=float))
     y = out['summary']['energy_kwh_per_day']

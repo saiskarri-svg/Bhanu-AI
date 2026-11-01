@@ -31,7 +31,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
 
   const S = eng.summary, E = d.E!, des = d.des!;
   h1(`Mini-grid concept note: ${site.name}`);
-  p(`${site.region && site.region.includes(country) ? site.region : [site.region, country].filter(Boolean).join(', ')} · ${site.lat.toFixed(4)}, ${site.lon.toFixed(4)} · prepared with GridSight from open data, ${new Date().toISOString().slice(0, 10)}. All figures are rough guides to be checked on site.`, 9, 90);
+  p(`${site.region && site.region.includes(country) ? site.region : [site.region, country].filter(Boolean).join(', ')} · ${site.lat.toFixed(4)}, ${site.lon.toFixed(4)} · prepared with Kesho from open data, ${new Date().toISOString().slice(0, 10)}. All figures are rough guides to be checked on site.`, 9, 90);
 
   h2('1. The opportunity');
   p(`${n0(eng.landuse.residential_buildings)} homes and outbuildings within 1 km (${n0(S.households[0].p50)} households from roofs${eng.by_population ? `; Meta's population map suggests ${n0(eng.by_population.households[0].p50)}` : ''}). No mini-grid demand data exists here yet, so demand is forecast from satellite roofs, measured connection and appliance curves, and metered sites within 1,000 miles.`);
@@ -66,9 +66,9 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   p('1) A household count and short business walk-through in the village (the biggest driver of the range). 2) Partner introductions for installation and maintenance. 3) Grant or concessional finance for the first stage. 4) Monthly site totals once running, shared through a data trust, to sharpen future forecasts.');
 
   h2('Method and sources');
-  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023 (2021 prices); AMDA Benchmarking Africa\'s Minigrids 2024 (2022 to 2024 data); IRENA Renewable Power Generation Costs in 2024. Line costs per km: ESMAP tables, OnSSET West Africa 2026, World Bank 2019, RMI 2018. Built by the GridSight team for the Global Energy Hackathon 2026.', 8.5, 90);
+  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023 (2021 prices); AMDA Benchmarking Africa\'s Minigrids 2024 (2022 to 2024 data); IRENA Renewable Power Generation Costs in 2024. Line costs per km: ESMAP tables, OnSSET West Africa 2026, World Bank 2019, RMI 2018. Built by the Kesho team for the Global Energy Hackathon 2026.', 8.5, 90);
 
-  const name = `GridSight-concept-note-${site.name.replace(/\s+/g, '-')}.pdf`;
+  const name = `Kesho-concept-note-${site.name.replace(/\s+/g, '-')}.pdf`;
   // Inside claude.ai the page asks the runtime to save; elsewhere a normal download
   const w = window as unknown as { claude?: { use(n: string): Promise<{ save(f: { filename: string; data: Blob }): Promise<void> } | null> } };
   const dl = w.claude?.use ? await w.claude.use('downloads').catch(() => null) : null;

@@ -446,6 +446,10 @@ def run(site: Site, array: Array, opt: Options, out_dir="clearsky", plots=True) 
              "monthly": out / f"{slug}_clearsky_monthly.csv"}
     df.round(3).to_csv(files["timeseries"])
     summ.round(3).to_csv(files["monthly"], index=False)
+    files["meta"] = out / f"{slug}_clearsky_meta.json"
+    import json
+    files["meta"].write_text(json.dumps({"site": asdict(site), "array": asdict(arr), "options": asdict(opt),
+                                         "ac_kw": arr.ac_kw, "timeseries": files["timeseries"].name}, indent=2))
     if plots:
         files["pv_png"] = out / f"{slug}_pv_power_by_month.png"
         plot_pv_by_month(df, site, arr, opt, files["pv_png"])

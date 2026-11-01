@@ -1,4 +1,4 @@
-# GridSight
+# Kesho
 
 Mini-grid demand from public data, for the Global Energy Hackathon 2026, Brief 03 ("Predict mini-grid demand before building").
 
@@ -24,7 +24,7 @@ Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 | `pipeline/satellite.py` | Latest cloud-free Sentinel-2 picture for each village (open data, no login) |
 | `pipeline/measured_sites.csv` | Published metered sites used to calibrate villages within 1,000 miles |
 | `publish.sh` | Build and write `app/dist/page.html` for publishing |
-| `GridSight.html` | The whole dashboard in one file: open it in any browser, works offline, safe to email |
+| `Kesho.html` | The whole dashboard in one file: open it in any browser, works offline, safe to email |
 | `PITCH.md`, `IMPACT.md` | 3-minute pitch and one-page impact estimate |
 | `REPORT.md`, `CHANGELOG.md` | Build notes and decisions |
 
