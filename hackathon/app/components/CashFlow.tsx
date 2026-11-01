@@ -4,6 +4,7 @@ import { BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, More
 import type { Engine } from './engine';
 import { derive, type Settings } from './settings';
 import { n0, usd } from './format';
+import { Cite } from './refs';
 
 // Engine cost inputs (forecast/assumptions.yaml, Omorate 2021 prices)
 const OM = { pv: 13.5, inv: 4.3, batt: 22.3 };
@@ -88,11 +89,12 @@ export const CashFlow: React.FC<{ eng: Engine; s: Settings; grant: number }> = (
             </ComposedChart>
           </ResponsiveChart>
         </div>
-        {c.total < 0 && <p className="text-sm text-muted max-w-prose">Short early on because demand ramps up as homes connect. At these 2021 prices a commercial loan is not covered in the first two years at any size; a larger grant, current (cheaper) equipment prices, a first stage sized for year-2 demand, or a loan grace period are what close the gap.</p>}
+        {c.total < 0 && <p className="text-sm text-muted max-w-prose">Short early on because demand ramps up as homes connect. A smaller first stage (P25), a larger grant, lower build costs or a loan grace period close the gap; Compare villages shows which sites already cover their loan at these settings.</p>}
         <Legend items={[{ label: 'Money in from bills', color: 'var(--ok)' }, { label: 'Running costs plus loan payment', color: 'var(--bad)' }]} />
         <More label="What this assumes">
-          <p className="text-xs text-muted max-w-prose">Most likely demand for the chosen system and households, rising month by month and capped by what the system can make; use falls a little at higher tariffs (engine). {Math.round(TERMS.collection * 100)}% of bills collected; running costs from the engine's cost file (Omorate 2021 prices); a loan for 70% of the build cost left after the grant, {TERMS.years} years at {Math.round(TERMS.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
+          <p className="text-xs text-muted max-w-prose">Most likely demand for the chosen system and households, rising month by month and capped by what the system can make; use falls a little at higher tariffs (engine). {Math.round(TERMS.collection * 100)}% of bills collected; build cost from the chosen basis (2021 engine prices, or AMDA's 2024 cost per connection); running costs from the engine's cost file; a loan for 70% of the build cost left after the grant, {TERMS.years} years at {Math.round(TERMS.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
         </More>
+        <Cite k={['amda2024', 'irena2024', 'omorate']} />
       </div>
     </>
   );

@@ -5,8 +5,12 @@ import { StatusDot } from './ui';
 import { n0, n1 } from './format';
 
 // Site settings shared by the Map panel and every tab: change once, everything follows.
-export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number }
-export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85 };
+export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' }
+export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine' };
+
+// AMDA Benchmarking Africa's Minigrids 2024 (data 2022 to 2024), full build cost per connection, rough guide
+export const AMDA_PER_CONNECTION: Record<string, number> = { NG: 1046, SL: 1046, MR: 1046, KE: 1948, UG: 1948, TZ: 1948 };
+const COUNTRY_OF = (id: string) => SITES.find(x => x.id === id)?.data.country ?? '';
 
 const KEY = 'gs-settings';
 export const useSettings = () => {
@@ -26,9 +30,14 @@ export const derive = (eng: Engine | undefined, s: Settings) => {
   const PK = meta ? B!.peak_kw : S?.peak_kw;
   const CU = meta ? B!.customers : S?.customers;
   const dsel = meta ? 1 : s.di;
-  const des = meta && B
+  const des0 = meta && B
     ? { design: 'P50 of year-5 demand', pv_kwp: B.p50_design.pv_kwp, battery_kwh: B.p50_design.battery_kwh, capex_usd: B.p50_design.capex_usd, capacity_kwh_day: B.energy_kwh_per_day[4].p50 * 1.1 }
     : eng?.designs[s.di];
+  // AMDA basis: connections x regional cost per connection, scaled by system size against P50
+  const cc = eng ? COUNTRY_OF(eng.site) : '';
+  const per = AMDA_PER_CONNECTION[cc];
+  const p50kwp = meta && B ? B.p50_design.pv_kwp : eng?.designs[1].pv_kwp;
+  const des = des0 && s.cost === 'amda' && per && CU && p50kwp ? { ...des0, capex_usd: CU[4].p50 * per * (des0.pv_kwp / p50kwp) } : des0;
   const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === s.tar);
   const rk = !meta && des ? eng?.risk.find(r => r.design === des.design && r.year === s.yr) : undefined;
   const dem = E?.[s.yr - 1];
@@ -55,6 +64,7 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
       <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(s.yr === y, () => set({ yr: y }), y, y))}</Seg>
       <Seg label="System size">{eng.designs.map((d, i) => opt(dsel === i, () => set({ di: i }), d.design.split(' ')[0], d.design, meta && i !== 1))}</Seg>
       {eng.by_population && <Seg label="Households from">{opt(!meta, () => set({ hh: 'roofs' }), 'Roofs', 'r')}{opt(meta, () => set({ hh: 'meta' }), "Meta's map", 'm')}</Seg>}
+      <Seg label="Build cost">{opt(s.cost !== 'amda', () => set({ cost: 'engine' }), '2021 engine', 'e')}{opt(s.cost === 'amda', () => set({ cost: 'amda' }), 'AMDA 2024', 'a')}</Seg>
       <Seg label="Tariff, $ per kWh">{tariffs.map(t => opt(s.tar === t.tariff_usd_per_kwh, () => set({ tar: t.tariff_usd_per_kwh }), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
     </div>
   );
@@ -65,9 +75,9 @@ export const Answer: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => {
   const { meta, des, tsel, rk, dem } = derive(eng, s);
   const cells: { k: string; v: React.ReactNode; sub?: React.ReactNode }[] = [
     { k: `Demand, year ${s.yr}`, v: dem ? <>{n0(dem.p50)} <span className="text-xs text-muted font-sans">kWh a day</span></> : '-', sub: dem ? `${n0(dem.p10)} to ${n0(dem.p90)}` : undefined },
-    { k: `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (rough)` : undefined },
+    { k: `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${s.cost === 'amda' ? 'AMDA 2024' : '2021 prices'}, rough)` : undefined },
     { k: `Brownouts, year ${s.yr}`, v: rk ? <StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot> : '-', sub: rk ? `under 60% used: ${pc(rk.p_underused)}` : meta ? 'run for the roof count' : undefined },
-    { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: 'of futures, P50 system, year 5' },
+    { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: s.cost === 'amda' ? 'of futures, P50, 2021 engine costs' : 'of futures, P50 system, year 5' },
     { k: 'Home bill, year 5', v: tsel && !meta ? <>${n1(tsel.year5_household_bill_usd_month_p50)} <span className="text-xs text-muted font-sans">a month</span></> : '-', sub: `at $${s.tar.toFixed(2)} a kWh` },
   ];
   return (
@@ -99,7 +109,7 @@ export const SettingsBar: React.FC<{ eng?: Engine; s: Settings; set: (p: Partial
       <button onClick={() => goTab(1)} className="shrink-0 h-8 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
     </div>
     {eng && <button onClick={() => setOpen(o => !o)} aria-expanded={open} className="sm:hidden text-xs text-muted hover:text-fg underline underline-offset-2 decoration-line">{open ? 'Hide settings' : `Change settings · year ${s.yr}, ${['P25', 'P50', 'P75', 'P90'][derive(eng, s).dsel]}, ${s.hh === 'meta' ? "Meta's map" : 'roofs'}, $${s.tar.toFixed(2)}`}</button>}
-    {eng && <Controls eng={eng} s={s} set={set} className={`${open ? 'grid' : 'hidden'} sm:grid gap-3 grid-cols-2 lg:grid-cols-4`} />}
+    {eng && <Controls eng={eng} s={s} set={set} className={`${open ? 'grid' : 'hidden'} sm:grid gap-3 grid-cols-2 lg:grid-cols-5`} />}
     {eng && <div className="hidden sm:block"><Answer eng={eng} s={s} /></div>}
   </section>
   );

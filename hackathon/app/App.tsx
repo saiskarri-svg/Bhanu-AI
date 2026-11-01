@@ -45,13 +45,6 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
-const STEPS = [
-  { t: 'Count the roofs', tab: 1 },
-  { t: 'Forecast demand', tab: 2 },
-  { t: 'Size and fund', tab: 3 },
-  { t: 'Sun and weather', tab: 4 },
-  { t: 'Check and share', tab: 5 },
-];
 
 const NoEngine: React.FC = () => (
   <div className="bg-surface border border-line rounded-box px-5 py-4 text-sm text-muted max-w-3xl">
@@ -114,16 +107,6 @@ const App: React.FC = () => {
       {tab > 0 && <main className="max-w-page mx-auto px-[var(--gutter)] py-6 pb-24 sm:pb-6 space-y-6">
         <section className="space-y-3">
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-balance">How much power will a village use, before anyone builds there?</h1>
-          <ol className="flex gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible" aria-label="Steps">
-            {STEPS.map((st, i) => (
-              <li key={st.t} className="shrink-0">
-                <button onClick={() => goTab(st.tab)} aria-current={tab === st.tab ? 'step' : undefined}
-                  className={`h-9 pl-1.5 pr-3 inline-flex items-center gap-2 rounded-ctl border transition ${tab === st.tab ? 'border-fg/40 bg-surface text-fg font-medium' : 'border-line bg-surface-2 text-muted hover:text-fg'}`}>
-                  <span className={`h-6 w-6 grid place-items-center rounded-full text-xs tabular-nums ${tab === st.tab ? 'bg-accent text-[#131316]' : 'bg-line text-muted'}`}>{i + 1}</span>{st.t}
-                </button>
-              </li>
-            ))}
-          </ol>
           {tab === 1 && <More label="The story behind GridSight"><p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p></More>}
         </section>
         {tab === 1 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}

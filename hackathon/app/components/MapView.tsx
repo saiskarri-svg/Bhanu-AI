@@ -4,7 +4,7 @@ import { CLS_LABEL } from './model';
 import type { Engine } from './engine';
 import { ENGINE } from './engine';
 import { SITES, FLAG } from './sites';
-import type { Settings } from './settings';
+import { derive, type Settings } from './settings';
 import { btn, StatusDot } from './ui';
 import { n0, n1, pc, usd } from './format';
 import { Map3D } from './Map3D';
@@ -148,7 +148,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === tar);
     const s5 = eng?.sectors[yr - 1];
     const dsel = meta ? 1 : di;
-    const des = meta && B ? { design: 'P50 of year-5 demand', pv_kwp: B.p50_design.pv_kwp, battery_kwh: B.p50_design.battery_kwh, capex_usd: B.p50_design.capex_usd, capacity_kwh_day: B.energy_kwh_per_day[4].p50 * 1.1 } : eng?.designs[di];
+    const des = derive(eng, st).des;
     const solarDay = des ? des.capacity_kwh_day : 0;
     const demDay = E ? E[yr - 1] : undefined;
     const rk = !meta && des ? eng?.risk.find(r => r.design === des.design && r.year === yr) : undefined;
@@ -248,6 +248,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
           <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(yr === y, () => setYr(y), y, y))}</Seg>
           <Seg label="System size (share of futures it covers)">{eng.designs.map((d, i) => opt(dsel === i, () => setDi(i), d.design.split(' ')[0], d.design, meta && i !== 1))}</Seg>
           {eng.by_population && <Seg label="Households counted from">{opt(!meta, () => setHh('roofs'), 'Roofs', 'r')}{opt(meta, () => setHh('meta'), "Meta's map", 'm')}</Seg>}
+          <Seg label="Build cost">{opt(st.cost !== 'amda', () => set({ cost: 'engine' }), '2021 engine', 'ce')}{opt(st.cost === 'amda', () => set({ cost: 'amda' }), 'AMDA 2024', 'ca')}</Seg>
           <Seg label="Tariff, $ per kWh">{eng.tariffs.filter((t, i, a) => a.findIndex(u => u.tariff_usd_per_kwh === t.tariff_usd_per_kwh) === i).map(t => opt(tar === t.tariff_usd_per_kwh, () => setTar(t.tariff_usd_per_kwh), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
         </>}
         <Seg label="Map">{opt(mode === '2d', () => setMode('2d'), 'Flat', '2d')}{opt(mode === '3d', () => setMode('3d'), '3D', '3d')}{IMAGERY[siteId] && opt(sat, () => setSat(x => !x), 'Satellite', 'sat')}</Seg>

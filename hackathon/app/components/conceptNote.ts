@@ -39,7 +39,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   for (let i = 0; i < 5; i++) row([`${i + 1}`, n0(E[i].p50), `${n0(E[i].p10)} to ${n0(E[i].p90)}`, n0(d.CU![i].p50), `${n0(d.PK![i].p50)} kW`], [16, 44, 44, 30, 30]);
 
   h2('3. Proposed system');
-  p(`${des.design.split(' ')[0]} size (covers that share of 4,000 simulated futures in year 5): ${n0(des.pv_kwp)} kWp of solar, ${n0(des.battery_kwh)} kWh of battery. Build cost about ${usd(des.capex_usd)} at 2021 Omorate prices including distribution (rough guide; current quotes likely lower).${d.rk ? ` Chance of brownouts by year ${s.yr}: ${pc(d.rk.p_brownouts)}; chance it is under 60% used: ${pc(d.rk.p_underused)}.` : ''} Build in stages: the first stage can be sized for year-2 to year-3 demand.`);
+  p(`${des.design.split(' ')[0]} size (covers that share of 4,000 simulated futures in year 5): ${n0(des.pv_kwp)} kWp of solar, ${n0(des.battery_kwh)} kWh of battery. Build cost about ${usd(des.capex_usd)} (${s.cost === 'amda' ? "AMDA 2024 benchmark per connection for the region" : '2021 Omorate prices including distribution'}; rough guide, replace with quotes).${d.rk ? ` Chance of brownouts by year ${s.yr}: ${pc(d.rk.p_brownouts)}; chance it is under 60% used: ${pc(d.rk.p_underused)}.` : ''} Build in stages: the first stage can be sized for year-2 to year-3 demand.`);
   if (eng.weather_sim) p(`Checked against 10 real weather years (NASA POWER, 2015 to 2024): clouds, heat and dust on panels included.`);
 
   h2('4. Affordability and cost recovery');
@@ -48,7 +48,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   h2('5. Grant and first 24 months');
   if (cf) {
     p(`A results-based grant of $${rate} per connection for ${n0(d.CU![4].p50)} connections gives about ${usd(grant)} (${pc(grant / des.capex_usd)} of the build cost). The rest: a loan of ${usd(cf.loan)} (${Math.round(TERMS.debtShare * 100)}%, ${TERMS.years} years at ${Math.round(TERMS.rate * 100)}%, ${usd(cf.debt)} a month) and ${usd(cf.equity)} from the developer.`);
-    p(`Cash after running costs and loan payments: ${cf.firstPositive ? `first positive month ${cf.firstPositive}` : 'not positive within 24 months'}; ${cf.total >= 0 ? 'ahead' : 'short'} by ${usd(Math.abs(cf.total))} after 24 months${cf.dscr !== undefined ? `; debt cover in year 2 about ${cf.dscr.toFixed(2)}x` : ''}. Assumes ${Math.round(TERMS.collection * 100)}% of bills collected.${cf.total < 0 ? ' The early gap comes from demand ramping up as homes connect; at 2021 prices a commercial loan is not covered in the first two years at any size, so a larger grant, current equipment prices, a first stage sized for year-2 demand or a loan grace period is needed.' : ''}`);
+    p(`Cash after running costs and loan payments: ${cf.firstPositive ? `first positive month ${cf.firstPositive}` : 'not positive within 24 months'}; ${cf.total >= 0 ? 'ahead' : 'short'} by ${usd(Math.abs(cf.total))} after 24 months${cf.dscr !== undefined ? `; debt cover in year 2 about ${cf.dscr.toFixed(2)}x` : ''}. Assumes ${Math.round(TERMS.collection * 100)}% of bills collected.${cf.total < 0 ? ' The early gap comes from demand ramping up as homes connect; a smaller first stage, a larger grant, lower build costs or a loan grace period close it.' : ''}`);
   }
 
   h2('6. Funding routes to approach');
@@ -59,7 +59,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   p('1) A household count and short business walk-through in the village (the biggest driver of the range). 2) Partner introductions for installation and maintenance. 3) Grant or concessional finance for the first stage. 4) Monthly site totals once running, shared through a data trust, to sharpen future forecasts.');
 
   h2('Method and sources');
-  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine: Fereshteh (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023. Built by the GridSight team for the Global Energy Hackathon 2026.', 8.5, 90);
+  p('Roofs: Google Open Buildings, Microsoft and OpenStreetMap via Overture Maps. Demand engine: Fereshteh (forecast/demand_forecast.py), with measured connection and appliance curves (Faza, Kenya), published meter data and ESMAP 2022. Weather: NASA POWER, CMIP6. Satellite: Sentinel-2. Costs: Wassie and Ahlgren 2023 (2021 prices); AMDA Benchmarking Africa\'s Minigrids 2024 (2022 to 2024 data); IRENA Renewable Power Generation Costs in 2024. Built by the GridSight team for the Global Energy Hackathon 2026.', 8.5, 90);
 
   const name = `GridSight-concept-note-${site.name.replace(/\s+/g, '-')}.pdf`;
   // Inside claude.ai the page asks the runtime to save; elsewhere a normal download
