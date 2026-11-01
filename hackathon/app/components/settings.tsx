@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Engine } from './engine';
 import { SITES, FLAG } from './sites';
-import { StatusDot } from './ui';
+import { StatusDot, More } from './ui';
 import { n0, n1 } from './format';
 import { lifetime } from './lifetime';
 import { plan } from './rightsize';
@@ -77,6 +77,13 @@ const pc = (v: number) => `${Math.round(v * 100)}%`;
 export const Seg: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({ label, children, className = '' }) => (
   <div className={`space-y-1.5 min-w-0 ${className}`}><p className="text-xs text-muted">{label}</p><div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label={label}>{children}</div></div>
 );
+// Plain-words note for the size buttons
+export const SizeNote: React.FC = () => (
+  <More label="What P25, P50, P90 mean" className="mt-1">
+    <p className="text-[11px] text-muted leading-relaxed max-w-[44ch]">GridSight runs 4,000 possible futures. P50 is the middle one: half come in higher, half lower. A P50 system is built for that year-5 demand, so running short by year 5 is about a coin flip. P25 is smaller and cheaper but runs short in about 3 futures in 4; P75 and P90 are bigger, rarely run short, and sit idle more. Stages builds in steps, each kept to 15% or less chance of running short.</p>
+  </More>
+);
+
 export const opt = (on: boolean, onClick: () => void, text: React.ReactNode, key: React.Key, disabled = false) => (
   <button key={key} role="radio" aria-checked={on} disabled={disabled} onClick={onClick}
     className={`h-8 flex-1 px-2 text-xs tabular-nums whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed ${on ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{text}</button>
@@ -89,7 +96,7 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
   return (
     <div className={className}>
       <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(s.yr === y, () => set({ yr: y }), y, y))}</Seg>
-      <Seg label="System size">{eng.designs.map((d, i) => opt(!s.stage && dsel === i, () => set({ di: i, stage: false }), d.design.split(' ')[0], d.design, meta && i !== 1))}{opt(s.stage, () => set({ stage: true }), 'Stages', 'st')}</Seg>
+      <div className="min-w-0"><Seg label="System size">{eng.designs.map((d, i) => opt(!s.stage && dsel === i, () => set({ di: i, stage: false }), d.design.split(' ')[0], d.design, meta && i !== 1))}{opt(s.stage, () => set({ stage: true }), 'Stages', 'st')}</Seg><SizeNote /></div>
       {eng.by_population && <Seg label="Households from">{opt(!meta, () => set({ hh: 'roofs' }), 'Roofs', 'r')}{opt(meta, () => set({ hh: 'meta' }), "Meta's map", 'm')}</Seg>}
       <Seg label="Build cost">{(['engine', 'irena', 'amda'] as const).map(c => opt(s.cost === c, () => set({ cost: c }), c === 'engine' ? '2021' : c === 'irena' ? '2024 kit' : 'AMDA', c))}</Seg>
       <Seg label="Tariff, $ per kWh">{tariffs.map(t => opt(s.tar === t.tariff_usd_per_kwh, () => set({ tar: t.tariff_usd_per_kwh }), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
