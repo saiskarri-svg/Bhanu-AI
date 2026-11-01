@@ -2,6 +2,7 @@ import React from 'react';
 import type { Settings } from './settings';
 import { WiresBox } from './wires';
 import { RightSize } from './RightSize';
+import { SharedPlant } from './Shared';
 import { Area, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, More } from './ui';
 import type { SiteData } from './model';
@@ -175,6 +176,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
         {plantKw ? ` Solar for the most likely demand: year 1 about ${n0(kwpFor(S.energy_kwh_per_day[0].p50, eng.peak_sun_hours))} kWp, year 3 about ${n0(kwpFor(S.energy_kwh_per_day[2].p50, eng.peak_sun_hours))} kWp.` : ''}
       </p></More>
       <WiresBox site={site} eng={eng} s={s} />
+      <SharedPlant site={site} eng={eng} s={s} />
       <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: funding</button></div>
     </>
   );

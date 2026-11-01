@@ -7,8 +7,8 @@ import { lifetime } from './lifetime';
 import { plan } from './rightsize';
 
 // Site settings shared by the Map panel and every tab: change once, everything follows.
-export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; stages: number; grant: number; loan: 'commercial' | 'concessional' }
-export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine', stage: false, stages: 3, grant: 433, loan: 'commercial' };
+export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; stages: number; grant: number; loan: 'commercial' | 'concessional'; reuse: boolean }
+export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine', stage: false, stages: 3, grant: 433, loan: 'commercial', reuse: true };
 
 // 2024 equipment: IRENA Renewable Power Generation Costs in 2024 (solar $691/kW, batteries $192/kWh, utility averages)
 // times a remote small-site premium (assumption), inverter at the engine price; wires, meters and soft costs stay 40%
@@ -18,6 +18,14 @@ export const COST_LABEL = { engine: '2021 engine', amda: 'AMDA 2024', irena: '20
 // AMDA Benchmarking Africa's Minigrids 2024 (data 2022 to 2024), full build cost per connection, rough guide
 export const AMDA_PER_CONNECTION: Record<string, number> = { NG: 1046, SL: 1046, MR: 1046, KE: 1948, UG: 1948, TZ: 1948 };
 const COUNTRY_OF = (id: string) => SITES.find(x => x.id === id)?.data.country ?? '';
+
+// Existing solar plant mapped within 1 km (OpenStreetMap via Overture), in kWp
+export const existingPlant = (id: string) => {
+  const p = (SITES.find(x => x.id === id)?.data.grid.plants ?? []).find(q => q.cls === 'plant' && q.source === 'solar' && q.output && q.d_km <= 1);
+  if (!p || !p.output) return null;
+  const v = parseFloat(p.output); if (!isFinite(v)) return null;
+  return { kwp: /mw/i.test(p.output) ? v * 1000 : v, name: p.name, d_km: p.d_km };
+};
 
 const KEY = 'gs-settings';
 export const useSettings = () => {
@@ -65,10 +73,18 @@ export const derive = (eng: Engine | undefined, s: Settings) => {
   const grantShare0 = P ? connBy(0) : 1;
   const adds = P && priced ? P.caps.slice(1).map((c, i) => ({ year: P.groups[i + 1][0], capex_usd: cumCapex(i + 1) - cumCapex(i), kit: kitFor(c), prev: kitFor(P.caps[i]), grantShare: connBy(i + 1) - connBy(i) })) : [];
   const stage2 = adds.length ? { capex_usd: adds.reduce((a, x) => a + x.capex_usd, 0), month: (adds[0].year - 1) * 12 + 1, capacity_kwh_day: full!.capacity_kwh_day, adds } : undefined;
+  // Build on an existing plant: its panels count toward each stage, so fewer new panels are bought
+  const ex = s.reuse && eng ? existingPlant(eng.site) : null;
+  const pvPrice = s.cost === 'irena' ? IRENA.pv * IRENA.premium : 2133;
+  const credit = (kit: { pv_kwp: number } | undefined) => ex && kit ? Math.min(ex.kwp, kit.pv_kwp) * pvPrice : 0;
+  const reuse = ex ? { kwp: ex.kwp, name: ex.name, saved: credit(full) } : null;
+  const desR = des && ex ? { ...des, capex_usd: des.capex_usd - credit(des) } : des;
+  const fullR = full && ex ? { ...full, capex_usd: full.capex_usd - credit(full) } : full;
+  if (ex && adds.length) { let prev = credit(des); adds.forEach(a => { const c = credit(a.kit); a.capex_usd -= c - prev; prev = c; }); if (stage2) stage2.capex_usd = adds.reduce((t, a) => t + a.capex_usd, 0); }
   const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === s.tar);
   const rk = !meta && des && !s.stage ? eng?.risk.find(r => r.design === des.design && r.year === s.yr) : undefined;
   const dem = E?.[s.yr - 1];
-  return { meta, E, PK, CU, dsel, des, tsel, rk, dem, stage2, full, plan: P, adds, grantShare0 };
+  return { meta, E, PK, CU, dsel, des: desR, tsel, rk, dem, stage2, full: fullR, plan: P, adds, grantShare0, reuse };
 };
 
 const usd = (v: number) => v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`;
@@ -98,6 +114,7 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
       <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(s.yr === y, () => set({ yr: y }), y, y))}</Seg>
       <div className="min-w-0"><Seg label="System size">{eng.designs.map((d, i) => opt(!s.stage && dsel === i, () => set({ di: i, stage: false }), d.design.split(' ')[0], d.design, meta && i !== 1))}{opt(s.stage, () => set({ stage: true }), 'Stages', 'st')}</Seg><SizeNote /></div>
       {eng.by_population && <Seg label="Households from">{opt(!meta, () => set({ hh: 'roofs' }), 'Roofs', 'r')}{opt(meta, () => set({ hh: 'meta' }), "Meta's map", 'm')}</Seg>}
+      {existingPlant(eng.site) && <Seg label={`Existing ${Math.round(existingPlant(eng.site)!.kwp)} kWp solar plant`}>{opt(s.reuse, () => set({ reuse: true }), 'Build on it', 'ry')}{opt(!s.reuse, () => set({ reuse: false }), 'Start fresh', 'rn')}</Seg>}
       <Seg label="Build cost">{(['engine', 'irena', 'amda'] as const).map(c => opt(s.cost === c, () => set({ cost: c }), c === 'engine' ? '2021' : c === 'irena' ? '2024 kit' : 'AMDA', c))}</Seg>
       <Seg label="Tariff, $ per kWh">{tariffs.map(t => opt(s.tar === t.tariff_usd_per_kwh, () => set({ tar: t.tariff_usd_per_kwh }), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
     </div>
@@ -106,10 +123,10 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
 
 // The answer for the chosen settings, in five numbers
 export const Answer: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => {
-  const { meta, des, tsel, rk, dem, CU } = derive(eng, s);
+  const { meta, des, tsel, rk, dem, CU, reuse } = derive(eng, s);
   const cells: { k: string; v: React.ReactNode; sub?: React.ReactNode }[] = [
     { k: `Demand, year ${s.yr}`, v: dem ? <>{n0(dem.p50)} <span className="text-xs text-muted font-sans">kWh a day</span></> : '-', sub: dem ? `${n0(dem.p10)} to ${n0(dem.p90)}` : undefined },
-    { k: s.stage ? 'Stage 1 system' : `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${COST_LABEL[s.cost]}, rough)` : undefined },
+    { k: s.stage ? 'Stage 1 system' : `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${COST_LABEL[s.cost]}${reuse ? `, uses existing ${n0(reuse.kwp)} kWp` : ''}, rough)` : undefined },
     { k: `Brownouts, year ${s.yr}`, v: rk ? <StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot> : '-', sub: rk ? `under 60% used: ${pc(rk.p_underused)}` : meta ? 'run for the roof count' : undefined },
     { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: s.cost !== 'engine' || s.stage ? 'of futures, P50, 2021 engine costs' : 'of futures, P50 system, year 5' },
     { k: 'Home bill, year 5', v: tsel && !meta ? <>${n1(tsel.year5_household_bill_usd_month_p50)} <span className="text-xs text-muted font-sans">a month</span></> : '-', sub: `at $${s.tar.toFixed(2)} a kWh` },

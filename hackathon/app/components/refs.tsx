@@ -35,6 +35,8 @@ export const REFS: Record<string, Ref> = {
     feeds: 'High end of the cost per km for a line to the grid' },
   rmi2018: { short: 'RMI, Minigrids in the Money (2018)', full: 'Rocky Mountain Institute (2018), Minigrids in the Money: distribution about $15,475 per km', url: 'https://rmi.org/wp-content/uploads/2018/12/rmi-seeds-minigrid-report.pdf',
     feeds: 'High end of the cost per km for the village network' },
+  esmapcost: { short: 'ESMAP mini-grid cost analysis (2019)', full: 'ESMAP / World Bank (2019), Mini Grids for Half a Billion People, and World Bank mini-grid cost notes: per-customer cost about $68 lower for every 100 more customers a grid serves; portfolios of 5 or more grids about $100 per kW cheaper', url: 'https://www1.villanova.edu/content/dam/villanova/engineering/energy-workshop/ESMAP%20Mini%20Grids%20-%20Executive%20Summary.pdf',
+    feeds: 'Scale savings in the shared-plant check' },
   omorate: { short: 'Omorate, Ethiopia (Wassie and Ahlgren 2023)', full: 'Wassie and Ahlgren (2023), Omorate mini-grid, Ethiopia, 2021 contract data', url: scholar('Wassie Ahlgren 2023 Omorate mini-grid'),
     feeds: 'Solar, battery and inverter costs and running costs; 6.0 sun hours; 10% day-to-day variation; 37 businesses per 100 households as an upper reference' },
   sltariff: { short: 'Sierra Leone tariff trial', full: 'Sierra Leone mini-grid tariff trial, as cited in forecast/assumptions.yaml', url: scholar('Sierra Leone mini-grid tariff reduction consumption'),
