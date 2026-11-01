@@ -4,7 +4,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## Site at a glance
 
-- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Map (landing), Site, Demand, Growth and money, Sun and weather, Validation, Data sharing, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
+- **App:** `app/` (React, Vite, Tailwind; copy of the Site Studio starter). Tabs: Map (landing), Site, Demand, Growth and money, Sun and weather, Validation, Data sharing, Funding, Method; headline and 5-step strip on every tab; compact village bar after Site. Light/Dark toggle (follows system, remembered).
 - **Data:** `app/data/*.json`, one per sample village (Gbamu Gbamu NG, Kychom SL, Benichab MR, Talek KE, Kitobo UG, Bulongwa TZ), 1 km radius, made by `pipeline/gridsight_fetch.py` (`pipeline/fetch_samples.sh` rebuilds all).
 - **Demand engine (main model):** Fereshteh's `forecast/demand_forecast.py`, run on every village by `pipeline/run_engine.py` into `app/data/engine/*.json`; read by `app/components/engine.ts`.
 - **Building-level model (second opinion):** `app/components/model.ts` (classification, parameters, Monte Carlo range, drivers, growth, sizing). Sources in `app/components/sources.ts`.
@@ -13,6 +13,10 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 - **Fereshteh's toolkit:** `forecast/` (village_landuse.py maps a village, demand_forecast.py gives a 5-year forecast with ranges, HOMER 8760 files, sizing and tariff risk, validate command; ranges in assumptions.yaml). Benichab, Mauritania example in `forecast/examples/`.
 - **Measured sites:** `pipeline/measured_sites.csv` (nearby calibration within 1,000 miles; add partner or Zenodo rows here).
 - **Publish:** `./publish.sh`, then publish `app/dist/page.html` with the files in `app/dist/assets/`.
+
+## 2026-11-01
+
+- **Funding tab:** new `app/components/FundingPage.tsx` (tab 8, step 7 "Find funding"). Lists funding routes for the chosen village's country (Nigeria from Sai's partner shortlist: REA DARES, Africa Minigrids Program, All On, AECF, GFIF; plus Sierra Leone, Mauritania, Kenya, Uganda, Tanzania programmes) and Africa-wide ones (Mission 300, Universal Energy Facility, AMP, SEFA, GET.invest, AECF). Shows a rough grant-per-connection check against the P50 build cost and a list of what funders ask for against what GridSight already gives.
 
 ## 2026-10-31
 
