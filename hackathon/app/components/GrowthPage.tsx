@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Settings } from './settings';
 import { WiresBox } from './wires';
+import { RightSize } from './RightSize';
 import { Area, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, More } from './ui';
 import type { SiteData } from './model';
@@ -16,7 +17,7 @@ const STORY = [
   { y: 'Years 4 to 5', t: 'Appliance buying follows an S-curve and slows. New mills and workshops arrive one at a time; they decide the daytime load.' },
 ];
 
-export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; set: (p: Partial<Settings>) => void; onNext: () => void }> = ({ site, eng, s, set, onNext }) => {
+export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; set: (p: Partial<Settings>) => void; siteId: string; onPick: (id: string) => void; onNext: () => void }> = ({ site, eng, s, set, siteId, onPick, onNext }) => {
   const S = eng.summary;
   const pick = s.di, setPick = (i: number) => set({ di: i }); // shared site setting
   const d = eng.designs[pick];
@@ -30,6 +31,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
 
   return (
     <>
+      <RightSize eng={eng} s={s} set={set} siteId={siteId} onPick={onPick} />
       <Box>
         <BoxHeader title="Demand growth after connection" meta="kWh a day, most likely line and P10 to P90 band" />
         <div className="px-3 pb-2 h-[300px]">

@@ -24,7 +24,7 @@ Ten years of real weather: Gbamu Gbamu has 90 cloudy, 131 rainy and 143 dusty da
 
 **2:05 to 2:35. Step 4: size and tariff** (screen: Money tab, "How wrong can we be?", then Funding: grant, 24-month cash and the concept note)
 
-Build for the median year-5 forecast and there is about a 30% chance of brownouts by year 5, yet a 96% chance it sits more than 40% idle in year 2. So build in stages. With a staged build, 2024 equipment prices and a concessional loan, the owner's money comes back in about four to six years at every village at $0.85 a kWh, with no grant (rough guide). At Gbamu Gbamu, year-2 demand needs about 84 kWp; the plant actually built there is 85. At 85 cents a kWh, costs are covered in seven to nine futures out of ten, for a household bill of $5 to $8 a month, inside what families already spend on kerosene and batteries.
+Build for the median year-5 forecast and there is about a 30% chance of brownouts by year 5, yet a 96% chance it sits more than 40% idle in year 2. So build in stages, sized so brownout odds stay at 15% or less each year with the least idle kit, and expand when the meters pass 80% of what is installed. With a staged build, 2024 equipment prices and a concessional loan, the owner's money comes back in about four to six years at every village at $0.85 a kWh, with no grant (rough guide). At Gbamu Gbamu, year-2 demand needs about 84 kWp; the plant actually built there is 85. At 85 cents a kWh, costs are covered in seven to nine futures out of ten, for a household bill of $5 to $8 a month, inside what families already spend on kerosene and batteries.
 
 **2:35 to 3:00. Step 5: check it and share data** (screen: Trust tab: Checks, then Data sharing)
 

@@ -59,7 +59,7 @@ export const Payback: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => {
         </div>
         <Legend items={[{ label: "Owner's cash each year", color: 'color-mix(in srgb, var(--ok) 35%, transparent)' }, { label: "Owner's running total", color: 'var(--sun)' }, { label: 'Whole project, no loan', color: 'var(--info)' }]} />
         <More label="What this assumes">
-          <p className="text-xs text-muted max-w-prose">Most likely demand to year 5, then {Math.round(DEMAND_AFTER_5 * 100)}% more a year (assumption), capped by what the system makes. {Math.round(L.T.collection * 100)}% of bills collected. Running costs, a 10-year battery and inverter life and a 0.9 replacement factor from the engine's cost file. Staged builds add the rest in year 3 on the same loan terms, with no grant. No tax, inflation or tariff rises; panels kept for 20 years. Rough guides only.</p>
+          <p className="text-xs text-muted max-w-prose">Expected sales across the demand range to year 5 (shortfalls lost, spare capacity unpaid), then {Math.round(DEMAND_AFTER_5 * 100)}% more a year (assumption), capped by what the system makes. {Math.round(L.T.collection * 100)}% of bills collected. Running costs, a 10-year battery and inverter life and a 0.9 replacement factor from the engine's cost file. Staged builds add the rest in year 3 on the same loan terms, with no grant. No tax, inflation or tariff rises; panels kept for 20 years. Rough guides only.</p>
         </More>
         <Cite k={['omorate', 'irena2024', 'amda2024', 'assumption']} />
       </div>

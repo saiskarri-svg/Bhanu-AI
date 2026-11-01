@@ -122,7 +122,7 @@ const App: React.FC = () => {
         {tab === 1 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(2)} />}
         {(tab === 2 || (tab === 3 && money === 'size') || (tab === 5 && trust === 'checks')) && !eng && <NoEngine />}
         {tab === 2 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(3, 'size')} />}
-        {tab === 3 && money === 'size' && eng && <GrowthPage site={site} eng={eng} s={st} set={setSt} onNext={() => goTab(3, 'funding')} />}
+        {tab === 3 && money === 'size' && eng && <GrowthPage site={site} eng={eng} s={st} set={setSt} siteId={siteId} onPick={pick} onNext={() => goTab(3, 'funding')} />}
         {tab === 3 && money === 'funding' && <FundingPage site={site} eng={eng} s={st} set={setSt} goTab={goTab} />}
         {tab === 3 && money === 'compare' && <Compare s={st} siteId={siteId} onPick={pick} rate={st.grant} />}
         {tab === 4 && <WeatherPage site={site} siteId={siteId} eng={eng} onNext={() => goTab(5, 'checks')} />}

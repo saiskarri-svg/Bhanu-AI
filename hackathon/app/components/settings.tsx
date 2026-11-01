@@ -4,10 +4,11 @@ import { SITES, FLAG } from './sites';
 import { StatusDot } from './ui';
 import { n0, n1 } from './format';
 import { lifetime } from './lifetime';
+import { plan } from './rightsize';
 
 // Site settings shared by the Map panel and every tab: change once, everything follows.
-export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; grant: number; loan: 'commercial' | 'concessional' }
-export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine', stage: false, grant: 433, loan: 'commercial' };
+export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; stages: number; grant: number; loan: 'commercial' | 'concessional' }
+export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine', stage: false, stages: 3, grant: 433, loan: 'commercial' };
 
 // 2024 equipment: IRENA Renewable Power Generation Costs in 2024 (solar $691/kW, batteries $192/kWh, utility averages)
 // times a remote small-site premium (assumption), inverter at the engine price; wires, meters and soft costs stay 40%
@@ -47,17 +48,27 @@ export const derive = (eng: Engine | undefined, s: Settings) => {
     : s.cost === 'amda' && per && CU && p50kwp ? { ...base0, capex_usd: CU[4].p50 * per * (base0.pv_kwp / p50kwp) }
     : s.cost === 'irena' ? { ...base0, capex_usd: ((base0.pv_kwp * IRENA.pv + base0.battery_kwh * IRENA.batt) * IRENA.premium + base0.inverter_kw * IRENA.inv) / (1 - IRENA.nonGen) }
     : base0;
-  // Build in stages: first stage for year-2 demand (equipment scaled to it; wires, meters and soft costs, 40%, scaled to
-  // the homes connected by year 2), the rest added at the start of year 3
-  const ratio = s.stage && E ? Math.min(1, E[1].p50 / E[4].p50) : 1;
-  const des = priced && s.stage && E
-    ? { ...priced, design: 'Stage 1 (year-2 demand)', pv_kwp: priced.pv_kwp * ratio, battery_kwh: priced.battery_kwh * ratio, inverter_kw: priced.inverter_kw * ratio, capex_usd: priced.capex_usd * (0.6 * ratio + 0.4 * (CU ? Math.min(1, CU[1].p50 / CU[4].p50) : 1)), capacity_kwh_day: E[1].p50 * 1.1 }
-    : priced;
-  const stage2 = s.stage && priced && des ? { capex_usd: priced.capex_usd - des.capex_usd, month: 25, capacity_kwh_day: priced.capacity_kwh_day } : undefined;
+  // Build in stages (right-sized, components/rightsize.ts): stage 1 for years 1-2 and stage 2 from year 3, each sized
+  // so brownout odds stay under 15% while idle capacity is as low as possible. Equipment scales with capacity;
+  // wires, meters and soft costs (40%) are built for the homes connected by year 2, the rest with stage 2.
+  const P = s.stage && E && priced ? plan(E, priced.capacity_kwh_day, priced, s.stages ?? 3) : undefined;
+  // wires for the homes connected by the end of each stage's years
+  const wiresBy = (lastYear: number) => (CU ? Math.min(1, CU[lastYear - 1].p50 / CU[4].p50) : 1);
+  const cumCapex = (k: number) => priced!.capex_usd * (0.6 * P!.caps[k] / priced!.capacity_kwh_day + 0.4 * wiresBy(P!.groups[k][P!.groups[k].length - 1]));
+  const kitFor = (c: number) => ({ pv_kwp: c * P!.kwpPerCap, battery_kwh: c * P!.kwhPerCap, inverter_kw: priced!.inverter_kw * c / priced!.capacity_kwh_day, capacity_kwh_day: c });
+  const last = P ? P.caps.length - 1 : 0;
+  const full = P && priced ? { ...priced, design: 'Stages, full', ...kitFor(P.caps[last]), capex_usd: cumCapex(last) } : priced;
+  const des = P && priced ? { ...priced, design: 'Stage 1 (right-sized)', ...kitFor(P.caps[0]), capex_usd: cumCapex(0) } : priced;
+  // Later stages: the year they are added, what they cost and the kit they add
+  // Results-based grants are paid as homes connect: each stage gets the share of connections made in its years
+  const connBy = (k: number) => wiresBy(P!.groups[k][P!.groups[k].length - 1]);
+  const grantShare0 = P ? connBy(0) : 1;
+  const adds = P && priced ? P.caps.slice(1).map((c, i) => ({ year: P.groups[i + 1][0], capex_usd: cumCapex(i + 1) - cumCapex(i), kit: kitFor(c), prev: kitFor(P.caps[i]), grantShare: connBy(i + 1) - connBy(i) })) : [];
+  const stage2 = adds.length ? { capex_usd: adds.reduce((a, x) => a + x.capex_usd, 0), month: (adds[0].year - 1) * 12 + 1, capacity_kwh_day: full!.capacity_kwh_day, adds } : undefined;
   const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === s.tar);
   const rk = !meta && des && !s.stage ? eng?.risk.find(r => r.design === des.design && r.year === s.yr) : undefined;
   const dem = E?.[s.yr - 1];
-  return { meta, E, PK, CU, dsel, des, tsel, rk, dem, stage2, full: priced };
+  return { meta, E, PK, CU, dsel, des, tsel, rk, dem, stage2, full, plan: P, adds, grantShare0 };
 };
 
 const usd = (v: number) => v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`;

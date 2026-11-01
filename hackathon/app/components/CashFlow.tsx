@@ -5,6 +5,7 @@ import type { Engine } from './engine';
 import { derive, type Settings } from './settings';
 import { n0, usd } from './format';
 import { Cite } from './refs';
+import { expSold, scaleQ, lerpQ } from './rightsize';
 
 // Engine cost inputs (forecast/assumptions.yaml, Omorate 2021 prices)
 const OM = { pv: 13.5, inv: 4.3, batt: 22.3 };
@@ -31,7 +32,7 @@ export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
   const base = eng.summary.energy_kwh_per_day[4].p50;
   const f = d.meta || !d.tsel ? 1 : d.tsel.year5_kwh_per_day_p50 / base;
   const capex = des.capex_usd;
-  const toFinance = Math.max(0, capex - grant);
+  const toFinance = Math.max(0, capex - grant * d.grantShare0);
   const loan = toFinance * T.debtShare, equity = toFinance - loan;
   // Grace period: no payments, interest added to the loan; then equal payments over the rest of the term
   const r = T.rate / 12, n = T.years * 12 - T.grace;
@@ -42,18 +43,24 @@ export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
   for (let m = 1; m <= 24; m++) {
     const y = (m - 0.5) / 12; // years since connection
     const i = Math.min(3, Math.floor(y)), t = y - i;
-    const day = (d.E[i].p50 + (d.E[i + 1].p50 - d.E[i].p50) * t) * f;
-    const kwh = Math.min(day, des.capacity_kwh_day) * 30.4;
+    const q = scaleQ(lerpQ(d.E[i], d.E[i + 1], t), f);
+    const yr = Math.floor((m - 1) / 12) + 1;
+    const add = (d.adds ?? []).filter(a => a.year <= yr).pop();
+    const cap = add ? add.kit.capacity_kwh_day : des.capacity_kwh_day;
+    const omM = add ? (add.kit.pv_kwp * OM.pv + add.kit.inverter_kw * OM.inv + add.kit.battery_kwh * OM.batt) / 12 : om;
+    const addDebt = (d.adds ?? []).filter(a => a.year <= yr).reduce((t, a) => { const L = Math.max(0, a.capex_usd - grant * a.grantShare) * T.debtShare; return t + (L > 0 ? L * r / (1 - Math.pow(1 + r, -T.years * 12)) : 0); }, 0);
+    const kwh = expSold(q, cap) * 30.4;
     const revenue = kwh * s.tar * T.collection;
-    const pay = m > T.grace ? debt : 0;
-    const net = revenue - om - pay;
+    const pay = (m > T.grace ? debt : 0) + addDebt;
+    const net = revenue - omM - pay;
     cum += net;
-    rows.push({ m, kwh, revenue, om, debt: pay, net, cum });
+    rows.push({ m, kwh, revenue, om: omM, debt: pay, net, cum });
   }
   const firstPositive = rows.find(x => x.net > 0)?.m;
   const y2 = rows.slice(12);
   const cfads = y2.reduce((a, x) => a + x.revenue - x.om, 0);
-  const dscr = debt > 0 ? cfads / (debt * 12) : undefined;
+  const debtY2 = y2.reduce((a, x) => a + x.debt, 0);
+  const dscr = debtY2 > 0 ? cfads / debtY2 : undefined;
   const ok = cfads > 0 && (dscr === undefined || dscr >= DSCR_MIN);
   return { rows, capex, grant, loan, equity, debt, om, firstPositive, dscr, ok, T, stage2: d.stage2, total: rows.reduce((a, x) => a + x.net, 0) };
 };
@@ -64,7 +71,7 @@ export const minGrant = (eng: Engine, s: Settings, extra?: (grantTotal: number) 
   if (!d.des || cust <= 0) return null;
   const at = (g: number) => { const c = cashFlow(eng, s, g * cust); return c && c.ok && (!extra || extra(g * cust)) ? c : null; };
   if (at(0)) return 0;
-  const max = d.des.capex_usd / cust;
+  const max = (d.full?.capex_usd ?? d.des.capex_usd) / cust / Math.max(0.05, Math.min(d.grantShare0, ...(d.adds ?? []).map(a => a.grantShare || 1)));
   if (!at(max)) return null; // even a full grant leaves bills below running costs
   let lo = 0, hi = max;
   for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (at(mid)) hi = mid; else lo = mid; }
@@ -114,11 +121,11 @@ export const CashFlow: React.FC<{ eng: Engine; s: Settings; grant: number }> = (
             </ComposedChart>
           </ResponsiveChart>
         </div>
-        {c.stage2 && <p className="text-sm text-muted max-w-prose">Stage 1 only. About <span className="text-fg tabular-nums">{usd(c.stage2.capex_usd)}</span> more is added at the start of year 3 (month {c.stage2.month}), paid from a second loan or the operator's earnings by then.</p>}
+        {c.stage2 && <p className="text-sm text-muted max-w-prose">Built in {c.stage2.adds.length + 1} stages: {c.stage2.adds.map(a => `+${usd(a.capex_usd)} in year ${a.year}`).join(', ')}, each on the same loan terms with no grant. Payback over 20 years counts them all.</p>}
         {c.total < 0 && <p className="text-sm text-muted max-w-prose">Short early on because demand ramps up as homes connect. A smaller first stage (P25), a larger grant, lower build costs or a loan grace period close the gap; Compare villages shows which sites already cover their loan at these settings.</p>}
         <Legend items={[{ label: 'Money in from bills', color: 'var(--ok)' }, { label: 'Running costs plus loan payment', color: 'var(--bad)' }]} />
         <More label="What this assumes">
-          <p className="text-xs text-muted max-w-prose">Most likely demand for the chosen system and households, rising month by month and capped by what the system can make; use falls a little at higher tariffs (engine). {Math.round(c.T.collection * 100)}% of bills collected; build cost from the chosen basis (2021 engine prices, or AMDA's 2024 cost per connection); running costs from the engine's cost file; a loan for 70% of the build cost left after the grant, {c.T.years} years at {Math.round(c.T.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
+          <p className="text-xs text-muted max-w-prose">Expected sales across the demand range for the chosen households, rising month by month: when demand would exceed what the system makes the extra is lost, and spare capacity earns nothing; use falls a little at higher tariffs (engine). {Math.round(c.T.collection * 100)}% of bills collected; build cost from the chosen basis (2021 engine prices, or AMDA's 2024 cost per connection); running costs from the engine's cost file; a loan for 70% of the build cost left after the grant, {c.T.years} years at {Math.round(c.T.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
         </More>
         <Cite k={['amda2024', 'irena2024', 'omorate']} />
       </div>

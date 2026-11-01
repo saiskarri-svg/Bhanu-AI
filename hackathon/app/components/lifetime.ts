@@ -1,6 +1,7 @@
 import type { Engine } from './engine';
 import { derive, IRENA, type Settings } from './settings';
 import { termsFor } from './CashFlow';
+import { expSold, scaleQ } from './rightsize';
 
 // 20-year cash for the chosen settings: the payback test lenders and owners ask for.
 // Engine cost file (forecast/assumptions.yaml): running costs, 10-year battery and inverter life, 0.9 replacement factor.
@@ -21,39 +22,41 @@ export const lifetime = (eng: Engine, s: Settings, grant: number) => {
   const d = derive(eng, s);
   if (!d.des || !d.E || !d.full) return null;
   const T = termsFor(s);
-  const st1 = d.des, full = d.full;
-  const inv1 = (st1 as { inverter_kw?: number }).inverter_kw ?? 0, invF = (full as { inverter_kw?: number }).inverter_kw ?? inv1;
+  const st1 = d.des as { pv_kwp: number; battery_kwh: number; inverter_kw?: number; capacity_kwh_day: number; capex_usd: number };
+  const inv1 = st1.inverter_kw ?? 0;
   const battPrice = s.cost === 'irena' ? IRENA.batt * IRENA.premium : 361, invPrice = 315;
   const base = eng.summary.energy_kwh_per_day[4].p50;
   const f = d.meta || !d.tsel ? 1 : d.tsel.year5_kwh_per_day_p50 / base;
-  const staged = !!d.stage2;
+  const adds = d.adds ?? [];
   // Money in at the start
-  const capex0 = st1.capex_usd, toFin0 = Math.max(0, capex0 - grant);
+  const g0 = Math.min(st1.capex_usd, grant * d.grantShare0);
+  const capex0 = st1.capex_usd, toFin0 = capex0 - g0;
   const loan0 = toFin0 * T.debtShare, eq0 = toFin0 - loan0;
   const L0 = pay(loan0, T.rate, T.years, T.grace);
-  // Expansion at the start of year 3 (no grant): same loan terms, no grace
-  const capex3 = staged ? d.stage2!.capex_usd : 0;
-  const loan3 = capex3 * T.debtShare, eq3 = capex3 - loan3;
-  const L3 = pay(loan3, T.rate, T.years, 0);
+  // Each later stage: no grant, same loan terms, no grace
+  const later = adds.map(a => { const g = Math.min(a.capex_usd, grant * a.grantShare); const loan = (a.capex_usd - g) * T.debtShare; return { ...a, g, loan, eq: a.capex_usd - g - loan, L: pay(loan, T.rate, T.years, 0) }; });
+  const kitAt = (y: number) => { let k = { pv: st1.pv_kwp, b: st1.battery_kwh, i: inv1, cap: st1.capacity_kwh_day }; later.forEach(a => { if (y >= a.year) k = { pv: a.kit.pv_kwp, b: a.kit.battery_kwh, i: a.kit.inverter_kw, cap: a.kit.capacity_kwh_day }; }); return k; };
   const rows: Year[] = [];
-  let oc = -eq0, pc = -(capex0 - grant);
+  let oc = -eq0, pc = -(capex0 - g0);
   for (let y = 1; y <= LIFE; y++) {
-    const kit = staged && y < 3 ? { pv: st1.pv_kwp, b: st1.battery_kwh, i: inv1, cap: st1.capacity_kwh_day } : { pv: full.pv_kwp, b: full.battery_kwh, i: invF, cap: full.capacity_kwh_day };
-    const day = (y <= 5 ? d.E[y - 1].p50 : d.E[4].p50 * Math.pow(1 + DEMAND_AFTER_5, y - 5)) * f;
-    const kwh = Math.min(day, kit.cap) * 365;
+    const kit = kitAt(y);
+    const q = scaleQ(y <= 5 ? d.E[y - 1] : scaleQ(d.E[4], Math.pow(1 + DEMAND_AFTER_5, y - 5)), f);
+    const kwh = expSold(q, kit.cap) * 365;
     const revenue = kwh * s.tar * T.collection;
     const om = kit.pv * OM.pv + kit.i * OM.inv + kit.b * OM.batt;
-    // Batteries and inverters replaced after 10 years (stage 1 kit in year 11, expansion kit in year 13)
-    const b1 = staged ? st1.battery_kwh : full.battery_kwh, i1 = staged ? inv1 : invF;
-    const repl = (y === BATT_LIFE + 1 ? REPL * (b1 * battPrice + i1 * invPrice) : 0)
-      + (staged && y === BATT_LIFE + 3 ? REPL * ((full.battery_kwh - b1) * battPrice + (invF - i1) * invPrice) : 0);
-    const debt = (y >= L0.from && y <= L0.to ? L0.pmt : 0) + (staged && y >= 3 && y < 3 + T.years ? L3.pmt : 0);
-    const capex = staged && y === 3 ? capex3 : 0;
-    const owner = revenue - om - repl - debt - (staged && y === 3 ? eq3 : 0);
+    // Batteries and inverters replaced 10 years after each stage goes in
+    let repl = y === BATT_LIFE + 1 ? REPL * (st1.battery_kwh * battPrice + inv1 * invPrice) : 0;
+    later.forEach(a => { if (y === a.year + BATT_LIFE) repl += REPL * ((a.kit.battery_kwh - a.prev.battery_kwh) * battPrice + (a.kit.inverter_kw - a.prev.inverter_kw) * invPrice); });
+    let debt = y >= L0.from && y <= L0.to ? L0.pmt : 0;
+    later.forEach(a => { if (y >= a.year && y < a.year + T.years) debt += a.L.pmt; });
+    const capex = later.filter(a => a.year === y).reduce((t, a) => t + a.capex_usd - a.g, 0);
+    const eqY = later.filter(a => a.year === y).reduce((t, a) => t + a.eq, 0);
+    const owner = revenue - om - repl - debt - eqY;
     const project = revenue - om - repl - capex;
     oc += owner; pc += project;
     rows.push({ y, kwh, revenue, om, repl, debt, capex, owner, ownerCum: oc, project, projectCum: pc });
   }
+  const eq3 = later.reduce((t, a) => t + a.eq, 0), capex3 = later.reduce((t, a) => t + a.capex_usd, 0);
   // Payback: first year the running total turns positive, with the fraction of that year
   const pb = (key: 'ownerCum' | 'projectCum', key2: 'owner' | 'project', start: number) => {
     // the point after which the running total stays positive (later money put in counts too)
@@ -64,5 +67,5 @@ export const lifetime = (eng: Engine, s: Settings, grant: number) => {
     const prev = rows[last][key];
     return last + 1 + Math.min(1, Math.max(0, -prev / Math.max(1e-9, rows[last + 1][key2])));
   };
-  return { rows, ownerPayback: pb('ownerCum', 'owner', -eq0), projectPayback: pb('projectCum', 'project', -(capex0 - grant)), equity: eq0 + eq3, eq0, eq3, capex0, capex3, grant, loan0, loan3, T, ownerTotal: oc, projectTotal: pc };
+  return { rows, ownerPayback: pb('ownerCum', 'owner', -eq0), projectPayback: pb('projectCum', 'project', -(capex0 - g0)), equity: eq0 + eq3, eq0, eq3, capex0, capex3, grant, loan0, T, ownerTotal: oc, projectTotal: pc };
 };
