@@ -8,13 +8,20 @@ import { Cite } from './refs';
 
 // Engine cost inputs (forecast/assumptions.yaml, Omorate 2021 prices)
 const OM = { pv: 13.5, inv: 4.3, batt: 22.3 };
-// Rough-guide finance terms; change with a lender's real offer
-export const TERMS = { collection: 0.9, debtShare: 0.7, rate: 0.12, years: 7 };
+// Rough-guide finance terms (assumptions); change with a lender's real offer
+export const LOANS = {
+  commercial: { label: 'Commercial', rate: 0.12, years: 7, grace: 0 },
+  concessional: { label: 'Concessional', rate: 0.06, years: 12, grace: 12 },
+} as const;
+export const TERMS = { collection: 0.9, debtShare: 0.7, ...LOANS.commercial };
+export const termsFor = (s: Settings) => ({ collection: TERMS.collection, debtShare: TERMS.debtShare, ...LOANS[s.loan ?? 'commercial'] });
+export const DSCR_MIN = 1.2;
 
 export interface CashMonth { m: number; kwh: number; revenue: number; om: number; debt: number; net: number; cum: number }
 
 // A 24-month cash flow for the chosen system and tariff, after a grant
 export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
+  const T = termsFor(s);
   const d = derive(eng, s);
   if (!d.des || !d.E) return null;
   const des = d.des;
@@ -25,9 +32,11 @@ export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
   const f = d.meta || !d.tsel ? 1 : d.tsel.year5_kwh_per_day_p50 / base;
   const capex = des.capex_usd;
   const toFinance = Math.max(0, capex - grant);
-  const loan = toFinance * TERMS.debtShare, equity = toFinance - loan;
-  const r = TERMS.rate / 12, n = TERMS.years * 12;
-  const debt = loan > 0 ? loan * r / (1 - Math.pow(1 + r, -n)) : 0;
+  const loan = toFinance * T.debtShare, equity = toFinance - loan;
+  // Grace period: no payments, interest added to the loan; then equal payments over the rest of the term
+  const r = T.rate / 12, n = T.years * 12 - T.grace;
+  const bal = loan * Math.pow(1 + r, T.grace);
+  const debt = loan > 0 ? bal * r / (1 - Math.pow(1 + r, -n)) : 0;
   const rows: CashMonth[] = [];
   let cum = -equity;
   for (let m = 1; m <= 24; m++) {
@@ -35,15 +44,31 @@ export const cashFlow = (eng: Engine, s: Settings, grant: number) => {
     const i = Math.min(3, Math.floor(y)), t = y - i;
     const day = (d.E[i].p50 + (d.E[i + 1].p50 - d.E[i].p50) * t) * f;
     const kwh = Math.min(day, des.capacity_kwh_day) * 30.4;
-    const revenue = kwh * s.tar * TERMS.collection;
-    const net = revenue - om - debt;
+    const revenue = kwh * s.tar * T.collection;
+    const pay = m > T.grace ? debt : 0;
+    const net = revenue - om - pay;
     cum += net;
-    rows.push({ m, kwh, revenue, om, debt, net, cum });
+    rows.push({ m, kwh, revenue, om, debt: pay, net, cum });
   }
   const firstPositive = rows.find(x => x.net > 0)?.m;
   const y2 = rows.slice(12);
-  const dscr = debt > 0 ? y2.reduce((a, x) => a + x.revenue - x.om, 0) / (debt * 12) : undefined;
-  return { rows, capex, grant, loan, equity, debt, om, firstPositive, dscr, total: rows.reduce((a, x) => a + x.net, 0) };
+  const cfads = y2.reduce((a, x) => a + x.revenue - x.om, 0);
+  const dscr = debt > 0 ? cfads / (debt * 12) : undefined;
+  const ok = cfads > 0 && (dscr === undefined || dscr >= DSCR_MIN);
+  return { rows, capex, grant, loan, equity, debt, om, firstPositive, dscr, ok, T, stage2: d.stage2, total: rows.reduce((a, x) => a + x.net, 0) };
+};
+
+// Smallest grant per connection that makes year 2 cover running costs and 1.2x the loan payment
+export const minGrant = (eng: Engine, s: Settings): number | null => {
+  const d = derive(eng, s); const cust = d.CU?.[4].p50 ?? 0;
+  if (!d.des || cust <= 0) return null;
+  const at = (g: number) => cashFlow(eng, s, g * cust);
+  if (at(0)?.ok) return 0;
+  const max = d.des.capex_usd / cust;
+  if (!at(max)?.ok) return null; // even a full grant leaves bills below running costs
+  let lo = 0, hi = max;
+  for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (at(mid)?.ok) hi = mid; else lo = mid; }
+  return Math.ceil(hi / 10) * 10;
 };
 
 export const CashFlow: React.FC<{ eng: Engine; s: Settings; grant: number }> = ({ eng, s, grant }) => {
@@ -53,13 +78,13 @@ export const CashFlow: React.FC<{ eng: Engine; s: Settings; grant: number }> = (
   const tone = (v: number | undefined, ok: number, warn: number) => v === undefined ? 'text-fg' : v >= ok ? 'text-ok' : v >= warn ? 'text-warn' : 'text-bad';
   return (
     <>
-      <BoxHeader title="First 24 months of cash" meta={`${s.tar.toFixed(2)} $/kWh · after the grant above · rough guide`} />
+      <BoxHeader title="First 24 months of cash" meta={`$${s.tar.toFixed(2)} a kWh · ${c.T.label.toLowerCase()} loan · after the grant above · rough guide`} />
       <div className="px-5 pb-5 space-y-4">
         <dl className="grid gap-px bg-line border border-line rounded-ctl overflow-hidden grid-cols-2 lg:grid-cols-4">
           {[
-            { k: 'Loan (70% of the rest)', v: usd(c.loan), sub: `${usd(c.debt)} a month, ${TERMS.years} years at ${Math.round(TERMS.rate * 100)}%` },
+            { k: 'Loan (70% of the rest)', v: usd(c.loan), sub: `${usd(c.debt)} a month, ${c.T.years} years at ${Math.round(c.T.rate * 100)}%${c.T.grace ? `, ${c.T.grace}-month grace` : ''}` },
             { k: 'Owner puts in', v: usd(c.equity), sub: 'the other 30%' },
-            { k: 'Debt cover, year 2', v: c.dscr !== undefined ? `${c.dscr.toFixed(2)}x` : '-', sub: 'lenders often want 1.2x or more', cls: tone(c.dscr, 1.2, 1) },
+            { k: 'Debt cover, year 2', v: c.dscr !== undefined ? `${c.dscr.toFixed(2)}x` : 'no loan', sub: 'lenders often want 1.2x or more', cls: c.dscr === undefined ? (c.ok ? 'text-ok' : 'text-bad') : tone(c.dscr, 1.2, 1) },
             { k: 'Cash after 24 months', v: usd(Math.abs(c.total)), sub: c.total >= 0 ? 'ahead, after loan payments' : 'short, after loan payments', cls: c.total >= 0 ? 'text-ok' : 'text-bad' },
           ].map(x => (
             <div key={x.k} className="bg-surface-2 px-3 py-2 min-w-0">
@@ -89,10 +114,11 @@ export const CashFlow: React.FC<{ eng: Engine; s: Settings; grant: number }> = (
             </ComposedChart>
           </ResponsiveChart>
         </div>
+        {c.stage2 && <p className="text-sm text-muted max-w-prose">Stage 1 only. About <span className="text-fg tabular-nums">{usd(c.stage2.capex_usd)}</span> more is added at the start of year 3 (month {c.stage2.month}), paid from a second loan or the operator's earnings by then.</p>}
         {c.total < 0 && <p className="text-sm text-muted max-w-prose">Short early on because demand ramps up as homes connect. A smaller first stage (P25), a larger grant, lower build costs or a loan grace period close the gap; Compare villages shows which sites already cover their loan at these settings.</p>}
         <Legend items={[{ label: 'Money in from bills', color: 'var(--ok)' }, { label: 'Running costs plus loan payment', color: 'var(--bad)' }]} />
         <More label="What this assumes">
-          <p className="text-xs text-muted max-w-prose">Most likely demand for the chosen system and households, rising month by month and capped by what the system can make; use falls a little at higher tariffs (engine). {Math.round(TERMS.collection * 100)}% of bills collected; build cost from the chosen basis (2021 engine prices, or AMDA's 2024 cost per connection); running costs from the engine's cost file; a loan for 70% of the build cost left after the grant, {TERMS.years} years at {Math.round(TERMS.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
+          <p className="text-xs text-muted max-w-prose">Most likely demand for the chosen system and households, rising month by month and capped by what the system can make; use falls a little at higher tariffs (engine). {Math.round(c.T.collection * 100)}% of bills collected; build cost from the chosen basis (2021 engine prices, or AMDA's 2024 cost per connection); running costs from the engine's cost file; a loan for 70% of the build cost left after the grant, {c.T.years} years at {Math.round(c.T.rate * 100)}%. All rough guides: replace with real quotes and a lender's terms.</p>
         </More>
         <Cite k={['amda2024', 'irena2024', 'omorate']} />
       </div>

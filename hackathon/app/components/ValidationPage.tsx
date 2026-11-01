@@ -46,7 +46,7 @@ const ClassCheck: React.FC = () => {
             <thead><tr className="text-xs text-muted"><th className="text-left font-normal pr-3 py-1"></th>{CLASSES.map(c => <th key={c} className="font-normal px-2 py-1 text-right">{CLS_LABEL[c].split(' ')[0]}</th>)}</tr></thead>
             <tbody>
               {CLASSES.map(t => (
-                <tr key={t} className="border-t border-line/60">
+                <tr key={t} className="border-t border-line">
                   <td className="pr-3 py-1.5 text-muted whitespace-nowrap">{CLS_LABEL[t]}</td>
                   {CLASSES.map(g => <td key={g} className={`px-2 py-1.5 text-right ${t === g ? 'text-fg font-medium' : 'text-muted'}`}>{res.m[t][g] || ''}</td>)}
                 </tr>

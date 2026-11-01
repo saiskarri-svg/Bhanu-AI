@@ -166,7 +166,7 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
             </tr></thead>
             <tbody>
               {sorted.slice(0, rows).map(i => { const b = buildings[i]; return (
-                <tr key={i} onClick={() => setSel(i)} className={`border-b border-line/60 cursor-pointer ${sel === i ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
+                <tr key={i} onClick={() => setSel(i)} className={`border-b border-line cursor-pointer ${sel === i ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
                   <td className="py-2 pr-4 whitespace-nowrap">{b.lat.toFixed(5)}, {b.lon.toFixed(5)}</td>
                   <td className="py-2 pr-4">{n0(b.area)}</td>
                   <td className="py-2 pr-4 whitespace-nowrap"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR[b.cls] }} />{CLS_LABEL[b.cls]}</span></td>

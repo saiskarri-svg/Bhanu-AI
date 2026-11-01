@@ -39,7 +39,7 @@ export const MethodPage: React.FC = () => (
           <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Input</th><th className="py-2 pr-4 font-normal">Low</th><th className="py-2 pr-4 font-normal">Likely</th><th className="py-2 pr-4 font-normal">High</th><th className="py-2 pr-4 font-normal">Unit</th><th className="py-2 font-normal">Source</th></tr></thead>
           <tbody>
             {PARAMS.map(p => (
-              <tr key={p.key} className="border-b border-line/60 align-top">
+              <tr key={p.key} className="border-b border-line align-top">
                 <td className="py-2 pr-4">{p.label}</td>
                 <td className="py-2 pr-4 tabular-nums">{fmt(p.lo, p.unit)}</td><td className="py-2 pr-4 tabular-nums">{fmt(p.mode, p.unit)}</td><td className="py-2 pr-4 tabular-nums">{fmt(p.hi, p.unit)}</td>
                 <td className="py-2 pr-4 text-muted whitespace-nowrap">{p.unit === '%' ? 'share' : p.unit || 'per roof'}</td>
@@ -47,7 +47,7 @@ export const MethodPage: React.FC = () => (
               </tr>
             ))}
             {Object.entries(GROWTH_PARAMS).map(([k, g]) => (
-              <tr key={k} className="border-b border-line/60 align-top">
+              <tr key={k} className="border-b border-line align-top">
                 <td className="py-2 pr-4">{g.label}</td>
                 <td className="py-2 pr-4 tabular-nums">{Math.round(g.lo * 100)}%</td><td className="py-2 pr-4 tabular-nums">{Math.round(g.mode * 100)}%</td><td className="py-2 pr-4 tabular-nums">{Math.round(g.hi * 100)}%</td>
                 <td className="py-2 pr-4 text-muted">{k === 'connMax' ? 'share' : k === 'k' ? 'per year' : 'a year'}</td>

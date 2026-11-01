@@ -175,7 +175,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
                   const wm = r.monthly_unmet_share.reduce((a, v, k) => (v > r.monthly_unmet_share[a] ? k : a), 0);
                   const f = sim.designs_outlook[i];
                   return (
-                    <tr key={r.design} className="border-b border-line/60">
+                    <tr key={r.design} className="border-b border-line">
                       <td className="py-2 pr-3 whitespace-nowrap">{r.design.split(' ')[0]} of year-5 demand</td>
                       <td className="py-2 pr-3 text-right"><StatusDot tone={tone(r.unmet_share)}>{pc(r.unmet_share)}</StatusDot></td>
                       <td className="py-2 pr-3 text-right">{pc(r.worst_year_unmet_share)}</td>
@@ -214,7 +214,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
                 <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-3 font-normal">Model</th><th className="py-2 pr-3 font-normal text-right">Sunlight</th><th className="py-2 pr-3 font-normal text-right">Temperature</th><th className="py-2 font-normal text-right">Solar output</th></tr></thead>
                 <tbody>
                   {w.outlook.models.map((m, i) => (
-                    <tr key={m.model} className="border-b border-line/60">
+                    <tr key={m.model} className="border-b border-line">
                       <td className="py-1.5 pr-3">{m.model}</td>
                       <td className="py-1.5 pr-3 text-right">{avg(m.rsds_pct) >= 0 ? '+' : ''}{n1(avg(m.rsds_pct))}%</td>
                       <td className="py-1.5 pr-3 text-right">{avg(m.tas_c) >= 0 ? '+' : ''}{n1(avg(m.tas_c))} C</td>

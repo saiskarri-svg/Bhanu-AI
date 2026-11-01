@@ -5,8 +5,13 @@ import { StatusDot } from './ui';
 import { n0, n1 } from './format';
 
 // Site settings shared by the Map panel and every tab: change once, everything follows.
-export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' }
-export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine' };
+export interface Settings { yr: number; di: number; hh: 'roofs' | 'meta'; tar: number; cost: 'engine' | 'amda' | 'irena'; stage: boolean; grant: number; loan: 'commercial' | 'concessional' }
+export const DEFAULT: Settings = { yr: 5, di: 1, hh: 'roofs', tar: 0.85, cost: 'engine', stage: false, grant: 433, loan: 'commercial' };
+
+// 2024 equipment: IRENA Renewable Power Generation Costs in 2024 (solar $691/kW, batteries $192/kWh, utility averages)
+// times a remote small-site premium (assumption), inverter at the engine price; wires, meters and soft costs stay 40%
+export const IRENA = { pv: 691, batt: 192, inv: 315, premium: 1.5, nonGen: 0.4 };
+export const COST_LABEL = { engine: '2021 engine', amda: 'AMDA 2024', irena: '2024 equipment' } as const;
 
 // AMDA Benchmarking Africa's Minigrids 2024 (data 2022 to 2024), full build cost per connection, rough guide
 export const AMDA_PER_CONNECTION: Record<string, number> = { NG: 1046, SL: 1046, MR: 1046, KE: 1948, UG: 1948, TZ: 1948 };
@@ -30,18 +35,28 @@ export const derive = (eng: Engine | undefined, s: Settings) => {
   const PK = meta ? B!.peak_kw : S?.peak_kw;
   const CU = meta ? B!.customers : S?.customers;
   const dsel = meta ? 1 : s.di;
-  const des0 = meta && B
-    ? { design: 'P50 of year-5 demand', pv_kwp: B.p50_design.pv_kwp, battery_kwh: B.p50_design.battery_kwh, capex_usd: B.p50_design.capex_usd, capacity_kwh_day: B.energy_kwh_per_day[4].p50 * 1.1 }
-    : eng?.designs[s.di];
-  // AMDA basis: connections x regional cost per connection, scaled by system size against P50
+  const base0 = meta && B
+    ? { design: 'P50 of year-5 demand', pv_kwp: B.p50_design.pv_kwp, battery_kwh: B.p50_design.battery_kwh, inverter_kw: (B.peak_kw[4].p50 || 0) * 1.25, capex_usd: B.p50_design.capex_usd, capacity_kwh_day: B.energy_kwh_per_day[4].p50 * 1.1 }
+    : eng?.designs[s.stage ? 1 : s.di];
+  // Build cost for the chosen basis
   const cc = eng ? COUNTRY_OF(eng.site) : '';
   const per = AMDA_PER_CONNECTION[cc];
   const p50kwp = meta && B ? B.p50_design.pv_kwp : eng?.designs[1].pv_kwp;
-  const des = des0 && s.cost === 'amda' && per && CU && p50kwp ? { ...des0, capex_usd: CU[4].p50 * per * (des0.pv_kwp / p50kwp) } : des0;
+  const priced = !base0 ? undefined
+    : s.cost === 'amda' && per && CU && p50kwp ? { ...base0, capex_usd: CU[4].p50 * per * (base0.pv_kwp / p50kwp) }
+    : s.cost === 'irena' ? { ...base0, capex_usd: ((base0.pv_kwp * IRENA.pv + base0.battery_kwh * IRENA.batt) * IRENA.premium + base0.inverter_kw * IRENA.inv) / (1 - IRENA.nonGen) }
+    : base0;
+  // Build in stages: first stage for year-2 demand (equipment scaled to it; wires, meters and soft costs, 40%, scaled to
+  // the homes connected by year 2), the rest added at the start of year 3
+  const ratio = s.stage && E ? Math.min(1, E[1].p50 / E[4].p50) : 1;
+  const des = priced && s.stage && E
+    ? { ...priced, design: 'Stage 1 (year-2 demand)', pv_kwp: priced.pv_kwp * ratio, battery_kwh: priced.battery_kwh * ratio, inverter_kw: priced.inverter_kw * ratio, capex_usd: priced.capex_usd * (0.6 * ratio + 0.4 * (CU ? Math.min(1, CU[1].p50 / CU[4].p50) : 1)), capacity_kwh_day: E[1].p50 * 1.1 }
+    : priced;
+  const stage2 = s.stage && priced && des ? { capex_usd: priced.capex_usd - des.capex_usd, month: 25, capacity_kwh_day: priced.capacity_kwh_day } : undefined;
   const tsel = eng?.tariffs.find(t => t.tariff_usd_per_kwh === s.tar);
-  const rk = !meta && des ? eng?.risk.find(r => r.design === des.design && r.year === s.yr) : undefined;
+  const rk = !meta && des && !s.stage ? eng?.risk.find(r => r.design === des.design && r.year === s.yr) : undefined;
   const dem = E?.[s.yr - 1];
-  return { meta, E, PK, CU, dsel, des, tsel, rk, dem };
+  return { meta, E, PK, CU, dsel, des, tsel, rk, dem, stage2, full: priced };
 };
 
 const usd = (v: number) => v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`;
@@ -62,9 +77,9 @@ export const Controls: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Set
   return (
     <div className={className}>
       <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(s.yr === y, () => set({ yr: y }), y, y))}</Seg>
-      <Seg label="System size">{eng.designs.map((d, i) => opt(dsel === i, () => set({ di: i }), d.design.split(' ')[0], d.design, meta && i !== 1))}</Seg>
+      <Seg label="System size">{eng.designs.map((d, i) => opt(!s.stage && dsel === i, () => set({ di: i, stage: false }), d.design.split(' ')[0], d.design, meta && i !== 1))}{opt(s.stage, () => set({ stage: true }), 'Stages', 'st')}</Seg>
       {eng.by_population && <Seg label="Households from">{opt(!meta, () => set({ hh: 'roofs' }), 'Roofs', 'r')}{opt(meta, () => set({ hh: 'meta' }), "Meta's map", 'm')}</Seg>}
-      <Seg label="Build cost">{opt(s.cost !== 'amda', () => set({ cost: 'engine' }), '2021 engine', 'e')}{opt(s.cost === 'amda', () => set({ cost: 'amda' }), 'AMDA 2024', 'a')}</Seg>
+      <Seg label="Build cost">{(['engine', 'irena', 'amda'] as const).map(c => opt(s.cost === c, () => set({ cost: c }), c === 'engine' ? '2021' : c === 'irena' ? '2024 kit' : 'AMDA', c))}</Seg>
       <Seg label="Tariff, $ per kWh">{tariffs.map(t => opt(s.tar === t.tariff_usd_per_kwh, () => set({ tar: t.tariff_usd_per_kwh }), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
     </div>
   );
@@ -75,9 +90,9 @@ export const Answer: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => {
   const { meta, des, tsel, rk, dem } = derive(eng, s);
   const cells: { k: string; v: React.ReactNode; sub?: React.ReactNode }[] = [
     { k: `Demand, year ${s.yr}`, v: dem ? <>{n0(dem.p50)} <span className="text-xs text-muted font-sans">kWh a day</span></> : '-', sub: dem ? `${n0(dem.p10)} to ${n0(dem.p90)}` : undefined },
-    { k: `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${s.cost === 'amda' ? 'AMDA 2024' : '2021 prices'}, rough)` : undefined },
+    { k: s.stage ? 'Stage 1 system' : `${des?.design.split(' ')[0]} system`, v: des ? <>{n0(des.pv_kwp)} <span className="text-xs text-muted font-sans">kWp</span></> : '-', sub: des ? `${n0(des.battery_kwh)} kWh battery · ${usd(des.capex_usd)} (${COST_LABEL[s.cost]}, rough)` : undefined },
     { k: `Brownouts, year ${s.yr}`, v: rk ? <StatusDot tone={rk.p_brownouts > 0.3 ? 'bad' : rk.p_brownouts > 0.15 ? 'warn' : 'ok'}>{pc(rk.p_brownouts)}</StatusDot> : '-', sub: rk ? `under 60% used: ${pc(rk.p_underused)}` : meta ? 'run for the roof count' : undefined },
-    { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: s.cost === 'amda' ? 'of futures, P50, 2021 engine costs' : 'of futures, P50 system, year 5' },
+    { k: `Covers cost at $${s.tar.toFixed(2)}`, v: tsel && !meta ? <StatusDot tone={tsel.p_revenue_covers_cost_year5 >= 0.8 ? 'ok' : tsel.p_revenue_covers_cost_year5 >= 0.5 ? 'warn' : 'bad'}>{pc(tsel.p_revenue_covers_cost_year5)}</StatusDot> : '-', sub: s.cost !== 'engine' || s.stage ? 'of futures, P50, 2021 engine costs' : 'of futures, P50 system, year 5' },
     { k: 'Home bill, year 5', v: tsel && !meta ? <>${n1(tsel.year5_household_bill_usd_month_p50)} <span className="text-xs text-muted font-sans">a month</span></> : '-', sub: `at $${s.tar.toFixed(2)} a kWh` },
   ];
   return (
@@ -121,7 +136,7 @@ export const PhoneBar: React.FC<{ eng: Engine; s: Settings }> = ({ eng, s }) => 
   return (
     <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-surface border-t border-line grid grid-cols-3 divide-x divide-line pb-[env(safe-area-inset-bottom)]" aria-label="Answer for the chosen settings">
       <div className="px-3 py-2 min-w-0"><p className="text-[10px] text-muted truncate">Demand, yr {s.yr}</p><p className="font-display text-base tabular-nums">{dem ? n0(dem.p50) : '-'} <span className="text-[10px] text-muted font-sans">kWh/day</span></p></div>
-      <div className="px-3 py-2 min-w-0"><p className="text-[10px] text-muted truncate">{des?.design.split(' ')[0]} system</p><p className="font-display text-base tabular-nums">{des ? n0(des.pv_kwp) : '-'} <span className="text-[10px] text-muted font-sans">kWp</span></p></div>
+      <div className="px-3 py-2 min-w-0"><p className="text-[10px] text-muted truncate">{s.stage ? 'Stage 1' : des?.design.split(' ')[0]} system</p><p className="font-display text-base tabular-nums">{des ? n0(des.pv_kwp) : '-'} <span className="text-[10px] text-muted font-sans">kWp</span></p></div>
       <div className="px-3 py-2 min-w-0"><p className="text-[10px] text-muted truncate">Covers cost at ${s.tar.toFixed(2)}</p><p className="font-display text-base tabular-nums">{tsel && !meta ? `${Math.round(tsel.p_revenue_covers_cost_year5 * 100)}%` : '-'}</p></div>
     </div>
   );

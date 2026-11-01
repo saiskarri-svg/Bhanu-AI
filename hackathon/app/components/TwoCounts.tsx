@@ -39,7 +39,7 @@ export const TwoCounts: React.FC<{ eng: Engine; site: SiteData }> = ({ eng, site
             </tr></thead>
             <tbody>
               {rows.map(([k, a, c]) => (
-                <tr key={k} className="border-b border-line/60 align-top">
+                <tr key={k} className="border-b border-line align-top">
                   <td className="py-2 pr-3 text-muted">{k}</td><td className="py-2 pr-3">{a}</td><td className="py-2">{c}</td>
                 </tr>
               ))}

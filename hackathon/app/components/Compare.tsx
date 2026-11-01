@@ -59,7 +59,7 @@ export const Compare: React.FC<{ s: Settings; siteId: string; onPick: (id: strin
             </tr></thead>
             <tbody>
               {sorted.map((r, i) => (
-                <tr key={r.id} onClick={() => onPick(r.id)} className={`border-b border-line/60 cursor-pointer ${r.id === siteId ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
+                <tr key={r.id} onClick={() => onPick(r.id)} className={`border-b border-line cursor-pointer ${r.id === siteId ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
                   <td className="py-2 pr-3 whitespace-nowrap"><span className="text-muted mr-2">{i + 1}</span>{r.name} <span className="text-xs text-muted">{FLAG[r.cc] ?? r.cc}</span></td>
                   {cols.map(x => { const v = x.get(r); return <td key={x.k} className={`py-2 pr-3 text-right whitespace-nowrap ${sort === x.k ? 'text-fg' : ''}`}>{v === undefined ? <span className="text-muted">-</span> : x.k === 'gridKm' ? <>{r.gridKnown ? '' : 'over '}{x.fmt(v)} <span className={`text-[11px] ${r.verdict.includes('grid') ? 'text-info' : 'text-ok'}`}>{r.verdict.includes('grid') ? 'grid' : 'mini-grid'}</span></> : x.fmt(v)}</td>; })}
                 </tr>

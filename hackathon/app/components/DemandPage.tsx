@@ -170,9 +170,9 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
             <More label="Show what was mapped, by type"><table className="w-full text-sm tabular-nums">
               <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Type</th><th className="py-2 pr-4 font-normal text-right">Mapped</th><th className="py-2 font-normal text-right">Used (P10 to P90)</th></tr></thead>
               <tbody>
-                <tr className="border-b border-line/60"><td className="py-1.5 pr-4">Residential buildings</td><td className="py-1.5 pr-4 text-right">{n0(eng.landuse.residential_buildings)}</td><td className="py-1.5 text-right text-muted">{n0(S.households[0].p10)} to {n0(S.households[0].p90)} households</td></tr>
+                <tr className="border-b border-line"><td className="py-1.5 pr-4">Residential buildings</td><td className="py-1.5 pr-4 text-right">{n0(eng.landuse.residential_buildings)}</td><td className="py-1.5 text-right text-muted">{n0(S.households[0].p10)} to {n0(S.households[0].p90)} households</td></tr>
                 {biz.map(([k, b]) => (
-                  <tr key={k} className="border-b border-line/60"><td className="py-1.5 pr-4">{b.label}</td><td className="py-1.5 pr-4 text-right">{n0(b.mapped)}</td><td className="py-1.5 text-right text-muted">{n1(b.p10)} to {n1(b.p90)}</td></tr>
+                  <tr key={k} className="border-b border-line"><td className="py-1.5 pr-4">{b.label}</td><td className="py-1.5 pr-4 text-right">{n0(b.mapped)}</td><td className="py-1.5 text-right text-muted">{n1(b.p10)} to {n1(b.p90)}</td></tr>
                 ))}
               </tbody>
             </table></More>

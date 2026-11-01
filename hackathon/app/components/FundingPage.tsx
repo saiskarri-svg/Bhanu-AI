@@ -1,6 +1,7 @@
 import React from 'react';
 import { derive, type Settings } from './settings';
-import { CashFlow } from './CashFlow';
+import { CashFlow, LOANS } from './CashFlow';
+import { Pencil } from './Pencil';
 import { conceptNote } from './conceptNote';
 import { Box, BoxHeader, More, StatusDot, StatStrip, type Tone } from './ui';
 import type { Engine } from './engine';
@@ -77,14 +78,14 @@ const SchemeList: React.FC<{ items: Scheme[] }> = ({ items }) => (
   </ul>
 );
 
-export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; goTab: (t: number, sub?: string) => void }> = ({ site, eng, s: st, goTab }) => {
+export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; set: (p: Partial<Settings>) => void; goTab: (t: number, sub?: string) => void }> = ({ site, eng, s: st, set, goTab }) => {
   const cc = site.country;
   const local = COUNTRY[cc] ?? [];
   const dv = derive(eng, st);
   const p50 = dv.des ? { ...dv.des, capex_per_customer_usd: dv.des.capex_usd / Math.max(1, dv.CU?.[4].p50 ?? 1) } : undefined;
   const cust = dv.CU?.[4].p50 ?? 0;
   const sz = dv.des?.design.split(' ')[0] ?? 'P50';
-  const [rate, setRate] = React.useState(433);
+  const rate = st.grant, setRate = (g: number) => set({ grant: g });
   const grant = cust * rate;
   const share = p50 ? grant / p50.capex_usd : 0;
   const t45 = eng?.tariffs.find(t => t.tariff_usd_per_kwh === 0.45);
@@ -127,9 +128,16 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-xs text-muted">Grant per connection</span>
               <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Grant per connection">
-                {[250, 433, 600, 800].map(r => (
+                {[...new Set([0, 250, 433, 600, 800, rate])].sort((a, b) => a - b).map(r => (
                   <button key={r} role="radio" aria-checked={rate === r} onClick={() => setRate(r)}
-                    className={`h-8 px-3 text-xs tabular-nums ${rate === r ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>${r}</button>
+                    className={`h-8 px-3 text-xs tabular-nums ${rate === r ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{r === 0 ? 'None' : `$${n0(r)}`}</button>
+                ))}
+              </div>
+              <span className="text-xs text-muted ml-2">Loan</span>
+              <div className="flex rounded-ctl border border-line overflow-hidden" role="radiogroup" aria-label="Loan terms">
+                {(Object.keys(LOANS) as (keyof typeof LOANS)[]).map(k => (
+                  <button key={k} role="radio" aria-checked={st.loan === k} onClick={() => set({ loan: k })}
+                    className={`h-8 px-3 text-xs ${st.loan === k ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{LOANS[k].label} {Math.round(LOANS[k].rate * 100)}%</button>
                 ))}
               </div>
             </div>
@@ -147,6 +155,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
       )}
 
       {eng && p50 && <Box><CashFlow eng={eng} s={st} grant={grant} /></Box>}
+      {eng && p50 && <Pencil eng={eng} s={st} set={set} />}
 
       <Box>
         <BoxHeader title={`In ${NAME[cc] ?? cc}`} meta={COMPACT[cc] ? `Mission 300 energy compact presented ${COMPACT[cc]}` : 'No Mission 300 compact confirmed'} />

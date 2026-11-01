@@ -1,7 +1,7 @@
 import type { Engine } from './engine';
 import type { SiteData } from './model';
 import { derive, type Settings } from './settings';
-import { cashFlow, TERMS } from './CashFlow';
+import { cashFlow } from './CashFlow';
 import { lvNetwork, gridVsMini, LV_PER_KM, VERDICT } from './wires';
 
 const n0 = (x: number) => Math.round(x).toLocaleString('en-US');
@@ -40,7 +40,7 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
   for (let i = 0; i < 5; i++) row([`${i + 1}`, n0(E[i].p50), `${n0(E[i].p10)} to ${n0(E[i].p90)}`, n0(d.CU![i].p50), `${n0(d.PK![i].p50)} kW`], [16, 44, 44, 30, 30]);
 
   h2('3. Proposed system');
-  p(`${des.design.split(' ')[0]} size (covers that share of 4,000 simulated futures in year 5): ${n0(des.pv_kwp)} kWp of solar, ${n0(des.battery_kwh)} kWh of battery. Build cost about ${usd(des.capex_usd)} (${s.cost === 'amda' ? "AMDA 2024 benchmark per connection for the region" : '2021 Omorate prices including distribution'}; rough guide, replace with quotes).${d.rk ? ` Chance of brownouts by year ${s.yr}: ${pc(d.rk.p_brownouts)}; chance it is under 60% used: ${pc(d.rk.p_underused)}.` : ''} Build in stages: the first stage can be sized for year-2 to year-3 demand.`);
+  p(`${des.design.split(' ')[0]} size (covers that share of 4,000 simulated futures in year 5): ${n0(des.pv_kwp)} kWp of solar, ${n0(des.battery_kwh)} kWh of battery. Build cost about ${usd(des.capex_usd)} (${s.cost === 'amda' ? "AMDA 2024 benchmark per connection for the region" : s.cost === 'irena' ? 'IRENA 2024 equipment prices with a 1.5x remote-site premium, plus 40% for wires, meters and soft costs' : '2021 Omorate prices including distribution'}; rough guide, replace with quotes).${d.rk ? ` Chance of brownouts by year ${s.yr}: ${pc(d.rk.p_brownouts)}; chance it is under 60% used: ${pc(d.rk.p_underused)}.` : ''} ${d.stage2 ? `Built in stages: this first stage covers year-2 demand; about ${usd(d.stage2.capex_usd)} more is added at the start of year 3 to reach the full system.` : 'Build in stages: the first stage can be sized for year-2 to year-3 demand.'}`);
   { const lv = lvNetwork(site), g = gridVsMini(site, eng, s);
     p(`Village network: about ${lv.km.toFixed(1)} km of low-voltage line reaches ${n0(lv.reached)} of ${n0(lv.total)} roofs, roughly ${usd(lv.km * LV_PER_KM.mid)} (${usd(lv.km * LV_PER_KM.lo)} to ${usd(lv.km * LV_PER_KM.hi)}). Grid alternative: the nearest mapped line is ${g.known ? `${g.km.toFixed(1)} km` : `over ${g.km} km`} away; a medium-voltage line costs about ${usd(g.grid.mid)} (${usd(g.grid.lo)} to ${usd(g.grid.hi)}) against ${usd(g.gen)} for solar and battery. ${VERDICT[g.verdict]} (break-even about ${g.breakEven.toFixed(1)} km; line cost only, rough guide).`); }
   if (eng.weather_sim) p(`Checked against 10 real weather years (NASA POWER, 2015 to 2024): clouds, heat and dust on panels included.`);
@@ -50,8 +50,8 @@ export const conceptNote = async (site: SiteData, eng: Engine, s: Settings, gran
 
   h2('5. Grant and first 24 months');
   if (cf) {
-    p(`A results-based grant of $${rate} per connection for ${n0(d.CU![4].p50)} connections gives about ${usd(grant)} (${pc(grant / des.capex_usd)} of the build cost). The rest: a loan of ${usd(cf.loan)} (${Math.round(TERMS.debtShare * 100)}%, ${TERMS.years} years at ${Math.round(TERMS.rate * 100)}%, ${usd(cf.debt)} a month) and ${usd(cf.equity)} from the developer.`);
-    p(`Cash after running costs and loan payments: ${cf.firstPositive ? `first positive month ${cf.firstPositive}` : 'not positive within 24 months'}; ${cf.total >= 0 ? 'ahead' : 'short'} by ${usd(Math.abs(cf.total))} after 24 months${cf.dscr !== undefined ? `; debt cover in year 2 about ${cf.dscr.toFixed(2)}x` : ''}. Assumes ${Math.round(TERMS.collection * 100)}% of bills collected.${cf.total < 0 ? ' The early gap comes from demand ramping up as homes connect; a smaller first stage, a larger grant, lower build costs or a loan grace period close it.' : ''}`);
+    p(`A results-based grant of $${rate} per connection for ${n0(d.CU![4].p50)} connections gives about ${usd(grant)} (${pc(grant / des.capex_usd)} of the build cost). The rest: a loan of ${usd(cf.loan)} (${Math.round(cf.T.debtShare * 100)}%, ${cf.T.years} years at ${Math.round(cf.T.rate * 100)}%${cf.T.grace ? `, ${cf.T.grace}-month grace` : ''}, ${usd(cf.debt)} a month) and ${usd(cf.equity)} from the developer.`);
+    p(`Cash after running costs and loan payments: ${cf.firstPositive ? `first positive month ${cf.firstPositive}` : 'not positive within 24 months'}; ${cf.total >= 0 ? 'ahead' : 'short'} by ${usd(Math.abs(cf.total))} after 24 months${cf.dscr !== undefined ? `; debt cover in year 2 about ${cf.dscr.toFixed(2)}x` : ''}. Assumes ${Math.round(cf.T.collection * 100)}% of bills collected.${cf.total < 0 ? ' The early gap comes from demand ramping up as homes connect; a smaller first stage, a larger grant, lower build costs or a loan grace period close it.' : ''}`);
   }
 
   h2('6. Funding routes to approach');

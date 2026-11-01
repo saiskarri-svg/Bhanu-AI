@@ -84,7 +84,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
               {eng.designs.map((x, i) => {
                 const a = eng.risk.find(r => r.design === x.design && r.year === 5)!, b = eng.risk.find(r => r.design === x.design && r.year === 2)!;
                 return (
-                  <tr key={x.design} onClick={() => setPick(i)} aria-selected={pick === i} className={`border-b border-line/60 cursor-pointer ${pick === i ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
+                  <tr key={x.design} onClick={() => setPick(i)} aria-selected={pick === i} className={`border-b border-line cursor-pointer ${pick === i ? 'bg-surface-2' : 'hover:bg-surface-2'}`}>
                     <td className="py-2 pr-3 whitespace-nowrap"><span className={`inline-block h-3 w-3 rounded-full border mr-2 align-[-1px] ${pick === i ? 'bg-accent border-accent' : 'border-muted'}`} />{x.design.split(' ')[0]} of year-5 demand</td>
                     <td className="py-2 pr-3 text-right">{n0(x.pv_kwp)}</td><td className="py-2 pr-3 text-right">{n0(x.battery_kwh)}</td><td className="py-2 pr-3 text-right">{usd(x.capex_usd)}</td>
                     <td className="py-2 pr-3 text-right"><StatusDot tone={tone(a.p_brownouts)}>{pc(a.p_brownouts)}</StatusDot></td>
@@ -109,7 +109,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
       ]} />
 
       {eng.sizing_basis && (() => { const a = eng.sizing_basis.dull_season, b = eng.sizing_basis.yearly_average; const row = (k: string, f: (x: typeof a) => string) => (
-        <tr key={k} className="border-b border-line/60"><td className="py-2 pr-3 text-muted">{k}</td><td className="py-2 pr-3 text-right">{f(a)}</td><td className="py-2 text-right">{f(b)}</td></tr>); return (
+        <tr key={k} className="border-b border-line"><td className="py-2 pr-3 text-muted">{k}</td><td className="py-2 pr-3 text-right">{f(a)}</td><td className="py-2 text-right">{f(b)}</td></tr>); return (
         <Box>
           <BoxHeader title="Size for the dull season or the yearly average?" meta="P50 system, year-5 demand, run through 10 real weather years" />
           <div className="px-5 pb-5 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
@@ -144,7 +144,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; se
               </tr></thead>
               <tbody>
                 {eng.tariffs.filter((t, i, a) => a.findIndex(u => u.tariff_usd_per_kwh === t.tariff_usd_per_kwh) === i).map(t => (
-                  <tr key={t.tariff_usd_per_kwh} className="border-b border-line/60">
+                  <tr key={t.tariff_usd_per_kwh} className="border-b border-line">
                     <td className="py-2 pr-3">${t.tariff_usd_per_kwh.toFixed(2)}/kWh</td>
                     <td className="py-2 pr-3 text-right">{n0(t.year5_kwh_per_day_p50)} kWh/day</td>
                     <td className="py-2 pr-3 text-right">{n1(t.year5_kwh_per_household_month_p50)} kWh/mo</td>

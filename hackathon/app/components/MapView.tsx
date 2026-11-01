@@ -246,9 +246,9 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
         </div>
         {eng && <>
           <Seg label="Year after connection">{[1, 2, 3, 4, 5].map(y => opt(yr === y, () => setYr(y), y, y))}</Seg>
-          <Seg label="System size (share of futures it covers)">{eng.designs.map((d, i) => opt(dsel === i, () => setDi(i), d.design.split(' ')[0], d.design, meta && i !== 1))}</Seg>
+          <Seg label="System size (share of futures it covers)">{eng.designs.map((d, i) => opt(!st.stage && dsel === i, () => set({ di: i, stage: false }), d.design.split(' ')[0], d.design, meta && i !== 1))}{opt(st.stage, () => set({ stage: true }), 'Stages', 'stg')}</Seg>
           {eng.by_population && <Seg label="Households counted from">{opt(!meta, () => setHh('roofs'), 'Roofs', 'r')}{opt(meta, () => setHh('meta'), "Meta's map", 'm')}</Seg>}
-          <Seg label="Build cost">{opt(st.cost !== 'amda', () => set({ cost: 'engine' }), '2021 engine', 'ce')}{opt(st.cost === 'amda', () => set({ cost: 'amda' }), 'AMDA 2024', 'ca')}</Seg>
+          <Seg label="Build cost">{(['engine', 'irena', 'amda'] as const).map(c => opt(st.cost === c, () => set({ cost: c }), c === 'engine' ? '2021' : c === 'irena' ? '2024 kit' : 'AMDA', 'c' + c))}</Seg>
           <Seg label="Tariff, $ per kWh">{eng.tariffs.filter((t, i, a) => a.findIndex(u => u.tariff_usd_per_kwh === t.tariff_usd_per_kwh) === i).map(t => opt(tar === t.tariff_usd_per_kwh, () => setTar(t.tariff_usd_per_kwh), t.tariff_usd_per_kwh.toFixed(2), t.tariff_usd_per_kwh, meta))}</Seg>
         </>}
         <Seg label="Map">{opt(mode === '2d', () => setMode('2d'), 'Flat', '2d')}{opt(mode === '3d', () => setMode('3d'), '3D', '3d')}{IMAGERY[siteId] && opt(sat, () => setSat(x => !x), 'Satellite', 'sat')}</Seg>

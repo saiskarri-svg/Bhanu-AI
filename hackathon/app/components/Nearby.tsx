@@ -31,7 +31,7 @@ export const NearbyBox: React.FC<{ eng: Engine; name: string }> = ({ eng, name }
                 </tr></thead>
                 <tbody>
                   {nb.sites.map(s => (
-                    <tr key={s.site_id} className="border-b border-line/60 align-top">
+                    <tr key={s.site_id} className="border-b border-line align-top">
                       <td className="py-2 pr-3 min-w-[220px]">
                         <a href={s.url} target="_blank" rel="noreferrer" className="underline decoration-line underline-offset-2 hover:decoration-fg">{s.name}</a>
                         <span className="block text-[11px] text-muted leading-snug mt-0.5">{s.source}. {s.note}</span>
