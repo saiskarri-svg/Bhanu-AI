@@ -1,4 +1,4 @@
-# Kesho
+# Kesho AI
 
 Mini-grid demand from public data, for the Global Energy Hackathon 2026, Brief 03 ("Predict mini-grid demand before building").
 

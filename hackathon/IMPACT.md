@@ -1,4 +1,4 @@
-# Kesho: one-page impact estimate
+# Kesho AI: one-page impact estimate
 
 **What it is.** An open tool that turns satellite building footprints, ten years of weather and published meter data into a five-year mini-grid demand forecast with ranges (P10, P50, P90), the drivers a lender can review, and the brownout, idle-capacity and tariff risk of each system size, checked against real weather. Map, data pipeline and dashboard by Sai; demand engine and clear-sky solar model by Fereshteh. Prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 

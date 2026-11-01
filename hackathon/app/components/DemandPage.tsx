@@ -183,7 +183,7 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
         <Box>
           <BoxHeader title="Second opinion" meta="Two models, built separately" />
           <div className="px-5 pb-5 text-sm space-y-3">
-            <p className="text-muted">Kesho's building-level model classes every roof and assumes most homes connect in year 1. It gives <span className="text-fg tabular-nums">{n0(ours.p10 / 30)} to {n0(ours.p90 / 30)} kWh a day</span> for year 1.</p>
+            <p className="text-muted">Kesho AI's building-level model classes every roof and assumes most homes connect in year 1. It gives <span className="text-fg tabular-nums">{n0(ours.p10 / 30)} to {n0(ours.p90 / 30)} kWh a day</span> for year 1.</p>
             <More label="How the two models differ"><p className="text-muted">The demand engine follows the connection pace measured at the Faza mini-grid in Kenya, so year 1 starts lower ({n0(e1.p10)} to {n0(e1.p90)}) and grows faster. By year 5 the building model says {n0(ours5.p10 / 30)} to {n0(ours5.p90 / 30)} kWh a day and the engine {n0(e5.p10)} to {n0(e5.p90)}.</p></More>
             <Cite k={['esmap', 'mtf', 'who', 'amda', 'assumption']} label="Building-level model" />
             <p className="text-xs text-muted">Demand engine: forecast/demand_forecast.py; every input and its source in forecast/assumptions.yaml, and listed on the Method tab.</p>

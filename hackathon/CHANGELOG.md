@@ -17,6 +17,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-11-01
 
+- **Kesho AI:** name on the site is now "Kesho AI" (footer notes kesho is Swahili for "tomorrow"). `Kesho_AI_Pitch.pptx`: the GEH pitch template filled in (5 slides, speaker notes, prototype screenshot).
 - **Renamed to Kesho** (Swahili for "tomorrow") across the site, data files, pipeline and docs; tagline "See a village's power needs before you build"; single file now `Kesho.html`. GitHub repo links unchanged.
 - **What the battery has to carry** (`components/BatteryJob.tsx`, Sun and weather): team's new `forecast/pv_vs_demand.py` (tests pass) run inside `pipeline/run_engine.py` for every village, at clear sky and typical weather: average-day split of demand between solar and battery by month, usable battery one night needs (P10/P50/P90) against the design battery, an hour-by-hour year (unserved demand, spilled solar, cycles) and a week in the hardest month with battery charge. `clearsky_pv.py` updated (writes a settings file).
 - **Goal on the Map view:** one-line goal at the top of the left panel on desktop; on phones a Goal card under the map with Site settings directly beneath it.

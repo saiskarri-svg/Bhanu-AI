@@ -20,7 +20,7 @@ const fmt = (x: number, unit: string) => (unit === '%' ? `${Math.round(x * 100)}
 export const MethodPage: React.FC = () => (
   <>
     <Box>
-      <BoxHeader title="How Kesho works" />
+      <BoxHeader title="How Kesho AI works" />
       <ol className="px-5 pb-5 space-y-3 text-sm max-w-3xl">
         <li><span className="text-fg font-medium">1. Count roofs.</span> <span className="text-muted">Every building within the radius from three footprint sources merged by Overture Maps (Google Open Buildings, Microsoft ML Buildings, OpenStreetMap), because any one source can have old or missing pictures. Homes built since each record's date are added at the local household growth rate. Tags, places, roads and power lines come from OpenStreetMap.</span></li>
         <li><span className="text-fg font-medium">2. Say what each one is.</span> <span className="text-muted">Use the map tag or a nearby mapped place where there is one. Where the map is thin, shops, schools and clinics come from regional averages per household, and the building-level model keeps each roof's doubt as a probability.</span></li>
@@ -29,7 +29,7 @@ export const MethodPage: React.FC = () => (
         <li><span className="text-fg font-medium">5. Test system sizes.</span> <span className="text-muted">Size solar and battery for P25 to P90 demand and test each against every future: brownouts, idle capacity, cost per kWh and whether revenue covers cost at each tariff.</span></li>
         <li><span className="text-fg font-medium">Use measured load nearby.</span> <span className="text-muted">Metered sites within 1,000 miles pull the forecast toward what they actually use, weighted by distance, data quality and location accuracy. The published ranges count as one good site, so one weak number cannot swing the answer.</span></li>
         <li><span className="text-fg font-medium">6. Learn from meters.</span> <span className="text-muted">The engine's validate command scores coverage and error on held-out metered sites and calibrates from them (see Validation and Data sharing).</span></li>
-        <li><span className="text-fg font-medium">Why independent matters.</span> <span className="text-muted">Demand projections are often overstated, especially for productive use, and should come from parties without an incentive to overstate growth (Peters, Sievert and Toman 2019). Kesho is open: every input, source and building class can be traced.</span></li>
+        <li><span className="text-fg font-medium">Why independent matters.</span> <span className="text-muted">Demand projections are often overstated, especially for productive use, and should come from parties without an incentive to overstate growth (Peters, Sievert and Toman 2019). Kesho AI is open: every input, source and building class can be traced.</span></li>
       </ol>
     </Box>
     <Box>

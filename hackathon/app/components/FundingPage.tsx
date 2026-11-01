@@ -52,7 +52,7 @@ const AFRICA: Scheme[] = [
   { name: 'Universal Energy Facility (UEF)', who: 'SEforALL, several donors', kind: 'Grant per connection', what: 'Grants paid per verified connection for mini-grids, stand-alone solar for productive use, and clean cooking in sub-Saharan Africa.', fit: 'Developers in the countries with an open window; first wave paid about USD 433 a connection.', status: 'Windows open country by country.', url: 'https://www.seforall.org/programmes/universal-energy-facility' },
   { name: 'Africa Minigrids Program', who: 'UNDP and the Global Environment Facility', kind: 'Grant', what: 'National programmes in about 21 countries to cut mini-grid costs: planning tools, finance, and lower-cost designs.', fit: 'Countries include Nigeria and Mauritania; national teams run calls.', status: 'Varies by country.', url: 'https://www.thegef.org/newsroom/publications/africa-minigrids-program' },
   { name: 'Sustainable Energy Fund for Africa (SEFA)', who: 'African Development Bank', kind: 'Grant', what: 'Grants and concessional finance for project preparation and green mini-grid programmes (it funds RIMDIR in Mauritania).', fit: 'Usually goes through governments or larger programmes; developers bid into what it funds.', status: 'Watch AfDB procurement.', url: 'https://www.afdb.org/en/topics-and-sectors/initiatives-partnerships/sustainable-energy-fund-for-africa' },
-  { name: 'GET.invest Finance Access Advisory', who: 'EU and partners', kind: 'Advice', what: 'Free help with financial models, investment readiness and meeting lenders.', fit: 'Good while turning a Kesho forecast into a bankable plan. Advice, not money.', status: 'Open on a rolling basis; check eligibility.', url: 'https://www.get-invest.eu/finance-access-advisory/' },
+  { name: 'GET.invest Finance Access Advisory', who: 'EU and partners', kind: 'Advice', what: 'Free help with financial models, investment readiness and meeting lenders.', fit: 'Good while turning a Kesho AI forecast into a bankable plan. Advice, not money.', status: 'Open on a rolling basis; check eligibility.', url: 'https://www.get-invest.eu/finance-access-advisory/' },
   { name: 'Africa Enterprise Challenge Fund (AECF)', who: 'Regional challenge fund', kind: 'Grant', what: 'Matching grants and loans for energy access companies across Africa, one call at a time.', fit: 'Operating companies with accounts and matching money.', status: 'Watch for country calls.', url: 'https://www.aecfafrica.org/' },
 ];
 
@@ -101,7 +101,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
     { t: '12 to 24 month cash flow', tone: 'ok', state: 'First 24 months above, for the chosen system, tariff and grant' },
     { t: 'Payback period', tone: 'ok', state: '20-year payback for the owner and the whole project, above' },
     { t: '2-page concept note', tone: 'ok', state: 'Download below, built from these numbers' },
-    { t: 'Installation and maintenance partners', tone: 'muted', state: 'From the developer; not something Kesho can supply' },
+    { t: 'Installation and maintenance partners', tone: 'muted', state: 'From the developer; not something Kesho AI can supply' },
     { t: 'Track record and audited accounts', tone: 'muted', state: 'From the developer' },
   ];
 
@@ -173,7 +173,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
       </Box>
 
       <Box>
-        <BoxHeader title="What funders ask for" meta="And what Kesho already gives" />
+        <BoxHeader title="What funders ask for" meta="And what Kesho AI already gives" />
         <div className="px-5 pb-5 space-y-4">
           <ul className="divide-y divide-line">
             {READY.map(r => (
@@ -188,7 +188,7 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; 
           </ul>
           {eng && p50 && <button onClick={() => conceptNote(site, eng, st, grant, rate, [...local, ...AFRICA.slice(0, 3)].map(x => `${x.name} (${x.who}): ${x.kind.toLowerCase()}`), NAME[cc] ?? cc)} className="h-10 px-4 rounded-ctl bg-accent text-[#131316] text-sm font-medium hover:brightness-105">Download concept note (PDF)</button>}
           <More label="A suggested order"><div className="text-sm space-y-1.5 max-w-prose">
-                        <p className="text-muted">1. Results-based grants first (the national agency and the Universal Energy Facility), since they pay per connection and fit village mini-grids. 2. Free advice (GET.invest) to turn the forecast and sizing into a bankable plan. 3. Investors and lenders (All On in Nigeria, AECF calls) once there is a pipeline. 4. Bundle several villages into one portfolio for blended-finance platforms such as GFIF: Kesho can run the same forecast for each village. Do not promise a subsidy to a village before it is formally approved.</p>
+                        <p className="text-muted">1. Results-based grants first (the national agency and the Universal Energy Facility), since they pay per connection and fit village mini-grids. 2. Free advice (GET.invest) to turn the forecast and sizing into a bankable plan. 3. Investors and lenders (All On in Nigeria, AECF calls) once there is a pipeline. 4. Bundle several villages into one portfolio for blended-finance platforms such as GFIF: Kesho AI can run the same forecast for each village. Do not promise a subsidy to a village before it is formally approved.</p>
           </div></More>
         </div>
       </Box>

@@ -1,4 +1,4 @@
-// Kesho model: building classes, demand range, load profile, drivers,
+// Kesho AI model: building classes, demand range, load profile, drivers,
 // growth and sizing. Every number here is a rough guide; the sources are in
 // sources.ts and each parameter says where its range comes from.
 

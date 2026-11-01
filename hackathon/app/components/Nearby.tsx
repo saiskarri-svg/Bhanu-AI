@@ -54,7 +54,7 @@ export const NearbyBox: React.FC<{ eng: Engine; name: string }> = ({ eng, name }
                 <p className="text-xs text-muted mt-1">range {nb.factor_lo.toFixed(2)}x to {nb.factor_hi.toFixed(2)}x · total weight {nb.weight.toFixed(2)} against 1.00 for the published ranges</p>
               </div>
               <div className="text-sm text-muted space-y-2 min-w-0">
-                <p>Every number in Kesho for {name} uses this adjustment: about <span className="text-fg tabular-nums">{n0(c[0].p50)} kWh a day</span> in year 1 and <span className="text-fg tabular-nums">{n0(c[4].p50)}</span> by year 5, against {n0(e[0].p50)} and {n0(e[4].p50)} from the published ranges alone. Sizing and tariffs follow.</p>
+                <p>Every number in Kesho AI for {name} uses this adjustment: about <span className="text-fg tabular-nums">{n0(c[0].p50)} kWh a day</span> in year 1 and <span className="text-fg tabular-nums">{n0(c[4].p50)}</span> by year 5, against {n0(e[0].p50)} and {n0(e[4].p50)} from the published ranges alone. Sizing and tariffs follow.</p>
                 <More label="How the nearby sites move it"><p>{Math.abs(move) < 0.05 ? 'The nearby data barely moves the forecast.' : move > 0 ? `Nearby sites use more than the model expects, so the forecast moves up ${pc(move)}.` : `Nearby sites use less than the model expects, so the forecast moves down ${pc(-move)}.`} Each site's weight falls with distance, data quality and how exactly it is located, and the published ranges count as one good site, so a single weak nearby number cannot swing the answer.</p></More>
               </div>
             </div>

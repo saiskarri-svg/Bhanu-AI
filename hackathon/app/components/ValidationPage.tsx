@@ -82,7 +82,7 @@ export const ValidationPage: React.FC<{ site: SiteData; eng: Engine; onNext: () 
         <div className="px-5 pb-5 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <ol className="space-y-3 text-sm min-w-0">
             <li><span className="text-fg font-medium">Hold sites back.</span> <span className="text-muted">Split metered mini-grids by country and developer, so the model is always tested on sites, and ideally countries, it has not seen.</span></li>
-            <li><span className="text-fg font-medium">Predict before looking.</span> <span className="text-muted">Run Kesho on each held-out site using public data only, as Amina would before building.</span></li>
+            <li><span className="text-fg font-medium">Predict before looking.</span> <span className="text-muted">Run Kesho AI on each held-out site using public data only, as Amina would before building.</span></li>
             <li><span className="text-fg font-medium">Score the middle.</span> <span className="text-muted">Error of the P50 against metered kWh in months 6 to 12 (median absolute percentage error).</span></li>
             <li><span className="text-fg font-medium">Score the range.</span> <span className="text-muted">About 8 in 10 sites should land between P10 and P90. Fewer means the range is too narrow; more means it is too wide to help a lender.</span></li>
             <li><span className="text-fg font-medium">Score the growth.</span> <span className="text-muted">Repeat for years 2 and 3 where meters have run that long.</span></li>

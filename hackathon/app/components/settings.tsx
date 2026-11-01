@@ -96,7 +96,7 @@ export const Seg: React.FC<{ label: string; children: React.ReactNode; className
 // Plain-words note for the size buttons
 export const SizeNote: React.FC = () => (
   <More label="What P25, P50, P90 mean" className="mt-1">
-    <p className="text-[11px] text-muted leading-relaxed max-w-[44ch]">Kesho runs 4,000 possible futures. P50 is the middle one: half come in higher, half lower. A P50 system is built for that year-5 demand, so running short by year 5 is about a coin flip. P25 is smaller and cheaper but runs short in about 3 futures in 4; P75 and P90 are bigger, rarely run short, and sit idle more. Stages builds in steps, each kept to 15% or less chance of running short.</p>
+    <p className="text-[11px] text-muted leading-relaxed max-w-[44ch]">Kesho AI runs 4,000 possible futures. P50 is the middle one: half come in higher, half lower. A P50 system is built for that year-5 demand, so running short by year 5 is about a coin flip. P25 is smaller and cheaper but runs short in about 3 futures in 4; P75 and P90 are bigger, rarely run short, and sit idle more. Stages builds in steps, each kept to 15% or less chance of running short.</p>
   </More>
 );
 

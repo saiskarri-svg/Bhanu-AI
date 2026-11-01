@@ -1,4 +1,4 @@
-# Kesho: 3-minute pitch
+# Kesho AI: 3-minute pitch
 
 Live prototype: https://claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS
 Team: Sai (map, data pipeline, dashboard) and Fereshteh (demand engine, clear-sky solar model, Benichab field test).
@@ -12,7 +12,7 @@ Amina builds mini-grids. Her last site was too big: the tariff to repay it price
 
 **0:25 to 0:55. Step 1: count the roofs** (screen: Site tab, footprint sources and the satellite picture)
 
-Kesho starts from space. We merge three footprint sources, because pictures can be old or missing: at Talek in Kenya, Google alone sees only half the roofs. A satellite picture from this month shows what is there now. Gbamu Gbamu in Nigeria: about 1,350 roofs. And we check the count against a second open source, Meta's population map. They disagree up to four-fold, and we show both.
+Kesho AI starts from space. We merge three footprint sources, because pictures can be old or missing: at Talek in Kenya, Google alone sees only half the roofs. A satellite picture from this month shows what is there now. Gbamu Gbamu in Nigeria: about 1,350 roofs. And we check the count against a second open source, Meta's population map. They disagree up to four-fold, and we show both.
 
 **0:55 to 1:30. Step 2: forecast demand** (screen: Demand tab, the answer, then "Why this number")
 
