@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Kesho AI one-page summary</title>
+<style>
+@page{size:A4;margin:12mm 13mm}
+body{font:9.4pt/1.38 Calibri,Arial,sans-serif;color:#151821;margin:0}
+h1{font:700 21pt/1.1 Cambria,Georgia,serif;margin:0}
+.tag{color:#b8202f;font-weight:700;letter-spacing:.08em;font-size:7.6pt;text-transform:uppercase;margin:0 0 2px}
+.sub{font-size:10.4pt;color:#3a3f4b;margin:3px 0 8px}
+.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.meta div{background:#eef1f7;border-radius:6px;padding:5px 7px}
+.meta b{display:block;font-size:7.2pt;letter-spacing:.06em;text-transform:uppercase;color:#5a6070}
+h2{font:700 10.6pt Cambria,Georgia,serif;margin:8px 0 3px;color:#0b0f1a}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+p{margin:0 0 4px}ul{margin:0 0 4px;padding-left:14px}li{margin:0 0 2px}
+table{border-collapse:collapse;width:100%;font-size:8.6pt}td,th{border-bottom:1px solid #d9dde6;padding:2.5px 4px;text-align:left}th{color:#5a6070;font-weight:600}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 6px}
+.stats div{border:1px solid #d9dde6;border-radius:6px;padding:5px 7px}.stats b{white-space:nowrap;font:700 12pt Cambria,Georgia,serif;color:#b8202f;display:block}
+.foot{font-size:7.6pt;color:#5a6070;margin-top:6px}
+</style></head><body>
+<p class="tag">Global Energy Hackathon 2026 · One-page summary</p>
+<h1>Kesho AI</h1>
+<p class="sub">See a village's power needs before you build: a five-year electricity demand forecast from satellite roofs and open data, then a right-sized, financeable solar mini-grid plan. <i>Kesho</i> is Swahili for "tomorrow".</p>
+<div class="meta">
+<div><b>Brief</b>03 · Predict mini-grid demand before building</div>
+<div><b>Track</b>Energy access: mini-grids</div>
+<div><b>Setting</b>Rural villages without grid power, sub-Saharan Africa</div>
+<div><b>Tested on</b>6 villages: Nigeria, Sierra Leone, Mauritania, Kenya, Uganda, Tanzania</div>
+</div>
+<div class="cols"><div>
+<h2>Problem</h2>
+<p>About 490 million people need mini-grids by 2030 (217,000 grids, about $127 billion), yet at today's pace only about 44,800 get built (ESMAP 2022). Developers size each grid from old census data and surveys about power people have never had. Measured use runs 5 to 35 kWh per customer a month and forecasts are often overstated, so grids are built too big (tariffs price people out) or too small (evening brownouts), and lenders cannot price the risk.</p>
+<h2>Target users</h2>
+<ul><li><b>Mini-grid developers</b> choosing and sizing sites.</li><li><b>Lenders, funders and results-based grant programmes</b> (REA DARES, SEforALL UEF, AfDB) checking a proposal.</li><li><b>Rural electrification agencies</b> planning which villages get mini-grids or grid lines.</li><li>Ultimately the <b>households and businesses</b> who get reliable power at a fair price.</li></ul>
+<h2>Solution</h2>
+<ul><li>Counts and classifies every roof from Google, Microsoft and OpenStreetMap footprints, checked with fresh Sentinel-2 images and a second count from Meta's population map.</li>
+<li>Forecasts five years of demand as a P10 to P90 range (4,000 futures), pulled toward metered sites within 1,000 miles, and tested against 10 years of NASA POWER weather and CMIP6 outlooks.</li>
+<li>Right-sizes the system in stages so brownout odds stay at 15% or less with the least idle kit; shows what the battery must carry hour by hour; prices the village wires, a grid line and a shared plant.</li>
+<li>Finance: 24-month cash flow, 20-year payback, funding routes by country, the smallest grant that makes it pay, and a downloadable 2-page concept note.</li></ul>
+</div><div>
+<h2>Impact (brief metric: households served)</h2>
+<div class="stats"><div><b>2,888</b>households by year 5, 6 villages</div><div><b>37%→15%</b>brownout odds, one build vs staged</div><div><b>$1.1M</b>saved sharing one plant (Gbamu Gbamu)</div><div><b>85 kWp</b>real plant matches our year-2 forecast</div></div>
+<h2>Cost estimate (rough guides)</h2>
+<table><tr><th>Item</th><th class="num">Estimate</th></tr>
+<tr><td>Build cost per connection, AMDA 2024 benchmark</td><td class="num">$1,046 (W. Africa) to $1,948 (E. Africa)</td></tr>
+<tr><td>Gbamu Gbamu, 1,346 roofs: one P50 build (2021 prices)</td><td class="num">230 kWp, 403 kWh, about $1.1M</td></tr>
+<tr><td>Same village, stage 1 now (right-sized)</td><td class="num">60 kWp; later stages in years 2 and 4</td></tr>
+<tr><td>Household bill at $0.85 a kWh, year 5</td><td class="num">$5 to $8 a month</td></tr>
+<tr><td>Today's spend on kerosene, candles, batteries</td><td class="num">$5 to $20 a month</td></tr>
+<tr><td>Owner payback: staged + 2024 prices + 6% loan, no grant</td><td class="num">4 to 6 years</td></tr>
+<tr><td>Running the tool</td><td class="num">Open data, minutes per village on a laptop</td></tr></table>
+<p><b>Who pays:</b> households pay per kWh; results-based grants (about $433 a connection) and concessional loans cover the build; developers and agencies use Kesho AI to prepare and check proposals. <b>Lowest-income users:</b> the tool finds the grant that keeps bills inside what families spend today.</p>
+<h2>6 to 18 month plan</h2>
+<table><tr><td><b>Months 0–6</b></td><td>Pilot at Gbamu Gbamu, Nigeria (existing 85 kWp plant) with a developer: one-day household count, first meter data, compare forecast to use.</td></tr>
+<tr><td><b>Months 6–12</b></td><td>Meter-data trust with 50 to 200 sites (monthly totals only); recalibrate ranges; 2 to 3 developers and one agency using it on new sites.</td></tr>
+<tr><td><b>Months 12–18</b></td><td>Plug into REA DARES and SEforALL UEF pipelines in Nigeria and Sierra Leone; bundle nearby villages into financeable portfolios; 100+ villages assessed.</td></tr></table>
+<p><b>Ask:</b> a pilot developer, meter data from 50 to 200 sites, and an introduction to REA Nigeria.</p>
+</div></div>
+<p class="foot">Live prototype: claude.ai/artifact/PZNH8ccqmgMXbZZmybJqXS · Code and models: github.com/saiskarri-svg/GridSight · Sources: ESMAP 2022, AMDA Benchmarking 2024, IRENA Renewable Power Generation Costs in 2024, Google Open Buildings, Overture Maps, Sentinel-2, NASA POWER, CMIP6, Meta HRSL. Costs, payback and loan terms are rough guides; assumptions are labelled in the tool.</p>
+</body></html>
