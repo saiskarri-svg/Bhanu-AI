@@ -132,7 +132,7 @@ const App: React.FC = () => {
       </main>}
       {tab > 1 && eng && <PhoneBar eng={eng} s={st} />}
       {tab > 0 && <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
-        GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Demand engine by Fereshteh (forecast/demand_forecast.py); map, data pipeline and dashboard by GridSight. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
+        GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Built by the GridSight team. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
       </footer>}
       <BackToTop />
     </div>

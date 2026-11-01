@@ -66,7 +66,7 @@ export const Pencil: React.FC<{ eng: Engine; s: Settings; set: (p: Partial<Setti
                       <td key={c.ss.tar} className="py-1.5 pr-1 text-right">
                         {c.g === null ? <span className="text-muted text-xs">not within {target} yrs</span> : (
                           <button onClick={() => set({ ...l.p, stage: !!l.p.stage, cost: l.p.cost ?? s.cost, loan: l.p.loan ?? s.loan, tar: c.ss.tar, grant: c.g! })}
-                            className={`h-8 px-2 rounded-ctl tabular-nums hover:bg-surface-2 ${on ? 'ring-1 ring-ok text-ok font-medium' : c.g === 0 ? 'text-ok' : c.g <= ref ? 'text-fg' : 'text-warn'}`}>
+                            className={`px-1 tabular-nums hover:underline underline-offset-2 ${c.g <= ref ? 'text-ok' : 'text-warn'} ${on ? 'font-semibold' : ''}`}>
                             {c.g === 0 ? 'no grant' : `$${n0(c.g)}`}<span className="block text-[10px] text-muted font-normal">{c.g ? usd(c.g * cust) : 'works alone'}{c.pb !== null ? ` · back in ${c.pb.toFixed(1)} yrs` : ''}</span>
                           </button>)}
                       </td>);

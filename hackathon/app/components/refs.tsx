@@ -54,7 +54,7 @@ export const REFS: Record<string, Ref> = {
   mtf: { short: 'MTF', full: 'ESMAP / World Bank, Multi-Tier Framework for energy access', url: 'https://mtfenergyaccess.esmap.org/', feeds: 'Building-level model: household tiers' },
   who: { short: 'WHO et al. 2023', full: 'WHO, World Bank, IRENA, SEforALL (2023), Energizing Health', url: 'https://www.who.int/publications/i/item/9789240066960', feeds: 'Building-level model: health facility use' },
   amda: { short: 'AMDA', full: 'Africa Minigrid Developers Association, Benchmarking Africa’s Minigrids', url: 'https://africamda.org/', feeds: 'Building-level model: use per business' },
-  clearsky: { short: 'Clear-sky PV model (Fereshteh)', full: 'clearsky_pv.py, GridSight team (2026): Ineichen-Perez clear sky with pvlib Linke turbidity climatology, Perez transposition, Faiman cell temperature, PVWatts DC and inverter', url: 'https://pvlib-python.readthedocs.io/',
+  clearsky: { short: 'Clear-sky PV model (GridSight)', full: 'clearsky_pv.py, GridSight team (2026): Ineichen-Perez clear sky with pvlib Linke turbidity climatology, Perez transposition, Faiman cell temperature, PVWatts DC and inverter', url: 'https://pvlib-python.readthedocs.io/',
     feeds: 'Hourly solar curve for each month at each village, the shape behind the typical-day charts' },
   copdem: { short: 'Copernicus 30 m elevation', full: 'Copernicus DEM GLO-30 (ESA), AWS open data s3://copernicus-dem-30m', url: 'https://registry.opendata.aws/copernicus-dem/',
     feeds: 'Altitude of each village for the clear-sky model (41 m at Benichab to 2,120 m at Bulongwa)' },
@@ -76,7 +76,7 @@ export const REFS: Record<string, Ref> = {
     feeds: 'Planned: 24 mini-grids, 11,942 customers, 15-minute meter data; to add as nearby measured sites on a laptop (Zenodo is blocked from the build box)' },
   viirs: { short: 'VIIRS night lights', full: 'NOAA / Earth Observation Group, VIIRS nighttime lights', url: 'https://eogdata.mines.edu/products/vnl/', feeds: 'Planned: signal of existing activity (not loaded yet)' },
   gridfinder: { short: 'GridFinder', full: 'Arderne et al. (2020), GridFinder predicted grid lines', url: 'https://gridfinder.org/', feeds: 'Planned: grid lines where OpenStreetMap has none' },
-  engine: { short: 'Demand engine (Fereshteh)', full: 'demand_forecast.py and assumptions.yaml, GridSight team (2026)', feeds: 'Turns the inputs above into the 5-year forecast, drivers, sizing and tariff risk' },
+  engine: { short: 'Demand engine (GridSight)', full: 'demand_forecast.py and assumptions.yaml, GridSight team (2026)', feeds: 'Turns the inputs above into the 5-year forecast, drivers, sizing and tariff risk' },
   gsrough: { short: 'GridSight rough guide', full: 'GridSight rough guide by country (to replace with NASA POWER for each site)', feeds: 'Sun hours: Nigeria 4.6, Sierra Leone 4.8, Uganda 5.0, Tanzania 5.3, Kenya 5.4' },
   assumption: { short: 'assumption', full: 'Assumption: no published source found; check locally first', feeds: 'Buildings per household; share that connect by year 5; clinic and school use; business counts where the map is thin; brownout and idle thresholds; household size and growth outside Mauritania' },
 };

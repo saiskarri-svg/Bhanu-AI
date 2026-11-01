@@ -7,7 +7,7 @@ import { n0, n1 } from './format';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// Fereshteh's clear-sky curves, scaled by each month's measured weather, with
+// Clear-sky curves, scaled by each month's measured weather, with
 // the engine's hourly demand laid over them: what the battery must carry.
 export const DayCurves: React.FC<{ eng: Engine }> = ({ eng }) => {
   const p = eng.pvday;
@@ -59,7 +59,7 @@ export const DayCurves: React.FC<{ eng: Engine }> = ({ eng }) => {
       <div className="px-5 pb-5 pt-2 space-y-2">
         <button onClick={() => setAll(v => !v)} aria-expanded={all} className="text-xs text-muted hover:text-fg underline underline-offset-2 decoration-line">{all ? 'Show 4 months' : 'Show all 12 months'}</button>
         <Legend items={[{ label: 'Solar, typical weather', color: 'var(--sun)' }, { label: 'Solar, clear sky', color: 'var(--muted)' }, { label: 'Demand, year 5 (most likely)', color: 'var(--fg)' }]} />
-        <More label="How the curves are made"><p className="text-xs text-muted">Solar from Fereshteh's clear-sky model (Ineichen-Perez, Perez transposition, cell temperature, 14% system losses) at {n0(p.altitude_m)} m altitude (Copernicus 30 m elevation), tilt {p.tilt} degrees facing the equator, scaled each month by measured sunlight against clear sky (NASA POWER 2015 to 2024) and by dust on the panels. Demand: the engine's hourly profile. Rough guide; use the 8760 files in HOMER or REopt for detailed design.</p></More>
+        <More label="How the curves are made"><p className="text-xs text-muted">Solar from our clear-sky model (Ineichen-Perez, Perez transposition, cell temperature, 14% system losses) at {n0(p.altitude_m)} m altitude (Copernicus 30 m elevation), tilt {p.tilt} degrees facing the equator, scaled each month by measured sunlight against clear sky (NASA POWER 2015 to 2024) and by dust on the panels. Demand: the engine's hourly profile. Rough guide; use the 8760 files in HOMER or REopt for detailed design.</p></More>
         <Cite k={['clearsky', 'nasapower', 'copdem', 'engine']} />
       </div>
     </Box>

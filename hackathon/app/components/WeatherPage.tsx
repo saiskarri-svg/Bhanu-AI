@@ -196,7 +196,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
       <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         {wi && (
           <Box>
-            <BoxHeader title="What the weather changed in the model" meta="Fed into Fereshteh's engine (forecast/assumptions.yaml settings)" />
+            <BoxHeader title="What the weather changed in the model" meta="Fed into the demand engine (forecast/assumptions.yaml settings)" />
             <ul className="px-5 pb-5 space-y-2 text-sm">
               <li className="flex justify-between gap-3"><span className="text-muted">Sun hours used for sizing (third-worst month)</span><span className="tabular-nums">{n1(wi.peak_sun_hours)} kWh/m² a day</span></li>
               <li className="flex justify-between gap-3"><span className="text-muted">Share of sunlight that becomes power</span><span className="tabular-nums">{pc(wi.performance_ratio)}</span></li>

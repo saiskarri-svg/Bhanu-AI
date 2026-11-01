@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the demand engine (forecast/demand_forecast.py, by Fereshteh) on every
+"""Run the demand engine (forecast/demand_forecast.py, by GridSight team) on every
 GridSight site file and write one compact JSON per site for the dashboard.
 
 GridSight site file (buildings with map tags and nearby places)
@@ -215,7 +215,7 @@ def run(path):
                        for q in dfc.QUANTILES} for j, yr in enumerate(dfc.YEARS)}
     sect = fc.sector_table()
     out = dict(
-        site=path.stem, engine='demand_forecast.py (Fereshteh), 4,000 draws, seed 42',
+        site=path.stem, engine='demand_forecast.py (GridSight), 4,000 draws, seed 42',
         tariff=fc.tariff, peak_sun_hours=A['sizing']['peak_sun_hours'],
         landuse=dict(residential_buildings=res, mapped=counts, evidence_pct=s.evidence_pct),
         notes=fc.notes, business=fc.business_estimate,

@@ -1,4 +1,4 @@
-// Results from the demand engine (forecast/demand_forecast.py, by Fereshteh),
+// Results from the demand engine (forecast/demand_forecast.py),
 // precomputed for each village by pipeline/run_engine.py.
 
 export interface Q { year: number; p10: number; p50: number; p90: number }
