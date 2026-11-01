@@ -1,6 +1,6 @@
 import React from 'react';
 import { Area, Bar, BarChart, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from 'recharts';
-import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, monthTick } from './ui';
+import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, monthTick, More } from './ui';
 import type { SiteData } from './model';
 import type { Engine } from './engine';
 import { Cite } from './refs';
@@ -154,7 +154,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
               </ResponsiveChart>
             </div>
             <div className="px-5 pb-4"><Legend items={[{ label: 'Solar made, typical', color: 'var(--sun)' }, { label: 'Worst to best year', color: 'color-mix(in srgb, var(--sun) 30%, transparent)' }, { label: 'Demand, year 5', color: 'var(--fg)' }]} />
-              <p className="text-xs text-muted mt-2">Solar above demand charges the battery for the night; the battery covers evening use. Months where the band dips toward the dashed line are where brownouts come from.</p></div>
+              <More label="How to read this" className="mt-2"><p className="text-xs text-muted mt-2">Solar above demand charges the battery for the night; the battery covers evening use. Months where the band dips toward the dashed line are where brownouts come from.</p></More></div>
           </Box>
         )}
       </div>
@@ -187,7 +187,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
                 })}
               </tbody>
             </table>
-            <p className="text-xs text-muted mt-3 max-w-prose">Demand is the most likely year-5 forecast; the P25 system is built for less than that, so it falls short most often. A short day is one with more than 10% of the day's use unserved. This uses daily totals and the engine's battery size, a rough guide; the hourly files in forecast/ go into HOMER or REopt for detailed design.</p>
+            <More label="How to read this" className="mt-3"><p className="text-xs text-muted mt-3 max-w-prose">Demand is the most likely year-5 forecast; the P25 system is built for less than that, so it falls short most often. A short day is one with more than 10% of the day's use unserved. This uses daily totals and the engine's battery size, a rough guide; the hourly files in forecast/ go into HOMER or REopt for detailed design.</p></More>
             <Cite className="mt-2" k={['nasapower', 'engine', 'cmip6']} />
           </div>
         </Box>
@@ -223,7 +223,7 @@ export const WeatherPage: React.FC<{ site: SiteData; siteId: string; eng?: Engin
                   ))}
                 </tbody>
               </table>
-              <p className="text-xs text-muted mt-3">Models change the sunlight reaching the ground through clouds and aerosols; warming adds heat loss. Small next to year-to-year swings, so the 10-year history above carries most of the risk.</p>
+              <More label="How climate models change it" className="mt-3"><p className="text-xs text-muted mt-3">Models change the sunlight reaching the ground through clouds and aerosols; warming adds heat loss. Small next to year-to-year swings, so the 10-year history above carries most of the risk.</p></More>
             </div>
           </Box>
         )}

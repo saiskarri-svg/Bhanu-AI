@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxHeader, StatusDot } from './ui';
+import { Box, BoxHeader, StatusDot, More } from './ui';
 import type { Engine } from './engine';
 import { n0, n1, pc } from './format';
 
@@ -55,12 +55,12 @@ export const NearbyBox: React.FC<{ eng: Engine; name: string }> = ({ eng, name }
               </div>
               <div className="text-sm text-muted space-y-2 min-w-0">
                 <p>Every number in GridSight for {name} uses this adjustment: about <span className="text-fg tabular-nums">{n0(c[0].p50)} kWh a day</span> in year 1 and <span className="text-fg tabular-nums">{n0(c[4].p50)}</span> by year 5, against {n0(e[0].p50)} and {n0(e[4].p50)} from the published ranges alone. Sizing and tariffs follow.</p>
-                <p>{Math.abs(move) < 0.05 ? 'The nearby data barely moves the forecast.' : move > 0 ? `Nearby sites use more than the model expects, so the forecast moves up ${pc(move)}.` : `Nearby sites use less than the model expects, so the forecast moves down ${pc(-move)}.`} Each site's weight falls with distance, data quality and how exactly it is located, and the published ranges count as one good site, so a single weak nearby number cannot swing the answer.</p>
+                <More label="How the nearby sites move it"><p>{Math.abs(move) < 0.05 ? 'The nearby data barely moves the forecast.' : move > 0 ? `Nearby sites use more than the model expects, so the forecast moves up ${pc(move)}.` : `Nearby sites use less than the model expects, so the forecast moves down ${pc(-move)}.`} Each site's weight falls with distance, data quality and how exactly it is located, and the published ranges count as one good site, so a single weak nearby number cannot swing the answer.</p></More>
               </div>
             </div>
           </>
         )}
-        <p className="text-[11px] text-muted">Sites are listed in pipeline/measured_sites.csv with their sources. Add rows from partner operators or from the Kenya and Nigeria smart-meter dataset (24 mini-grids, 11,942 customers, on Zenodo) and run pipeline/run_engine.py.</p>
+        <More label="Add more measured sites"><p className="text-[11px] text-muted">Sites are listed in pipeline/measured_sites.csv with their sources. Add rows from partner operators or from the Kenya and Nigeria smart-meter dataset (24 mini-grids, 11,942 customers, on Zenodo) and run pipeline/run_engine.py.</p></More>
       </div>
     </Box>
   );
@@ -83,9 +83,9 @@ export const FootprintBox: React.FC<{ eng?: Engine; total: number; coverage?: { 
           <li key={k} className="flex justify-between gap-3"><span>{SRC_LABEL[k] ?? k}</span><span className="tabular-nums text-muted">{n0(v)} ({pc(v / Math.max(1, total))})</span></li>
         ))}
       </ul>
-      <p className="text-xs text-muted leading-relaxed">
+      <More label="How old are the pictures?"><p className="text-xs text-muted leading-relaxed">
         Typical record date {a.data_year ?? 'unknown'}. Pictures may be older than that, and villages grow. At {pc(a.growth)} household growth a year, the model adds about {n0(a.residential_now - a.residential_seen)} homes built since ({n0(a.residential_seen)} seen, {n0(a.residential_now)} used). Dates are when each source last updated its record, not the photo date.
-      </p>
+      </p></More>
     </div>
   );
 };

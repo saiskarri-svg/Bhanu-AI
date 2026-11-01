@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxHeader, StatStrip, btn } from './ui';
+import { Box, BoxHeader, StatStrip, btn, More } from './ui';
 import { SiteMap } from './SiteMap';
 import type { Building, ClassSummary, SiteData } from './model';
 import { CLASSES, CLS_LABEL } from './model';
@@ -109,9 +109,9 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
                   </div>
                 );
               })}
-              <p className="text-xs text-muted leading-relaxed pt-1">
+              <More label="How the classes are worked out"><p className="text-xs text-muted leading-relaxed pt-1">
                 Numbers add up each building's chance of being that class; brackets show the likely range. Map colours show each building's most likely class. Untagged buildings are classed by size, shape, road frontage and how crowded the spot is. It is an estimate, never more than 85% sure.
-              </p>
+              </p></More>
             </div>
           </Box>
           {eng?.age && (
@@ -143,13 +143,13 @@ export const SitePage: React.FC<{ site: SiteData; buildings: Building[]; sum: Cl
           })()}
           <Box>
             <BoxHeader title="Where the data comes from" />
-            <ul className="px-5 pb-5 text-sm space-y-2 text-muted">
+            <More label="Show data sources" className="px-5 pb-5"><ul className="text-sm space-y-2 text-muted">
               <li><span className="text-fg">Footprints:</span> Overture's merged set of Google Open Buildings, Microsoft ML Buildings and OpenStreetMap (duplicates removed), plus Google buildings with 70% or more confidence that the others miss. Area is the footprint, not floor space.</li>
               <li><span className="text-fg">Tags, places, roads, power lines:</span> Overture Maps (includes OpenStreetMap). Footprint sources here: {Object.entries(obs).map(([k, v]) => `${k} ${n0(Number(v))}`).join(', ')}.</li>
               <li><span className="text-fg">Night light:</span> {site.viirs != null ? `${site.viirs.toFixed(2)} nW/cm²/sr (VIIRS)` : 'not loaded in this prototype, so local spending power stays a wide range.'}</li>
               {plant && <li><span className="text-fg">Existing mini-grid:</span> OpenStreetMap shows a solar plant "{plant.name ?? 'unnamed'}" {plant.output ? `rated ${plant.output}` : ''} {Math.round(plant.d_km * 1000)} m from the centre. See Validation.</li>}
               <li><span className="text-fg">Fetched:</span> {site.fetched}</li>
-            </ul>
+            </ul></More>
           </Box>
           <button onClick={onNext} className={`${btn.primary} w-full h-11`}>Estimate demand for {site.name}</button>
         </div>

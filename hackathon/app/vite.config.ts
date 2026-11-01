@@ -9,7 +9,7 @@ export default defineConfig(() => {
         host: '0.0.0.0',
       },
       base: './',
-      build: { assetsInlineLimit: 100_000_000 },
+      build: { assetsInlineLimit: 100_000_000, rollupOptions: { output: { inlineDynamicImports: true } } },
       plugins: [react()],
       resolve: {
         alias: {

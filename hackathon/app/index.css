@@ -276,3 +276,4 @@ html { scroll-padding-top: 120px; }
 .reveal { opacity: 1; }
 .tab-ink { transition: transform .25s ease, width .25s ease; }
 .shimmer { background: var(--surface-2); }
+.rounded-box h3[id] { scroll-margin-top: 88px; }

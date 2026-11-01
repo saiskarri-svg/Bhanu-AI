@@ -224,6 +224,17 @@ export const BackToTop: React.FC = () => {
   );
 };
 
+// Folded detail: a one-line toggle that opens the longer explanation
+export const More: React.FC<{ label?: string; className?: string; children: React.ReactNode }> = ({ label = 'Why?', className = '', children }) => (
+  <details className={`group ${className}`}>
+    <summary className="list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1 text-xs text-muted hover:text-fg cursor-pointer select-none">
+      <svg className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      {label}
+    </summary>
+    <div className="mt-2">{children}</div>
+  </details>
+);
+
 export const BoxHeader: React.FC<{ title: string; meta?: React.ReactNode }> = ({ title, meta }) => (
   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 pt-4 pb-1">
     <h3 className="text-[15px] font-semibold text-fg whitespace-nowrap">{title}</h3>
@@ -261,7 +272,7 @@ export const StatStrip: React.FC<{ stats: Stat[]; cols?: 3 | 4; className?: stri
           <span className="font-display font-semibold text-[28px] leading-none text-fg tabular-nums truncate"><CountUp value={s.value} /></span>
           {s.unit && <span className="text-xs text-muted whitespace-nowrap">{s.unit}</span>}
         </p>
-        {s.note && <p className="mt-2 text-xs text-muted leading-relaxed">{s.note}</p>}
+        {s.note && <div className="mt-2 text-xs text-muted leading-relaxed">{s.note}</div>}
       </div>
     ))}
   </div>

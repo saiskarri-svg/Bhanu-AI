@@ -1,6 +1,6 @@
 import React from 'react';
 import { Area, CartesianGrid, Line, ComposedChart, Tooltip, XAxis, YAxis, Bar, BarChart } from 'recharts';
-import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, btn } from './ui';
+import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, btn, More } from './ui';
 import type { Estimate, SiteData } from './model';
 import type { Engine } from './engine';
 import { Cite, DRIVER_SRC } from './refs';
@@ -145,9 +145,9 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
           <ol className="space-y-3">
             {drv.map((d, i) => (
               <li key={d.input} className="grid gap-x-6 gap-y-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-center">
-                <p className="text-sm text-fg min-w-0"><span className="text-muted tabular-nums mr-2">{i + 1}</span>{d.label}
+                <div className="text-sm text-fg min-w-0"><span className="text-muted tabular-nums mr-2">{i + 1}</span>{d.label}
                   <span className="block text-xs text-muted ml-5">{d.effect.replace('->', 'means')}</span>
-                  <Cite className="ml-5" k={DRIVER_SRC[d.input] ?? ['assumption']} /></p>
+                  <Cite className="ml-5" k={DRIVER_SRC[d.input] ?? ['assumption']} /></div>
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex-1 h-3 rounded-sm bg-surface-2 overflow-hidden"><div className="h-full rounded-sm" style={{ width: `${(d.share_of_uncertainty / maxShare) * 100}%`, background: 'color-mix(in srgb, var(--sun) 65%, transparent)' }} /></div>
                   <span className="text-sm tabular-nums w-10 text-right">{pc(d.share_of_uncertainty)}</span>
@@ -167,7 +167,7 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
         <Box>
           <BoxHeader title="What the map gave the model" meta={`${eng.landuse.evidence_pct}% of buildings carry a use tag`} />
           <div className="px-5 pb-5 overflow-x-auto">
-            <table className="w-full text-sm tabular-nums">
+            <More label="Show what was mapped, by type"><table className="w-full text-sm tabular-nums">
               <thead><tr className="text-left text-xs text-muted border-b border-line"><th className="py-2 pr-4 font-normal">Type</th><th className="py-2 pr-4 font-normal text-right">Mapped</th><th className="py-2 font-normal text-right">Used (P10 to P90)</th></tr></thead>
               <tbody>
                 <tr className="border-b border-line/60"><td className="py-1.5 pr-4">Residential buildings</td><td className="py-1.5 pr-4 text-right">{n0(eng.landuse.residential_buildings)}</td><td className="py-1.5 text-right text-muted">{n0(S.households[0].p10)} to {n0(S.households[0].p90)} households</td></tr>
@@ -175,7 +175,7 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
                   <tr key={k} className="border-b border-line/60"><td className="py-1.5 pr-4">{b.label}</td><td className="py-1.5 pr-4 text-right">{n0(b.mapped)}</td><td className="py-1.5 text-right text-muted">{n1(b.p10)} to {n1(b.p90)}</td></tr>
                 ))}
               </tbody>
-            </table>
+            </table></More>
             <p className="text-xs text-muted mt-3 leading-relaxed">Where few buildings are tagged, shops, schools and clinics come from regional averages per household; mapped counts are used where higher. Check them on site.</p>
             <Cite className="mt-2" k={['openbuildings', 'overture', 'omorate', 'assumption']} />
           </div>
@@ -184,13 +184,13 @@ export const DemandPage: React.FC<{ site: SiteData; eng: Engine; est: Estimate; 
           <BoxHeader title="Second opinion" meta="Two models, built separately" />
           <div className="px-5 pb-5 text-sm space-y-3">
             <p className="text-muted">GridSight's building-level model classes every roof and assumes most homes connect in year 1. It gives <span className="text-fg tabular-nums">{n0(ours.p10 / 30)} to {n0(ours.p90 / 30)} kWh a day</span> for year 1.</p>
-            <p className="text-muted">The demand engine follows the connection pace measured at the Faza mini-grid in Kenya, so year 1 starts lower ({n0(e1.p10)} to {n0(e1.p90)}) and grows faster. By year 5 the building model says {n0(ours5.p10 / 30)} to {n0(ours5.p90 / 30)} kWh a day and the engine {n0(e5.p10)} to {n0(e5.p90)}.</p>
+            <More label="How the two models differ"><p className="text-muted">The demand engine follows the connection pace measured at the Faza mini-grid in Kenya, so year 1 starts lower ({n0(e1.p10)} to {n0(e1.p90)}) and grows faster. By year 5 the building model says {n0(ours5.p10 / 30)} to {n0(ours5.p90 / 30)} kWh a day and the engine {n0(e5.p10)} to {n0(e5.p90)}.</p></More>
             <Cite k={['esmap', 'mtf', 'who', 'amda', 'assumption']} label="Building-level model" />
             <p className="text-xs text-muted">Demand engine by Fereshteh (forecast/demand_forecast.py); every input and its source in forecast/assumptions.yaml, and listed on the Method tab.</p>
           </div>
         </Box>
       </div>
-      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: growth, size and tariff</button></div>
+      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: size and fund</button></div>
     </>
   );
 };

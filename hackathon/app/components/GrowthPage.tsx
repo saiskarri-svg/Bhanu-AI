@@ -1,6 +1,7 @@
 import React from 'react';
+import type { Settings } from './settings';
 import { Area, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
-import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn } from './ui';
+import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatStrip, StatusDot, btn, More } from './ui';
 import type { SiteData } from './model';
 import type { Engine } from './engine';
 import { kwpFor } from './engine';
@@ -14,9 +15,9 @@ const STORY = [
   { y: 'Years 4 to 5', t: 'Appliance buying follows an S-curve and slows. New mills and workshops arrive one at a time; they decide the daytime load.' },
 ];
 
-export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => void }> = ({ site, eng, onNext }) => {
+export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; s: Settings; set: (p: Partial<Settings>) => void; onNext: () => void }> = ({ site, eng, s, set, onNext }) => {
   const S = eng.summary;
-  const [pick, setPick] = React.useState(1); // index into designs, P50 by default
+  const pick = s.di, setPick = (i: number) => set({ di: i }); // shared site setting
   const d = eng.designs[pick];
   const risk = eng.risk.filter(r => r.design === d.design);
   const r5 = risk.find(r => r.year === 5)!, r2 = risk.find(r => r.year === 2)!;
@@ -152,7 +153,7 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-muted mt-3 leading-relaxed">A higher tariff lowers use (price elasticity -0.1 to -0.8; in Sierra Leone a 41% tariff cut raised use by about 50%) but raises revenue per kWh. Households spend $5 to $20 a month today on candles, kerosene, batteries and diesel (ESMAP 2022).</p>
+            <More label="How the tariff changes use" className="mt-3"><p className="text-xs text-muted mt-3 leading-relaxed">A higher tariff lowers use (price elasticity -0.1 to -0.8; in Sierra Leone a 41% tariff cut raised use by about 50%) but raises revenue per kWh. Households spend $5 to $20 a month today on candles, kerosene, batteries and diesel (ESMAP 2022).</p></More>
             <Cite className="mt-2" k={['sltariff', 'esmap', 'omorate']} />
           </div>
         </Box>
@@ -166,11 +167,11 @@ export const GrowthPage: React.FC<{ site: SiteData; eng: Engine; onNext: () => v
           </ul>
         </Box>
       </div>
-      <p className="text-xs text-muted">
+      <More label="Where the costs come from"><p className="text-xs text-muted">
         Costs: Omorate mini-grid, Ethiopia, 2021 contract prices (Wassie and Ahlgren 2023), generation only plus a share for distribution and soft costs. Likely above today's prices: replace with current quotes before quoting dollars. Grants and subsidies are not included.
         {plantKw ? ` Solar for the most likely demand: year 1 about ${n0(kwpFor(S.energy_kwh_per_day[0].p50, eng.peak_sun_hours))} kWp, year 3 about ${n0(kwpFor(S.energy_kwh_per_day[2].p50, eng.peak_sun_hours))} kWp.` : ''}
-      </p>
-      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: sun and weather</button></div>
+      </p></More>
+      <div className="flex justify-end"><button onClick={onNext} className={`${btn.primary} h-11 px-6`}>Next: funding</button></div>
     </>
   );
 };

@@ -29,7 +29,7 @@ export const SharingPage: React.FC = () => (
       <BoxHeader title="Sharing meter data safely" meta="A proposal for operators, lenders and regulators" />
       <div className="px-5 pb-5">
         <p className="text-sm text-muted max-w-prose">
-          Every developer starts from scratch because metered use sits in private systems. A few hundred sites, shared as monthly totals, would let GridSight learn real ranges and tell lenders how often it is right. This is how operators could share without exposing customers or giving away their business.
+          A few hundred sites sharing monthly totals would let GridSight learn real ranges. Six rules keep customers and business data safe.
         </p>
         <ol className="mt-5 grid gap-x-8 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
           {STEPS.map((s, i) => (

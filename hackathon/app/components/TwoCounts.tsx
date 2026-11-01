@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxHeader } from './ui';
+import { Box, BoxHeader, More } from './ui';
 import type { Engine } from './engine';
 import type { SiteData } from './model';
 import { Cite } from './refs';
@@ -29,7 +29,8 @@ export const TwoCounts: React.FC<{ eng: Engine; site: SiteData }> = ({ eng, site
     <Box>
       <BoxHeader title="Two ways to count households" meta="Same engine, same assumptions; only the household count differs" />
       <div className="px-5 pb-5">
-        <div className="overflow-x-auto">
+        <p className="text-sm text-muted max-w-prose">Roofs give <span className="text-fg tabular-nums">{n0(hhR)}</span> households in year 1, Meta's population map <span className="text-fg tabular-nums">{n0(hhM)}</span> ({ratio >= 1 ? `${n1(ratio)} times fewer` : `${n1(1 / ratio)} times more`}). Switch between them with "Households from" above.</p>
+        <More label="Compare every number" className="mt-2"><div className="overflow-x-auto">
           <table className="w-full text-sm tabular-nums min-w-[560px]">
             <thead><tr className="text-left text-xs text-muted border-b border-line">
               <th className="py-2 pr-3 font-normal w-[30%]"></th>
@@ -44,11 +45,11 @@ export const TwoCounts: React.FC<{ eng: Engine; site: SiteData }> = ({ eng, site
               ))}
             </tbody>
           </table>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 text-sm">
+        </div></More>
+        <More label="Why the two counts differ, and how to settle it" className="mt-4"><div className="mt-4 grid gap-4 md:grid-cols-2 text-sm">
           <p className="text-muted"><span className="text-fg font-medium">Why they differ.</span> Roofs count every building, divided by 1 to 2.5 buildings per home; recent pictures catch new houses. Meta's map spreads census counts over detected buildings, and censuses can be years old, so fast-growing villages come out low. Here the roof count gives {ratio >= 1 ? `${n1(ratio)} times as many` : `${n1(1 / ratio)} times fewer`} households.</p>
           <p className="text-muted"><span className="text-fg font-medium">How to settle it.</span> One day counting households on the ground decides between them; it is also the input that moves the forecast most. {plantKw ? `At ${site.name} the built ${n0(plantKw)} kWp plant sits ${plantKw > Math.min(p50.pv_kwp, b.p50_design.pv_kwp) && plantKw < Math.max(p50.pv_kwp, b.p50_design.pv_kwp) ? 'between' : 'outside'} the two year-5 sizes.` : 'Until then, a staged build that starts near the lower answer limits the risk either way.'}</p>
-        </div>
+        </div></More>
         <Cite className="mt-3" k={['openbuildings', 'overture', 'metahrsl', 'engine']} />
       </div>
     </Box>

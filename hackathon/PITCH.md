@@ -22,10 +22,10 @@ Fereshteh's engine runs 4,000 futures: households connect at the pace measured a
 
 Ten years of real weather: Gbamu Gbamu has 90 cloudy, 131 rainy and 143 dusty days a year; Benichab in Mauritania loses 10% to heat and 6% to dust. Fereshteh's clear-sky model, scaled by that weather, gives the solar curve for every month, and the demand on top shows what the battery must carry each evening. Climate models change it by only about 2% this decade.
 
-**2:05 to 2:35. Step 4: size and tariff** (screen: Growth and money, "How wrong can we be?")
+**2:05 to 2:35. Step 4: size and tariff** (screen: Money tab, "How wrong can we be?", then Funding: grant, 24-month cash and the concept note)
 
 Build for the median year-5 forecast and there is about a 30% chance of brownouts by year 5, yet a 96% chance it sits more than 40% idle in year 2. So build in stages. At Gbamu Gbamu, year-2 demand needs about 84 kWp; the plant actually built there is 85. At 85 cents a kWh, costs are covered in seven to nine futures out of ten, for a household bill of $5 to $8 a month, inside what families already spend on kerosene and batteries.
 
-**2:35 to 3:00. Step 5: check it and share data** (screen: Validation, then Data sharing)
+**2:35 to 3:00. Step 5: check it and share data** (screen: Trust tab: Checks, then Data sharing)
 
 We scored our building classes on 2,225 volunteer-tagged buildings in 84 villages it had never seen, and we show where it falls short. Six villages, six countries, open data only, on a laptop. The missing piece is meter data, so we propose a data trust: operators share monthly site totals, never customer rows, and get a better model back. Fewer oversized grids, fewer brownouts, faster finance. That is GridSight.

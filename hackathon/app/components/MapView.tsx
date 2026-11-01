@@ -4,6 +4,7 @@ import { CLS_LABEL } from './model';
 import type { Engine } from './engine';
 import { ENGINE } from './engine';
 import { SITES, FLAG } from './sites';
+import type { Settings } from './settings';
 import { btn, StatusDot } from './ui';
 import { n0, n1, pc, usd } from './format';
 import { Map3D } from './Map3D';
@@ -78,8 +79,8 @@ const Gauge: React.FC<{ value: number; lo: number; hi: number }> = ({ value, lo,
 
 interface Callout { key: string; x: number; y: number; label: string; value: string; unit: string; note: string; color: string }
 
-export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: Engine; siteId: string; onPick: (id: string) => void; goTab: (t: number) => void }> =
-  ({ site, buildings, eng, siteId, onPick, goTab }) => {
+export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: Engine; siteId: string; onPick: (id: string) => void; goTab: (t: number, sub?: string) => void; st: Settings; set: (p: Partial<Settings>) => void }> =
+  ({ site, buildings, eng, siteId, onPick, goTab, st, set }) => {
     const box = React.useRef<HTMLDivElement>(null);
     const { w: W, h: H } = useSize(box);
     const wide = W >= 1024;
@@ -135,10 +136,8 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     }, [eng, buildings, plant, proj]);
 
     // Site settings (right panel)
-    const [yr, setYr] = React.useState(5);
-    const [di, setDi] = React.useState(1);
-    const [hh, setHh] = React.useState<'roofs' | 'meta'>('roofs');
-    const [tar, setTar] = React.useState(0.85);
+    const { yr, di, hh, tar } = st;
+    const setYr = (v: number) => set({ yr: v }), setDi = (v: number) => set({ di: v }), setHh = (v: 'roofs' | 'meta') => set({ hh: v }), setTar = (v: number) => set({ tar: v });
     const meta = hh === 'meta' && !!eng?.by_population;
     const B = eng?.by_population;
     const S = eng?.summary;

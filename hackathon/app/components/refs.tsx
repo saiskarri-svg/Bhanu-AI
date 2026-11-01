@@ -68,20 +68,30 @@ export const REFS: Record<string, Ref> = {
 };
 
 // Inline "Source:" line under a modelled number
-export const Cite: React.FC<{ k: string[]; className?: string; label?: string }> = ({ k, className = '', label = 'Source' }) => (
-  <span className={`block text-[11px] leading-snug text-muted ${className}`}>
-    {label}:{' '}
-    {k.map((key, i) => {
-      const r = REFS[key];
-      if (!r) return null;
-      const body = key === 'assumption'
-        ? <span className="text-warn">assumption</span>
-        : r.url ? <a href={r.url} target="_blank" rel="noreferrer" title={r.full} className="underline decoration-line underline-offset-2 hover:text-fg">{r.short}</a>
-          : <span title={r.full}>{r.short}</span>;
-      return <React.Fragment key={key}>{i > 0 && ' · '}{body}</React.Fragment>;
-    })}
-  </span>
-);
+export const Cite: React.FC<{ k: string[]; className?: string; label?: string }> = ({ k, className = '', label = 'Source' }) => {
+  const keys = k.filter(key => REFS[key]);
+  const real = keys.filter(key => key !== 'assumption');
+  const assumed = keys.includes('assumption');
+  const sum = [real.length ? `${label === 'Source' ? '' : label + ': '}${real.length} source${real.length > 1 ? 's' : ''}` : label === 'Source' ? '' : label, assumed ? 'assumption' : ''].filter(Boolean);
+  return (
+    <details className={`group block text-[11px] leading-snug text-muted ${className}`}>
+      <summary className="list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1.5 h-5 px-1.5 -ml-1.5 rounded-ctl cursor-pointer select-none hover:text-fg hover:bg-surface-2">
+        <svg className="h-2.5 w-2.5 shrink-0 transition-transform group-open:rotate-90" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        {sum.map((t, i) => <span key={t} className={t === 'assumption' ? 'text-warn' : ''}>{i > 0 && <span className="text-muted"> · </span>}{t}</span>)}
+      </summary>
+      <span className="block mt-1 pl-1">
+        {keys.map((key, i) => {
+          const r = REFS[key];
+          const body = key === 'assumption'
+            ? <span className="text-warn">assumption: no published source found</span>
+            : r.url ? <a href={r.url} target="_blank" rel="noreferrer" title={r.full} className="underline decoration-line underline-offset-2 hover:text-fg">{r.short}</a>
+              : <span title={r.full}>{r.short}</span>;
+          return <React.Fragment key={key}>{i > 0 && ' · '}{body}</React.Fragment>;
+        })}
+      </span>
+    </details>
+  );
+};
 
 // Sources behind each driver the engine reports
 export const DRIVER_SRC: Record<string, string[]> = {

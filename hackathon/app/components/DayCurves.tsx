@@ -1,6 +1,6 @@
 import React from 'react';
 import { Area, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatusDot } from './ui';
+import { Box, BoxHeader, ResponsiveChart, axisProps, CHART, TooltipCard, Legend, StatusDot, More } from './ui';
 import type { Engine } from './engine';
 import { Cite } from './refs';
 import { n0, n1 } from './format';
@@ -14,14 +14,18 @@ export const DayCurves: React.FC<{ eng: Engine }> = ({ eng }) => {
   if (!p) return null;
   const ymax = Math.ceil(Math.max(...p.months.flatMap(m => [...m.clear, ...m.demand])) * 1.08);
   const worst = p.months.reduce((a, m) => (m.battery_need_kwh > a.battery_need_kwh ? m : a), p.months[0]);
+  const [all, setAll] = React.useState(false);
+  // Default: the worst month for the battery plus the other three seasons
+  const pick = [...new Set([worst.month, 1, 4, 7, 10].map(m => m))].slice(0, 4).sort((a, b) => a - b);
+  const shown = all ? p.months : p.months.filter(m => pick.includes(m.month));
   return (
     <Box>
-      <BoxHeader title="A typical day in each month" meta={`P50 system: ${n0(p.pv_kwp)} kWp, battery ${n0(p.battery_kwh)} kWh (${n0(p.battery_usable_kwh)} usable); year-5 demand; local time (${p.tz})`} />
+      <BoxHeader title={all ? "A typical day in each month" : "A typical day, four months"} meta={`P50 system: ${n0(p.pv_kwp)} kWp, battery ${n0(p.battery_kwh)} kWh (${n0(p.battery_usable_kwh)} usable); year-5 demand; local time (${p.tz})`} />
       <div className="px-5 pb-2">
         <p className="text-sm text-muted max-w-prose">Midday sun beyond what people use charges the battery; everything under the demand line outside the yellow is carried by the battery, mostly in the evening. The battery is busiest in {MONTHS[worst.month - 1]}: {n0(worst.battery_need_kwh)} kWh of {n0(p.battery_usable_kwh)} usable.</p>
       </div>
-      <div className="px-3 pb-2 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-2 gap-y-3">
-        {p.months.map(m => {
+      <div className="px-3 pb-2 grid grid-cols-2 xl:grid-cols-4 gap-x-2 gap-y-3">
+        {shown.map(m => {
           const data = m.solar.map((s, h) => ({ h, s, c: m.clear[h], d: m.demand[h] }));
           return (
             <figure key={m.month} className="min-w-0">
@@ -53,8 +57,9 @@ export const DayCurves: React.FC<{ eng: Engine }> = ({ eng }) => {
         })}
       </div>
       <div className="px-5 pb-5 pt-2 space-y-2">
+        <button onClick={() => setAll(v => !v)} aria-expanded={all} className="text-xs text-muted hover:text-fg underline underline-offset-2 decoration-line">{all ? 'Show 4 months' : 'Show all 12 months'}</button>
         <Legend items={[{ label: 'Solar, typical weather', color: 'var(--sun)' }, { label: 'Solar, clear sky', color: 'var(--muted)' }, { label: 'Demand, year 5 (most likely)', color: 'var(--fg)' }]} />
-        <p className="text-xs text-muted">Solar from Fereshteh's clear-sky model (Ineichen-Perez, Perez transposition, cell temperature, 14% system losses) at {n0(p.altitude_m)} m altitude (Copernicus 30 m elevation), tilt {p.tilt} degrees facing the equator, scaled each month by measured sunlight against clear sky (NASA POWER 2015 to 2024) and by dust on the panels. Demand: the engine's hourly profile. Rough guide; use the 8760 files in HOMER or REopt for detailed design.</p>
+        <More label="How the curves are made"><p className="text-xs text-muted">Solar from Fereshteh's clear-sky model (Ineichen-Perez, Perez transposition, cell temperature, 14% system losses) at {n0(p.altitude_m)} m altitude (Copernicus 30 m elevation), tilt {p.tilt} degrees facing the equator, scaled each month by measured sunlight against clear sky (NASA POWER 2015 to 2024) and by dust on the panels. Demand: the engine's hourly profile. Rough guide; use the 8760 files in HOMER or REopt for detailed design.</p></More>
         <Cite k={['clearsky', 'nasapower', 'copdem', 'engine']} />
       </div>
     </Box>

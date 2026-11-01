@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxHeader, StatusDot } from './ui';
+import { Box, BoxHeader, StatusDot, More } from './ui';
 import type { Cls, RawBuilding, SiteData } from './model';
 import { CLASSES, CLS_LABEL, classify } from './model';
 import type { Engine } from './engine';
@@ -36,9 +36,9 @@ const ClassCheck: React.FC = () => {
   if (!HOLD || !res) return <p className="px-5 pb-5 text-sm text-muted">Held-out test set not built yet. Run pipeline/holdout_tags.py.</p>;
   return (
     <div className="px-5 pb-5 space-y-4">
-      <p className="text-sm text-muted max-w-prose">
+      <More label="About this test"><p className="text-sm text-muted max-w-prose">
         {n0(res.n)} buildings that OpenStreetMap volunteers tagged as a home, shop, school, clinic or other use ({n0(HOLD.buildings.length - res.n)} more carry tags such as "roof" that name no use and are left out), in {HOLD.villages.length} villages across Nigeria, Sierra Leone, Kenya, Uganda and Tanzania that are not among the sample sites. We hide the tag, classify each building from its footprint and surroundings only, and compare.
-      </p>
+      </p></More>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="min-w-0 overflow-x-auto">
           <p className="text-xs text-muted mb-2">Tagged as (rows) against our estimate (columns)</p>
@@ -64,7 +64,7 @@ const ClassCheck: React.FC = () => {
           </ul>
           <p className="text-sm text-fg leading-relaxed">What we learned: shape rules find homes well but miss most shops, schools and clinics. Those need map tags, the place list, or a model trained on tagged villages like these (next step). Until then the demand range carries this doubt.</p>
           <Cite k={['overture']} label="Tagged buildings" />
-          <p className="text-xs text-muted leading-relaxed">Caveat: volunteers tag clinics and schools more often than ordinary houses, so this set has more of them than a real village. Footprints here are OSM polygons, not Open Buildings.</p>
+          <More label="Caveat"><p className="text-xs text-muted leading-relaxed">Caveat: volunteers tag clinics and schools more often than ordinary houses, so this set has more of them than a real village. Footprints here are OSM polygons, not Open Buildings.</p></More>
         </div>
       </div>
     </div>

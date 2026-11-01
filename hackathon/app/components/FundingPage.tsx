@@ -1,5 +1,8 @@
 import React from 'react';
-import { Box, BoxHeader, StatusDot, StatStrip, type Tone } from './ui';
+import { derive, type Settings } from './settings';
+import { CashFlow } from './CashFlow';
+import { conceptNote } from './conceptNote';
+import { Box, BoxHeader, More, StatusDot, StatStrip, type Tone } from './ui';
 import type { Engine } from './engine';
 import type { SiteData } from './model';
 
@@ -67,19 +70,20 @@ const SchemeList: React.FC<{ items: Scheme[] }> = ({ items }) => (
         </div>
         <div className="min-w-0 text-sm space-y-1">
           <p>{s.what}</p>
-          <p className="text-xs text-muted"><span className="text-fg">Fit:</span> {s.fit}</p>
-          <p className="text-xs text-muted"><span className="text-fg">Status:</span> {s.status}</p>
+          <More label="Fit and status"><div className="text-xs text-muted space-y-1"><p><span className="text-fg">Fit:</span> {s.fit}</p><p><span className="text-fg">Status:</span> {s.status}</p></div></More>
         </div>
       </li>
     ))}
   </ul>
 );
 
-export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: number) => void }> = ({ site, eng, goTab }) => {
+export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; s: Settings; goTab: (t: number, sub?: string) => void }> = ({ site, eng, s: st, goTab }) => {
   const cc = site.country;
   const local = COUNTRY[cc] ?? [];
-  const p50 = eng?.designs.find(d => d.design.startsWith('P50'));
-  const cust = eng?.summary.customers[4].p50 ?? 0;
+  const dv = derive(eng, st);
+  const p50 = dv.des ? { ...dv.des, capex_per_customer_usd: dv.des.capex_usd / Math.max(1, dv.CU?.[4].p50 ?? 1) } : undefined;
+  const cust = dv.CU?.[4].p50 ?? 0;
+  const sz = dv.des?.design.split(' ')[0] ?? 'P50';
   const [rate, setRate] = React.useState(433);
   const grant = cust * rate;
   const share = p50 ? grant / p50.capex_usd : 0;
@@ -92,7 +96,8 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: nu
     { t: 'System tiers: panels, inverter, battery', tone: 'ok', state: 'Four sizes with kWp, kWh, inverter kW and build cost', tab: 3 },
     { t: 'Customer affordability', tone: 'ok', state: 'Household bill and chance of covering cost at four tariffs', tab: 3 },
     { t: 'Weather risk to output', tone: 'ok', state: 'Ten real weather years and climate-model outlook', tab: 4 },
-    { t: '12 to 24 month cash flow', tone: 'warn', state: 'Yearly cost and demand are here; a monthly cash flow is not built yet' },
+    { t: '12 to 24 month cash flow', tone: 'ok', state: 'First 24 months above, for the chosen system, tariff and grant' },
+    { t: '2-page concept note', tone: 'ok', state: 'Download below, built from these numbers' },
     { t: 'Installation and maintenance partners', tone: 'muted', state: 'From the developer; not something GridSight can supply' },
     { t: 'Track record and audited accounts', tone: 'muted', state: 'From the developer' },
   ];
@@ -102,12 +107,11 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: nu
       <Box>
         <BoxHeader title="Who could pay for it" meta={`Funding routes for ${site.name}, ${NAME[cc] ?? cc}, and across Africa`} />
         <div className="px-5 pb-5 space-y-4">
-          <p className="text-sm text-muted max-w-prose">
-            Solar and batteries reach villages faster when the upfront cost is shared. These are programmes to approach for grants, subsidies, loans or advice. They are potential partners, not approvals or open calls: confirm the live status, eligible equipment, places covered, matching money and payment timing with each one. Amounts are rough guides.
-          </p>
+          <p className="text-sm text-muted max-w-prose">Grants, subsidies, loans and advice that can share the upfront cost.</p>
+          <More label="Before you apply"><p className="text-xs text-muted max-w-prose">These are potential partners, not approvals or open calls. Confirm the live status, eligible equipment, places covered, matching money and payment timing with each one. Amounts are rough guides.</p></More>
           {eng && p50 && (
             <StatStrip stats={[
-              { label: 'P50 build cost (rough)', value: usd(p50.capex_usd), note: `${n0(p50.pv_kwp)} kWp, ${n0(p50.battery_kwh)} kWh` },
+              { label: `${sz} build cost (rough)`, value: usd(p50.capex_usd), note: `${n0(p50.pv_kwp)} kWp, ${n0(p50.battery_kwh)} kWh` },
               { label: 'Customers by year 5', value: n0(cust), note: `$${n0(p50.capex_per_customer_usd)} a customer` },
               { label: 'Covers cost at $0.85/kWh', value: t85 ? `${Math.round(t85.p_revenue_covers_cost_year5 * 100)}%` : '-', note: 'of futures, no grant' },
               { label: 'Covers cost at $0.45/kWh', value: t45 ? `${Math.round(t45.p_revenue_covers_cost_year5 * 100)}%` : '-', note: 'of futures, no grant' },
@@ -131,16 +135,18 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: nu
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div><p className="text-xs text-muted">Grant for {n0(cust)} connections</p><p className="font-display text-2xl tabular-nums text-ok">{usd(grant)}</p></div>
-              <div><p className="text-xs text-muted">Share of the P50 build cost</p><p className="font-display text-2xl tabular-nums">{Math.round(share * 100)}%</p></div>
+              <div><p className="text-xs text-muted">Share of the {sz} build cost</p><p className="font-display text-2xl tabular-nums">{Math.round(share * 100)}%</p></div>
               <div><p className="text-xs text-muted">Left for the developer and lenders</p><p className="font-display text-2xl tabular-nums">{usd(Math.max(0, p50.capex_usd - grant))}</p></div>
             </div>
             <div className="h-2 rounded-full bg-line overflow-hidden" aria-hidden><div className="h-full bg-ok" style={{ width: `${Math.min(100, share * 100)}%` }} /></div>
-            <p className="text-xs text-muted max-w-prose">
+            <More label="About the $433 rate"><p className="text-xs text-muted max-w-prose">
               $433 is what the Universal Energy Facility paid per connection in its first wave in Sierra Leone and Madagascar; it is a past rate, not an offer. Grants paid per connection reward signing people up, so the year-5 customer count from the Demand tab matters as much as the build cost. The grant lowers the money to repay, which is what lets a lower tariff cover cost.
-            </p>
+            </p></More>
           </div>
         </Box>
       )}
+
+      {eng && p50 && <Box><CashFlow eng={eng} s={st} grant={grant} /></Box>}
 
       <Box>
         <BoxHeader title={`In ${NAME[cc] ?? cc}`} meta={COMPACT[cc] ? `Mission 300 energy compact presented ${COMPACT[cc]}` : 'No Mission 300 compact confirmed'} />
@@ -163,15 +169,15 @@ export const FundingPage: React.FC<{ site: SiteData; eng?: Engine; goTab: (t: nu
                 <span>{r.t}</span>
                 <span className="flex items-start gap-2 min-w-0">
                   <StatusDot tone={r.tone}>{r.tone === 'ok' ? 'Ready' : r.tone === 'warn' ? 'Partly' : 'Developer'}</StatusDot>
-                  <span className="text-xs text-muted">{r.state}{r.tab !== undefined && <> · <button onClick={() => goTab(r.tab!)} className="underline underline-offset-2 hover:text-fg">open</button></>}</span>
+                  <span className="text-xs text-muted">{r.state}{r.tab !== undefined && <> · <button onClick={() => goTab(r.tab!, r.tab === 3 ? "size" : undefined)} className="underline underline-offset-2 hover:text-fg">open</button></>}</span>
                 </span>
               </li>
             ))}
           </ul>
-          <div className="text-sm space-y-1.5 max-w-prose">
-            <p className="font-medium">A suggested order</p>
-            <p className="text-muted">1. Results-based grants first (the national agency and the Universal Energy Facility), since they pay per connection and fit village mini-grids. 2. Free advice (GET.invest) to turn the forecast and sizing into a bankable plan. 3. Investors and lenders (All On in Nigeria, AECF calls) once there is a pipeline. 4. Bundle several villages into one portfolio for blended-finance platforms such as GFIF: GridSight can run the same forecast for each village. Do not promise a subsidy to a village before it is formally approved.</p>
-          </div>
+          {eng && p50 && <button onClick={() => conceptNote(site, eng, st, grant, rate, [...local, ...AFRICA.slice(0, 3)].map(x => `${x.name} (${x.who}): ${x.kind.toLowerCase()}`), NAME[cc] ?? cc)} className="h-10 px-4 rounded-ctl bg-accent text-[#131316] text-sm font-medium hover:brightness-105">Download concept note (PDF)</button>}
+          <More label="A suggested order"><div className="text-sm space-y-1.5 max-w-prose">
+                        <p className="text-muted">1. Results-based grants first (the national agency and the Universal Energy Facility), since they pay per connection and fit village mini-grids. 2. Free advice (GET.invest) to turn the forecast and sizing into a bankable plan. 3. Investors and lenders (All On in Nigeria, AECF calls) once there is a pipeline. 4. Bundle several villages into one portfolio for blended-finance platforms such as GFIF: GridSight can run the same forecast for each village. Do not promise a subsidy to a village before it is formally approved.</p>
+          </div></More>
         </div>
       </Box>
     </>

@@ -78,3 +78,9 @@ Batches: A 59, 60, 61, 62 · B 63, 66, 69 · C 64, 65, 72 · D 67, 71 · E 68, 7
 | 70 | 2026-10-31 | All tabs | Demo mode: number keys and arrow keys move between tabs, small step dots, picker hidden, for the 3-minute pitch | suggested |
 | 71 | 2026-10-31 | Data sharing | Example row is cut off on the right: show it as a field list with plain meanings (or wrap), and give "Who gets what" small meaning-colour markers | suggested |
 | 72 | 2026-10-31 | Site | Buildings table: fold behind "Show all buildings" for judges; keep the "Why" column on phone as a second line; larger sort controls | suggested |
+
+## To do later for Bhanu AI (saved 2026-11-01, from the GridSight "less scrolling" batches)
+- Put long explanations behind a small "Why?" toggle, keeping a one-line takeaway per box.
+- Turn inline "Source: ..." lines into small citation chips (tap or hover to see the source).
+- Cut remaining text by about 40%.
+- Phone: fold sections into accordions and show a bottom bar with the 3 key numbers.

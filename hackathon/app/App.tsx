@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { BackToTop, useEdgeFade, SunMark } from './components/ui';
+import { BackToTop, useEdgeFade, SunMark, More } from './components/ui';
 import { SITES } from './components/sites';
 import type { SiteData } from './components/model';
 import { classify, draws, estimate, growth, summarise } from './components/model';
@@ -11,12 +11,18 @@ import { GrowthPage } from './components/GrowthPage';
 import { ValidationPage } from './components/ValidationPage';
 import { SharingPage } from './components/SharingPage';
 import { FundingPage } from './components/FundingPage';
+import { useSettings, SettingsBar, JumpLinks, PhoneBar } from './components/settings';
+import { Compare } from './components/Compare';
 import { MapView } from './components/MapView';
 import { WeatherPage } from './components/WeatherPage';
 import { MethodPage } from './components/MethodPage';
 
-const TABS = ['Map', 'Site', 'Demand', 'Growth and money', 'Sun and weather', 'Validation', 'Data sharing', 'Funding', 'Method'] as const;
-const HASH = ['map', 'site', 'demand', 'growth', 'weather', 'validation', 'data-sharing', 'funding', 'method'];
+const TABS = ['Map', 'Site', 'Demand', 'Money', 'Sun and weather', 'Trust'] as const;
+const HASH = ['map', 'site', 'demand', 'money', 'weather', 'trust'];
+// Old links still work: they open the tab and section that replaced them
+const ALIAS: Record<string, [number, string]> = { growth: [3, 'size'], funding: [3, 'funding'], validation: [5, 'checks'], 'data-sharing': [5, 'sharing'], method: [5, 'method'] };
+const MONEY = [['size', 'Size and tariff'], ['funding', 'Funding'], ['compare', 'Compare villages']] as const;
+const TRUST = [['checks', 'Checks'], ['sharing', 'Data sharing'], ['method', 'Method and sources']] as const;
 
 type Theme = 'system' | 'light' | 'dark';
 const store = {
@@ -42,11 +48,9 @@ const ThemeToggle: React.FC = () => {
 const STEPS = [
   { t: 'Count the roofs', tab: 1 },
   { t: 'Forecast demand', tab: 2 },
-  { t: 'Size and tariff', tab: 3 },
+  { t: 'Size and fund', tab: 3 },
   { t: 'Sun and weather', tab: 4 },
-  { t: 'Check it', tab: 5 },
-  { t: 'Share meter data', tab: 6 },
-  { t: 'Find funding', tab: 7 },
+  { t: 'Check and share', tab: 5 },
 ];
 
 const NoEngine: React.FC = () => (
@@ -56,10 +60,14 @@ const NoEngine: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  const fromHash = () => Math.max(0, HASH.indexOf(location.hash.slice(1)));
+  const h0 = location.hash.slice(1);
+  const fromHash = () => { const h = location.hash.slice(1); return ALIAS[h]?.[0] ?? Math.max(0, HASH.indexOf(h)); };
   const [tab, setTab] = useState(fromHash);
-  React.useEffect(() => { const on = () => setTab(fromHash()); window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
-  const goTab = (t: number) => { setTab(t); try { history.replaceState(null, '', '#' + HASH[t]); } catch { /* sandboxed */ } window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); };
+  const [money, setMoney] = useState<string>(ALIAS[h0]?.[0] === 3 ? ALIAS[h0][1] : 'size');
+  const [trust, setTrust] = useState<string>(ALIAS[h0]?.[0] === 5 ? ALIAS[h0][1] : 'checks');
+  React.useEffect(() => { const on = () => { const h = location.hash.slice(1); setTab(fromHash()); if (ALIAS[h]) (ALIAS[h][0] === 3 ? setMoney : setTrust)(ALIAS[h][1]); }; window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
+  const goTab = (t: number, sub?: string) => { setTab(t); if (sub) (t === 3 ? setMoney : setTrust)(sub); try { history.replaceState(null, '', '#' + HASH[t]); } catch { /* sandboxed */ } window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); };
+  const [st, setSt] = useSettings();
 
   const [siteId, setSiteId] = useState(() => store.get('gs-site') || SITES[0].id);
   const [upload, setUpload] = useState<SiteData | null>(null);
@@ -102,8 +110,8 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {tab === 0 && <MapView site={site} buildings={buildings} eng={eng} siteId={siteId} onPick={pick} goTab={goTab} />}
-      {tab > 0 && <main className="max-w-page mx-auto px-[var(--gutter)] py-6 space-y-6">
+      {tab === 0 && <MapView site={site} buildings={buildings} eng={eng} siteId={siteId} onPick={pick} goTab={goTab} st={st} set={setSt} />}
+      {tab > 0 && <main className="max-w-page mx-auto px-[var(--gutter)] py-6 pb-24 sm:pb-6 space-y-6">
         <section className="space-y-3">
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-balance">How much power will a village use, before anyone builds there?</h1>
           <ol className="flex gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible" aria-label="Steps">
@@ -116,31 +124,30 @@ const App: React.FC = () => {
               </li>
             ))}
           </ol>
-          {tab === 1 && <p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p>}
+          {tab === 1 && <More label="The story behind GridSight"><p className="text-sm text-muted max-w-3xl">Amina builds mini-grids. Her last site was too big, so the tariff priced out half the village; the one before was too small and browned out every evening. GridSight gives her and her lender a demand range from open satellite and map data, explains what drives it, and tests system sizes against it.</p></More>}
         </section>
         {tab === 1 && <SitePicker id={siteId} onPick={pick} onUpload={d => { setUpload(d); setSiteId('upload'); }} />}
-        {((tab > 1 && tab < 6) || tab === 7) && (
-          <div className="flex items-center gap-2 text-sm overflow-x-auto no-scrollbar -mx-[var(--gutter)] px-[var(--gutter)] sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
-            <span className="text-muted mr-1 shrink-0">Village</span>
-            {SITES.map(s => (
-              <button key={s.id} onClick={() => pick(s.id)} aria-pressed={siteId === s.id}
-                className={`shrink-0 h-9 px-3 rounded-ctl border transition ${siteId === s.id ? 'bg-line border-line text-fg font-medium' : 'bg-surface-2 border-line text-muted hover:text-fg'}`}>
-                {s.data.name} <span className="text-muted font-normal">· {FLAG[s.data.country] ?? s.data.country}</span>
-              </button>
-            ))}
-            <button onClick={() => goTab(1)} className="shrink-0 h-9 px-2 text-muted hover:text-fg underline underline-offset-2 decoration-line">Any location</button>
+        {tab > 1 && <SettingsBar eng={eng} s={st} set={setSt} siteId={siteId} onPick={pick} goTab={goTab} />}
+        {(tab === 3 || tab === 5) && (
+          <div className="flex rounded-ctl border border-line overflow-hidden w-fit max-w-full" role="tablist" aria-label="Sections">
+            {(tab === 3 ? MONEY : TRUST).map(([k, l]) => { const on = (tab === 3 ? money : trust) === k; return (
+              <button key={k} role="tab" aria-selected={on} onClick={() => (tab === 3 ? setMoney : setTrust)(k)}
+                className={`h-9 px-4 text-sm whitespace-nowrap ${on ? 'bg-line text-fg font-medium' : 'bg-surface-2 text-muted hover:text-fg'}`}>{l}</button>); })}
           </div>
         )}
+        {tab > 1 && <JumpLinks deps={[tab, money, trust, siteId]} />}
         {tab === 1 && <SitePage site={site} buildings={buildings} sum={sum} eng={eng} onNext={() => goTab(2)} />}
-        {(tab === 2 || tab === 3 || tab === 5) && !eng && <NoEngine />}
-        {tab === 2 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(3)} />}
-        {tab === 3 && eng && <GrowthPage site={site} eng={eng} onNext={() => goTab(4)} />}
-        {tab === 4 && <WeatherPage site={site} siteId={siteId} eng={eng} onNext={() => goTab(5)} />}
-        {tab === 5 && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(6)} />}
-        {tab === 6 && <SharingPage />}
-        {tab === 7 && <FundingPage site={site} eng={eng} goTab={goTab} />}
-        {tab === 8 && <MethodPage />}
+        {(tab === 2 || (tab === 3 && money === 'size') || (tab === 5 && trust === 'checks')) && !eng && <NoEngine />}
+        {tab === 2 && eng && <DemandPage site={site} eng={eng} est={est} ours5={ours5} onNext={() => goTab(3, 'size')} />}
+        {tab === 3 && money === 'size' && eng && <GrowthPage site={site} eng={eng} s={st} set={setSt} onNext={() => goTab(3, 'funding')} />}
+        {tab === 3 && money === 'funding' && <FundingPage site={site} eng={eng} s={st} goTab={goTab} />}
+        {tab === 3 && money === 'compare' && <Compare s={st} siteId={siteId} onPick={pick} />}
+        {tab === 4 && <WeatherPage site={site} siteId={siteId} eng={eng} onNext={() => goTab(5, 'checks')} />}
+        {tab === 5 && trust === 'checks' && eng && <ValidationPage site={site} eng={eng} onNext={() => goTab(5, 'sharing')} />}
+        {tab === 5 && trust === 'sharing' && <SharingPage />}
+        {tab === 5 && trust === 'method' && <MethodPage />}
       </main>}
+      {tab > 1 && eng && <PhoneBar eng={eng} s={st} />}
       {tab > 0 && <footer className="max-w-page mx-auto px-[var(--gutter)] pb-10 text-xs text-muted">
         GridSight prototype for the Global Energy Hackathon 2026, Brief 03. Demand engine by Fereshteh (forecast/demand_forecast.py); map, data pipeline and dashboard by GridSight. Buildings: Google Open Buildings v3 (CC BY 4.0) and Overture Maps / OpenStreetMap (ODbL). All money and energy figures are rough guides.
       </footer>}

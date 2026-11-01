@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxHeader } from './ui';
+import { Box, BoxHeader, More } from './ui';
 import { PARAMS, GROWTH_PARAMS } from './model';
 import { REFS } from './refs';
 
@@ -60,7 +60,7 @@ export const MethodPage: React.FC = () => (
     </Box>
     <Box>
       <BoxHeader title="Where each number comes from" meta="Links to the paper where we hold it; otherwise to a search for it" />
-      <div className="px-5 pb-5 space-y-5 [overflow-wrap:anywhere]">
+      <More label="Show all sources" className="px-5 pb-5"><div className="space-y-5 [overflow-wrap:anywhere]">
         {GROUPS.map(g => (
           <div key={g.t}>
             <p className="text-xs text-muted mb-2">{g.t}</p>
@@ -74,7 +74,7 @@ export const MethodPage: React.FC = () => (
           </div>
         ))}
         <p className="text-xs text-muted">Engine references are cited as forecast/assumptions.yaml names them (author and year); confirm full citations before submission. Every number on the Demand and Growth and money tabs carries a Source line pointing here.</p>
-      </div>
+      </div></More>
     </Box>
   </>
 );
