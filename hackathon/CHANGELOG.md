@@ -17,6 +17,7 @@ Newest first. One line per change. Artifact: https://claude.ai/artifact/PZNH8ccq
 
 ## 2026-11-01
 
+- **Goal on the Map view:** one-line goal at the top of the left panel on desktop; on phones a Goal card under the map with Site settings directly beneath it.
 - **Names and highlight:** individual names removed from the site (footer now "Built by the GridSight team"; engine and clear-sky model credited to GridSight in the app, data files and pipeline). Make it pencil out: no outline box; grants at or under $433 a connection in green, above in amber.
 - **Shared plant and existing plant:** `pipeline/cluster.py` finds settlements of 50+ roofs within 10 km of each village (Google Open Buildings, 100 m grid) into `app/data/cluster/`; `components/Shared.tsx` (Money > Size and tariff) compares separate mini-grids with one shared plant plus medium-voltage line along the shortest route, using ESMAP / World Bank scale effects ($68 less per customer per 100 more customers; $100/kW portfolio saving for 5+ grids; floor at half the village's cost, assumption). New setting for villages with a mapped solar plant (Gbamu Gbamu, 85 kWp): "Build on it" counts its panels toward each stage (saves new panels at the chosen price basis).
 - **Size note:** "What P25, P50, P90 mean" fold-out under the System size buttons (settings bar and Map panel), `SizeNote` in `components/settings.tsx`.

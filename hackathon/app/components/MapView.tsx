@@ -158,8 +158,17 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
     ] : [];
     const segTot = segs.reduce((a, s) => a + s.v, 0) || 1;
 
+    // What GridSight is for, in one line
+    const goalText = <>Plan a solar mini-grid for a village before anyone builds there: count the roofs, forecast how much power people will use, size it so it is neither too big nor too small, and find a way to pay for it.</>;
+    const goal = (
+      <section aria-label="Goal" className="bg-surface border border-line rounded-box p-4 space-y-1">
+        <p className="text-xs text-muted">The goal</p>
+        <p className="text-sm leading-relaxed">{goalText}</p>
+      </section>
+    );
     const panel = (
       <div className="bg-surface border border-line rounded-box shadow-pop p-5 space-y-5 min-w-0">
+        {wide && <div className="pb-4 border-b border-line space-y-1"><p className="text-xs text-muted">The goal</p><p className="text-sm leading-relaxed">{goalText}</p></div>}
         <div>
           <p className="text-xs text-muted">{site.region.includes(FLAG[site.country] ?? '#') ? site.region : `${site.region}, ${FLAG[site.country] ?? site.country}`}</p>
           <h2 className="text-xl font-semibold tracking-tight">{site.name}</h2>
@@ -324,7 +333,7 @@ export const MapView: React.FC<{ site: SiteData; buildings: Building[]; eng?: En
           {wide && <div className="absolute left-4 top-4 bottom-4 w-[368px] overflow-y-auto no-scrollbar">{panel}</div>}
           {wide && <div className="absolute right-4 top-4 bottom-4 w-[252px] overflow-y-auto no-scrollbar">{rail}</div>}
         </div>
-        {!wide && <div className="px-[var(--gutter)] py-4 space-y-4">{rail}{panel}</div>}
+        {!wide && <div className="px-[var(--gutter)] py-4 space-y-4">{goal}{rail}{panel}</div>}
       </div>
     );
   };
