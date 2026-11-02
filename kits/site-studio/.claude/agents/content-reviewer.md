@@ -19,6 +19,7 @@ Look at the files the caller names. If none, use `git diff --name-only HEAD` and
 5. **Design:** one accent-coloured main action per screen, the corner sizes and colour tokens set in `CLAUDE.md` or `index.css`, no hard-coded colours outside the chart palette.
 6. **Safety and privacy:** nothing asks users to do something unsafe; personal data is only collected when needed and the page says where it is stored.
 7. **Messaging limits:** any WhatsApp, SMS or email sending keeps its daily cap and cooldown.
+8a. **UI states and mobile:** follow the `ui-states` skill; flag any changed screen missing one of the ten states or breaking smooth phone touch.
 8. **Translations:** list new or changed visible text not yet in `translations/en.md`, for the end-of-session list.
 
 ## Output

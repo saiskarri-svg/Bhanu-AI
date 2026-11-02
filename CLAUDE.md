@@ -15,6 +15,10 @@
 
 Follow the clean-dark-ui skill: four greys, small corners (8px boxes, 6px controls), one accent (solar yellow) for the single main action per screen, system font for text and Saira for big numbers, no em dashes. Colours carry meaning: sun amber for solar output, blue for monsoon/AC, green for profit and healthy, red for problems.
 
+## UI states and mobile (all of Sai's projects)
+
+Every screen handles the ten core UI states (empty, loading, error, offline, slow network, zero search results, permission denied, session expiry, form validation, success) and feels smooth on a phone (native drag down, pull to refresh on data views, bottom sheets that swipe down to close, 44px touch targets, transform-only animation). The full checklist is the `ui-states` skill; load it for any UI task and check every changed screen against it before publishing.
+
 ## Facts to keep straight
 
 - A grid-tied system without a battery switches off during a power cut (anti-islanding). Never claim solar keeps lights on during load shedding unless a battery is mentioned.
@@ -28,7 +32,7 @@ Follow the clean-dark-ui skill: four greys, small corners (8px boxes, 6px contro
 
 ## Skills and agents (in `.claude/`)
 
-- Skills: `bhanu-publish` (build, publish to the artifact, single HTML and zip), `bhanu-screenshots` (desktop and phone shots with error and overflow checks), `bhanu-translations` (en/te/hi line-aligned, end of session), `idea-batches` (ideas as an impact-ordered table with token costs), `funder-pack` (pitch pack for one school).
+- Skills: `ui-states` (the ten UI states and mobile touch rules, for every UI task), `bhanu-publish` (build, publish to the artifact, single HTML and zip), `bhanu-screenshots` (desktop and phone shots with error and overflow checks), `bhanu-translations` (en/te/hi line-aligned, end of session), `idea-batches` (ideas as an impact-ordered table with token costs), `funder-pack` (pitch pack for one school).
 - Agents: `ui-improver` (website and UI ideas as impact-ordered batches; runs once halfway through each session, at the 6th prompt, via the `ideas-midpoint` hook, and logs ideas in `.claude/ideas-log.md` so they are not repeated), `fact-checker` (claims vs sources, JSON report), `content-reviewer` (house rules before publishing), `maintenance-triage` (High/Medium/Low risk, WhatsApp only for High within limits), `new-school` (set up another school; needs Sai's school details).
 - Risk rules and WhatsApp limits live in `components/risk.ts` (at most 3 messages per 24 hours for each phone number and site pair, so a different number or site has its own count; one message per site with the address, a map link and every open item, sent only when something is high risk; the same set of high risk items is not resent within 24 hours; shared through the `whatsapp` collection). The school address and map link are in the site settings..
 - Site Studio kit (`kits/site-studio/`): general copies of these agents and skills plus new ones (`segment-scout`, `market-researcher`, `site-planner`, `new-site`) and a starter project, for building sites in other market segments. See its README.

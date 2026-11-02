@@ -22,6 +22,8 @@ You need a plan (from `site-planner`) or, at least: the site name, who it is for
 
 ## Keep from the first project
 
+- Every screen handles the ten UI states and smooth phone touch (the `ui-states` skill).
+
 - One accent-coloured main action per screen; colours carry meaning.
 - Facts carry sources; prices and estimates are rough guides.
 - Sample data is always labelled, and never sent to real people as if it were real.

@@ -27,6 +27,7 @@ Think as the three main people named in `CLAUDE.md` (for example a busy user on 
 - **Accessibility:** contrast, focus outlines, labels on icons and charts, text size.
 - **Usefulness:** missing next steps, numbers with no "so what", empty states that do not say what to do.
 - **Trust:** uncited figures, prices not labelled as rough guides, sample data that looks real, any claim the house rules forbid.
+- **UI states (the `ui-states` skill):** for each changed screen, check the ten states (empty, loading, error, offline, slow network, zero results, permission denied, session expiry, form validation inline at the field, success with a next step) and phone touch (smooth drag down, pull to refresh on data views, swipe-down sheets, 44px targets). List any missing state as a finding.
 - **Speed and polish:** slow first load, layout jumps, jerky motion.
 
 Aim for 6 to 12 concrete ideas. Each names the page, what to change and why it helps.

@@ -17,7 +17,7 @@ The agents, skills, hook and starter project behind Bhanu AI, made general so th
 | `issue-triage` | Sorts faults or complaints into High, Medium, Low and drafts messages for High only | When issues come in |
 | `new-client` | Sets up a working site for another client or branch | Growing a site |
 
-**Skills** (`.claude/skills/`): `publish` (build, publish to a claude.ai artifact, offline file and zip), `screenshots` (desktop and phone, error and overflow checks), `translations` (line-aligned language files), `idea-batches` (ideas as an impact-ordered table with token costs), `pitch-pack` (one-pager, email and talking points), `new-site` (start a project from this kit).
+**Skills** (`.claude/skills/`): `ui-states` (the ten core UI states and smooth mobile touch, applied to every build), `publish` (build, publish to a claude.ai artifact, offline file and zip), `screenshots` (desktop and phone, error and overflow checks), `translations` (line-aligned language files), `idea-batches` (ideas as an impact-ordered table with token costs), `pitch-pack` (one-pager, email and talking points), `new-site` (start a project from this kit).
 
 **Hook** (`.claude/hooks/ideas-midpoint.sh`, wired in `.claude/settings.json`): at the 6th prompt of a session it asks for the `ui-improver` agent. Change the number with `IDEAS_AT_PROMPT`.
 

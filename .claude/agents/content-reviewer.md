@@ -36,6 +36,7 @@ Look at the files the calling session names. If there are none, check files chan
 7. **WhatsApp alerts.**
    - **Only high risk items** (`components/risk.ts`) may offer "Send on WhatsApp".
    - **Limits:** the daily cap and the per-alert cooldown must stay in place.
+9. **UI states and mobile:** follow the `ui-states` skill. Flag any changed screen that misses one of the ten states (empty, loading, error, offline, slow network, zero results, permission denied, session expiry, inline field validation, success with a next step), or that breaks smooth phone touch (scroll traps, no swipe-down close on sheets, targets under 44px).
 8. **Translations.** List new or changed user-facing text that is not yet in `translations/en.md`, so it can go on the end-of-session list. Do not ask for an update now.
 
 ## Output

@@ -19,6 +19,10 @@
 
 Follow the clean-dark-ui skill: four greys, small corners (8px boxes, 6px controls), one accent (<colour>) for the single main action per screen, system font for text and <display font> for big numbers, no em dashes. Colours carry meaning: <colour = meaning, for example green for money saved, red for problems>.
 
+## UI states and mobile
+
+Every screen handles the ten core UI states (empty, loading, error, offline, slow network, zero search results, permission denied, session expiry, inline form validation, success with a next step) and feels smooth on a phone (native drag down, pull to refresh on data views, swipe-down sheets, 44px targets). Load the `ui-states` skill for any UI task.
+
 ## House rules
 
 - <Claims the site must never make, for example health promises or guaranteed returns>.
@@ -33,5 +37,5 @@ Follow the clean-dark-ui skill: four greys, small corners (8px boxes, 6px contro
 
 ## Skills and agents (in `.claude/`)
 
-- Skills: `publish`, `screenshots`, `translations`, `idea-batches`, `pitch-pack`, `new-site`.
+- Skills: `ui-states`, `publish`, `screenshots`, `translations`, `idea-batches`, `pitch-pack`, `new-site`.
 - Agents: `segment-scout`, `market-researcher`, `site-planner`, `ui-improver` (runs at the 6th prompt via the midpoint hook), `fact-checker`, `content-reviewer`, `issue-triage`, `new-client`.

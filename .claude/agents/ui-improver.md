@@ -27,6 +27,7 @@ Think as three people: a teacher in charge with a phone and five minutes, a stud
 - **Accessibility:** contrast, focus outlines, labels on icons and charts, text size.
 - **Usefulness:** missing next steps, numbers with no "so what", saved data that could be shown better, empty states that do not say what to do.
 - **Trust:** uncited figures, prices not labelled as rough guides, any claim that solar keeps power on in a cut without a battery.
+- **UI states (the `ui-states` skill):** for each changed screen, check the ten states (empty, loading, error, offline, slow network, zero results, permission denied, session expiry, form validation inline at the field, success with a next step) and phone touch (smooth drag down, pull to refresh on data views, swipe-down sheets, 44px targets). List any missing state as a finding.
 - **Speed and polish:** slow first load, layout jumps, jerky charts.
 
 Aim for 6 to 12 concrete ideas. Each one names the tab, what to change, and why it helps. No vague ideas like "improve the design".
